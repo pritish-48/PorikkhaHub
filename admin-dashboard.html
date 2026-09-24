@@ -1,20 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-    <title>Admin Dashboard | PorikkhaHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PorikkhaHub - Admin Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -23,209 +17,122 @@
             margin: 0;
             font-family: Arial, sans-serif;
             background: #f5f7fb;
-            color: #1f2937;
+            color: #222;
         }
 
-        .topbar {
+        header {
             background: #111827;
             color: white;
             padding: 18px 25px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .topbar h2 {
+        header h1 {
             margin: 0;
+            font-size: 24px;
         }
 
-        .admin-name {
-            color: #d1d5db;
-            font-size: 14px;
+        header button {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
         }
 
         .container {
             max-width: 1200px;
             margin: 30px auto;
-            padding: 0 18px;
+            padding: 0 20px;
         }
 
         .welcome {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,.06);
-
             margin-bottom: 25px;
         }
 
-        .welcome h1 {
-            margin: 0 0 8px;
-        }
-
-        .welcome p {
-            margin: 0;
-            color: #6b7280;
+        .welcome h2 {
+            margin-bottom: 5px;
         }
 
         .stats {
             display: grid;
-
-            grid-template-columns:
-                repeat(5, 1fr);
-
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 18px;
-
             margin-bottom: 30px;
         }
 
         .stat-card {
             background: white;
-
             padding: 22px;
-
             border-radius: 14px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,.06);
-
-            text-align: center;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
         }
 
         .stat-card h3 {
             margin: 0;
-
-            font-size: 30px;
-
-            color: #2563eb;
+            font-size: 15px;
+            color: #6b7280;
         }
 
         .stat-card p {
-            margin:
-                8px 0 0;
-
-            color: #6b7280;
-
-            font-size: 14px;
+            margin: 10px 0 0;
+            font-size: 30px;
+            font-weight: bold;
         }
 
         .actions {
             display: grid;
-
-            grid-template-columns:
-                repeat(3, 1fr);
-
-            gap: 18px;
-
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
         }
 
-        .action-card {
-            background: white;
-
-            padding: 25px;
-
-            border-radius: 14px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,.06);
-        }
-
-        .action-card h3 {
-            margin-top: 0;
-        }
-
-        .action-card p {
-            color: #6b7280;
-
-            min-height: 42px;
-        }
-
-        button {
+        .action-btn {
             border: none;
-
-            padding:
-                11px 18px;
-
-            border-radius: 8px;
-
-            cursor: pointer;
-
+            padding: 17px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: bold;
-
-            font-size: 14px;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .success {
-            background: #16a34a;
-            color: white;
-        }
-
-        .secondary {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        .danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .logout {
-            background: #dc2626;
-            color: white;
-        }
-
-        .question-bank-btn {
-            background: #7c3aed;
-            color: white;
-        }
-
-        .recent {
+            cursor: pointer;
             background: white;
-
-            padding: 25px;
-
-            border-radius: 14px;
-
-            box-shadow:
-                0 5px 20px rgba(0,0,0,.06);
-
-            overflow-x: auto;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            text-align: left;
         }
 
-        .recent h2 {
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-btn span {
+            display: block;
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: normal;
+            color: #6b7280;
+        }
+
+        .section {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
             margin-top: 0;
         }
 
         table {
             width: 100%;
-
-            border-collapse:
-                collapse;
-
-            min-width: 700px;
+            border-collapse: collapse;
         }
 
-        th,
-        td {
-            padding: 13px;
-
-            border-bottom:
-                1px solid #e5e7eb;
-
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
             text-align: left;
         }
 
@@ -233,873 +140,293 @@
             background: #f9fafb;
         }
 
-        .loading {
+        .empty {
             color: #6b7280;
+            padding: 20px 0;
         }
 
-        @media (max-width: 1000px) {
-
-            .stats {
-                grid-template-columns:
-                    repeat(3, 1fr);
+        @media (max-width: 600px) {
+            table {
+                font-size: 13px;
             }
 
-            .actions {
-                grid-template-columns:
-                    repeat(2, 1fr);
+            th, td {
+                padding: 8px;
             }
         }
-
-        @media (max-width: 650px) {
-
-            .stats {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .actions {
-                grid-template-columns:
-                    1fr;
-            }
-
-            .topbar {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
-        }
-
     </style>
-
 </head>
-
 
 <body>
 
+<header>
+    <h1>PorikkhaHub Admin</h1>
+    <button onclick="logout()">Logout</button>
+</header>
 
-<div class="topbar">
+<div class="container">
 
-    <h2>PorikkhaHub Admin</h2>
+    <div class="welcome">
+        <h2>Admin Dashboard</h2>
+        <p>Manage exams, students, MCQ and CQ submissions from here.</p>
+    </div>
 
-    <div>
+    <!-- Statistics -->
+    <div class="stats">
 
-        <span
-            class="admin-name"
-            id="adminName">
-            Admin
-        </span>
+        <div class="stat-card">
+            <h3>Total Exams</h3>
+            <p id="totalExams">0</p>
+        </div>
 
-        &nbsp;
+        <div class="stat-card">
+            <h3>Published Exams</h3>
+            <p id="publishedExams">0</p>
+        </div>
 
-        <button
-            class="logout"
-            onclick="logout()">
-            Logout
+        <div class="stat-card">
+            <h3>Total Students</h3>
+            <p id="totalStudents">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total MCQ Questions</h3>
+            <p id="totalQuestions">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Submitted Exams</h3>
+            <p id="submittedExams">0</p>
+        </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+
+        <button class="action-btn" onclick="location.href='create-exam.html'">
+            ➕ Create Exam
+            <span>Create a new examination</span>
+        </button>
+
+        <button class="action-btn" onclick="location.href='manage-exams.html'">
+            📚 Manage Exams
+            <span>Edit, publish or delete exams</span>
+        </button>
+
+        <button class="action-btn" onclick="location.href='admin-results.html'">
+            📊 Student Results
+            <span>View submitted exam results</span>
+        </button>
+
+        <button class="action-btn" onclick="location.href='admin-students.html'">
+            👨‍🎓 Students
+            <span>View registered students</span>
+        </button>
+
+        <button class="action-btn" onclick="location.href='manage-questions.html'">
+            ❓ MCQ Questions
+            <span>Manage MCQ question bank</span>
+        </button>
+
+        <!-- NEW CQ BUTTON -->
+        <button class="action-btn" onclick="location.href='cq-answer-sheets.html'">
+            📝 CQ Answer Sheets
+            <span>View answer sheets and give marks</span>
+        </button>
+
+        <button class="action-btn" onclick="loadDashboard()">
+            🔄 Refresh
+            <span>Refresh dashboard statistics</span>
         </button>
 
     </div>
 
-</div>
+    <!-- Recent Results -->
+    <div class="section">
+        <h2>Recent Student Results</h2>
 
-
-<div class="container">
-
-
-    <div class="welcome">
-
-        <h1>
-            Welcome to Admin Dashboard
-        </h1>
-
-        <p>
-            Manage exams, students, questions and results from here.
-        </p>
-
+        <div id="resultsArea">
+            <div class="empty">Loading...</div>
+        </div>
     </div>
 
-
-    <!-- STATISTICS -->
-
-    <div class="stats">
-
-
-        <div class="stat-card">
-
-            <h3 id="totalExams">
-                0
-            </h3>
-
-            <p>
-                Total Exams
-            </p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3 id="publishedExams">
-                0
-            </h3>
-
-            <p>
-                Published Exams
-            </p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3 id="totalStudents">
-                0
-            </h3>
-
-            <p>
-                Total Students
-            </p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3 id="totalQuestions">
-                0
-            </h3>
-
-            <p>
-                Total MCQ Questions
-            </p>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <h3 id="submittedExams">
-                0
-            </h3>
-
-            <p>
-                Submitted Exams
-            </p>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- ACTIONS -->
-
-    <div class="actions">
-
-
-        <!-- CREATE EXAM -->
-
-        <div class="action-card">
-
-            <h3>
-                Create Exam
-            </h3>
-
-            <p>
-                Create a new MCQ or CQ examination.
-            </p>
-
-            <button
-                class="primary"
-                onclick="openCreateExam()">
-
-                Create Exam
-
-            </button>
-
-        </div>
-
-
-        <!-- MANAGE EXAMS -->
-
-        <div class="action-card">
-
-            <h3>
-                Manage Exams
-            </h3>
-
-            <p>
-                Edit, publish, unpublish or delete examinations.
-            </p>
-
-            <button
-                class="success"
-                onclick="openManageExams()">
-
-                Manage Exams
-
-            </button>
-
-        </div>
-
-
-        <!-- RESULTS -->
-
-        <div class="action-card">
-
-            <h3>
-                Student Results
-            </h3>
-
-            <p>
-                View marks and performance of submitted exams.
-            </p>
-
-            <button
-                class="primary"
-                onclick="openResults()">
-
-                View Results
-
-            </button>
-
-        </div>
-
-
-        <!-- STUDENTS -->
-
-        <div class="action-card">
-
-            <h3>
-                Students
-            </h3>
-
-            <p>
-                Manage registered students.
-            </p>
-
-            <button
-                class="secondary"
-                onclick="openStudents()">
-
-                Students
-
-            </button>
-
-        </div>
-
-
-        <!-- OLD QUESTION MANAGEMENT -->
-
-        <div class="action-card">
-
-            <h3>
-                MCQ Questions
-            </h3>
-
-            <p>
-                Manage questions for an examination.
-            </p>
-
-            <button
-                class="secondary"
-                onclick="openQuestions()">
-
-                Questions
-
-            </button>
-
-        </div>
-
-
-       <!-- NEW QUESTION BANK -->
-
-<div class="action-card">
-
-    <h3>MCQ Question Bank</h3>
-
-    <p>
-        Manually add MCQs or copy-paste many questions at once.
-    </p>
-
-    <a href="./mcq-question-bank.html" class="question-bank-btn" style="display:inline-block;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:bold;font-size:14px;">Open MCQ Question Bank</a>
-
 </div>
-
-
-<!-- CQ Question Bank -->
-
-<div class="action-card">
-
-    <h3>CQ Question Bank</h3>
-
-    <p>
-        Manually add CQ questions or import many questions at once.
-    </p>
-
-    <button
-        class="success"
-        onclick="openCQQuestionBank()">
-
-        Open CQ Question Bank
-
-    </button>
-
-</div>
-
-
-        <!-- REFRESH -->
-
-        <div class="action-card">
-
-            <h3>
-                Refresh Data
-            </h3>
-
-            <p>
-                Reload the latest dashboard statistics.
-            </p>
-
-            <button
-                class="secondary"
-                onclick="loadDashboard()">
-
-                Refresh
-
-            </button>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- RECENT RESULTS -->
-
-    <div class="recent">
-
-        <h2>
-            Recent Results
-        </h2>
-
-
-        <div
-            id="recentLoading"
-            class="loading">
-
-            Loading recent results...
-
-        </div>
-
-
-        <table
-            id="recentTable"
-            style="display:none;">
-
-            <thead>
-
-                <tr>
-
-                    <th>
-                        Student
-                    </th>
-
-                    <th>
-                        Exam
-                    </th>
-
-                    <th>
-                        Marks
-                    </th>
-
-                    <th>
-                        Submitted
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody
-                id="recentBody">
-
-            </tbody>
-
-        </table>
-
-
-    </div>
-
-
-</div>
-
 
 <script>
 
+const supabaseClient = window.supabaseClient;
 
-const SUPABASE_URL =
-    "https://jsjkxpsnuizngofyjvdl.supabase.co";
-
-
-const SUPABASE_KEY =
-    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
-
-
-const supabaseClient =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-
-
-/* =========================
-   START PAGE
-========================= */
-
-async function startPage() {
-
-
-    const accessToken =
-        localStorage.getItem(
-            "porikkhahub_admin_access_token"
-        );
-
-
-    const refreshToken =
-        localStorage.getItem(
-            "porikkhahub_admin_refresh_token"
-        );
-
-
-    if (
-        !accessToken ||
-        !refreshToken
-    ) {
-
-        window.location.href =
-            "admin-login.html";
-
-        return;
-
-    }
-
+async function checkAdmin() {
 
     const {
-        data,
+        data: { user },
         error
-    } =
-        await supabaseClient.auth.setSession({
+    } = await supabaseClient.auth.getUser();
 
-            access_token:
-                accessToken,
-
-            refresh_token:
-                refreshToken
-
-        });
-
-
-    if (error) {
-
-        console.error(error);
-
-        alert(
-            "Admin session expired."
-        );
-
-        window.location.href =
-            "admin-login.html";
-
-        return;
-
+    if (error || !user) {
+        window.location.href = "admin-login.html";
+        return false;
     }
 
+    const { data: admin, error: adminError } =
+        await supabaseClient
+            .from("admins")
+            .select("id, full_name, email")
+            .eq("auth_user_id", user.id)
+            .maybeSingle();
 
-    /*
-        Save refreshed tokens.
-    */
-
-    if (data && data.session) {
-
-        localStorage.setItem(
-            "porikkhahub_admin_access_token",
-            data.session.access_token
-        );
-
-        localStorage.setItem(
-            "porikkhahub_admin_refresh_token",
-            data.session.refresh_token
-        );
-
+    if (adminError || !admin) {
+        alert("Unauthorized: admin account required.");
+        await supabaseClient.auth.signOut();
+        window.location.href = "admin-login.html";
+        return false;
     }
 
-
-    const admin =
-        JSON.parse(
-            localStorage.getItem(
-                "porikkhahub_admin"
-            ) || "null"
-        );
-
-
-    if (
-        admin &&
-        admin.full_name
-    ) {
-
-        document.getElementById(
-            "adminName"
-        ).textContent =
-            admin.full_name;
-
-    }
-
-
-    await loadDashboard();
-
+    return true;
 }
 
-
-
-/* =========================
-   LOAD DASHBOARD
-========================= */
 
 async function loadDashboard() {
 
+    const allowed = await checkAdmin();
 
-    /*
-        Statistics
-    */
+    if (!allowed) return;
 
-    const {
-        data: stats,
-        error: statsError
-    } =
-        await supabaseClient.rpc(
-            "get_admin_dashboard_stats"
-        );
+    try {
 
+        const { data, error } =
+            await supabaseClient.rpc("get_admin_dashboard_stats");
 
-    if (statsError) {
+        if (error) {
+            console.error(error);
+            alert("Dashboard loading failed: " + error.message);
+            return;
+        }
 
-        console.error(
-            statsError
-        );
+        document.getElementById("totalExams").textContent =
+            data.total_exams ?? 0;
 
-        alert(
-            "Could not load dashboard statistics: " +
-            statsError.message
-        );
+        document.getElementById("publishedExams").textContent =
+            data.published_exams ?? 0;
 
-        return;
+        document.getElementById("totalStudents").textContent =
+            data.total_students ?? 0;
+
+        document.getElementById("totalQuestions").textContent =
+            data.total_questions ?? 0;
+
+        document.getElementById("submittedExams").textContent =
+            data.submitted_exams ?? 0;
+
+        await loadRecentResults();
+
+    } catch (err) {
+
+        console.error(err);
 
     }
+}
 
 
-    document.getElementById(
-        "totalExams"
-    ).textContent =
-        stats.total_exams;
+async function loadRecentResults() {
 
+    const area = document.getElementById("resultsArea");
 
-    document.getElementById(
-        "publishedExams"
-    ).textContent =
-        stats.published_exams;
-
-
-    document.getElementById(
-        "totalStudents"
-    ).textContent =
-        stats.total_students;
-
-
-    document.getElementById(
-        "totalQuestions"
-    ).textContent =
-        stats.total_questions;
-
-
-    document.getElementById(
-        "submittedExams"
-    ).textContent =
-        stats.submitted_exams;
-
-
-
-    /*
-        Recent Results
-    */
-
-    const {
-        data: results,
-        error
-    } =
+    const { data, error } =
         await supabaseClient
             .from("admin_exam_results")
-            .select(`
-                student_name,
-                exam_title,
-                obtained_marks,
-                total_marks,
-                submitted_at
-            `)
-            .eq(
-                "status",
-                "submitted"
-            )
-            .order(
-                "submitted_at",
-                {
-                    ascending: false
-                }
-            )
+            .select("*")
+            .order("submitted_at", { ascending: false })
             .limit(5);
-
-
-    document.getElementById(
-        "recentLoading"
-    ).style.display =
-        "none";
-
 
     if (error) {
 
+        area.innerHTML =
+            `<div class="empty">
+                Could not load recent results.
+            </div>`;
+
         console.error(error);
-
         return;
-
     }
 
+    if (!data || data.length === 0) {
 
-    const body =
-        document.getElementById(
-            "recentBody"
-        );
+        area.innerHTML =
+            `<div class="empty">
+                No submitted results yet.
+            </div>`;
 
+        return;
+    }
 
-    body.innerHTML = "";
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Exam</th>
+                    <th>Marks</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
+    data.forEach(row => {
 
-    if (
-        !results ||
-        results.length === 0
-    ) {
-
-        body.innerHTML = `
+        html += `
             <tr>
-                <td colspan="4">
-                    No submitted results yet.
+                <td>${escapeHtml(row.student_name || "-")}</td>
+                <td>${escapeHtml(row.exam_title || "-")}</td>
+                <td>
+                    ${row.obtained_marks ?? 0}
+                    /
+                    ${row.total_marks ?? 0}
                 </td>
+                <td>${escapeHtml(row.status || "-")}</td>
             </tr>
         `;
 
-    } else {
+    });
 
+    html += `
+            </tbody>
+        </table>
+    `;
 
-        results.forEach(
-            result => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const submitted =
-                    result.submitted_at
-                        ? new Date(
-                            result.submitted_at
-                          ).toLocaleString()
-                        : "-";
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHtml(
-                            result.student_name || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            result.exam_title || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        <strong>
-                            ${result.obtained_marks ?? 0}
-                            /
-                            ${result.total_marks ?? 0}
-                        </strong>
-                    </td>
-
-                    <td>
-                        ${submitted}
-                    </td>
-
-                `;
-
-
-                body.appendChild(
-                    row
-                );
-
-            }
-        );
-
-    }
-
-
-    document.getElementById(
-        "recentTable"
-    ).style.display =
-        "table";
-
+    area.innerHTML = html;
 }
 
 
-
-/* =========================
-   ESCAPE HTML
-========================= */
-
-function escapeHtml(
-    value
-) {
+function escapeHtml(value) {
 
     return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
 }
 
-
-
-/* =========================
-   NAVIGATION
-========================= */
-
-function openCreateExam() {
-
-    window.location.href =
-        "create-exam.html";
-
-}
-
-
-function openManageExams() {
-
-    window.location.href =
-        "manage-exams.html";
-
-}
-
-
-function openResults() {
-
-    window.location.href =
-        "admin-results.html";
-
-}
-
-
-function openQuestions() {
-
-    window.location.href =
-        "manage-questions.html";
-
-}
-
-
-function openCQQuestionBank() {
-
-    window.location.href =
-        "cq-question-bank.html";
-
-}
-
-
-function openStudents() {
-
-    window.location.href =
-        "admin-students.html";
-
-}
-
-
-
-/* =========================
-   LOGOUT
-========================= */
 
 async function logout() {
 
     await supabaseClient.auth.signOut();
 
+    localStorage.removeItem("porikkhahub_admin");
+    localStorage.removeItem("porikkhahub_admin_access_token");
+    localStorage.removeItem("porikkhahub_admin_refresh_token");
 
-    localStorage.removeItem(
-        "porikkhahub_admin"
-    );
-
-    localStorage.removeItem(
-        "porikkhahub_admin_access_token"
-    );
-
-    localStorage.removeItem(
-        "porikkhahub_admin_refresh_token"
-    );
-
-
-    window.location.href =
-        "admin-login.html";
-
+    window.location.href = "admin-login.html";
 }
 
 
-/* =========================
-   START
-========================= */
-
-startPage();
+loadDashboard();
 
 </script>
 
-
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
-
