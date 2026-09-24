@@ -1,109 +1,127 @@
-﻿@'
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Admin Login | PorikkhaHub</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:Arial,sans-serif;
+* {
+    box-sizing: border-box;
 }
 
-body{
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,#111827,#1e3a8a);
-    padding:20px;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
 }
 
-.card{
-    width:100%;
-    max-width:420px;
-    background:white;
-    border-radius:22px;
-    padding:35px;
-    box-shadow:0 20px 50px rgba(0,0,0,.25);
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 35px;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.10);
 }
 
-.logo{
-    text-align:center;
-    font-size:28px;
-    font-weight:800;
-    color:#2563eb;
-    margin-bottom:8px;
+.logo {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 800;
+    color: #4f46e5;
+    margin-bottom: 8px;
 }
 
-.subtitle{
-    text-align:center;
-    color:#64748b;
-    margin-bottom:30px;
+.subtitle {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 30px;
 }
 
-label{
-    display:block;
-    margin:15px 0 7px;
-    font-weight:600;
-    color:#334155;
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #334155;
 }
 
-input{
-    width:100%;
-    padding:13px 14px;
-    border:1px solid #cbd5e1;
-    border-radius:10px;
-    font-size:15px;
-    outline:none;
+input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 18px;
 }
 
-input:focus{
-    border-color:#2563eb;
+input:focus {
+    outline: none;
+    border-color: #4f46e5;
 }
 
-button{
-    width:100%;
-    margin-top:25px;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:#2563eb;
-    color:white;
-    font-size:16px;
-    font-weight:700;
-    cursor:pointer;
+.login-btn,
+.forgot-btn {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-button:hover{
-    background:#1d4ed8;
+.login-btn {
+    border: none;
+    background: #4f46e5;
+    color: white;
+    margin-top: 5px;
 }
 
-button:disabled{
-    background:#94a3b8;
-    cursor:not-allowed;
+.login-btn:hover {
+    background: #4338ca;
 }
 
-#message{
-    margin-top:15px;
-    text-align:center;
-    font-size:14px;
-    min-height:20px;
+.forgot-btn {
+    background: white;
+    color: #4f46e5;
+    border: 2px solid #4f46e5;
+    margin-top: 5px;
+    margin-bottom: 12px;
 }
 
-.back{
-    display:block;
-    text-align:center;
-    margin-top:22px;
-    color:#2563eb;
-    text-decoration:none;
+.forgot-btn:hover {
+    background: #eef2ff;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#message {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.back {
+    display: block;
+    text-align: center;
+    margin-top: 22px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
 }
 </style>
-
 </head>
 
 <body>
@@ -112,191 +130,326 @@ button:disabled{
 
     <div class="logo">PorikkhaHub</div>
 
-    <div class="subtitle">Admin Panel Login</div>
+    <div class="subtitle">
+        Admin Panel Login
+    </div>
 
-    <form id="adminLoginForm">
+    <form id="loginForm">
 
-        <label>Email</label>
+        <label for="email">Email</label>
 
         <input
             type="email"
             id="email"
-            placeholder="Admin email"
+            placeholder="Enter admin email"
             required
         >
 
-        <label>Password</label>
+        <label for="password">Password</label>
 
         <input
             type="password"
             id="password"
-            placeholder="Admin password"
+            placeholder="Enter password"
             required
         >
 
-        <button type="submit" id="loginButton">
+        <!-- FORGOT PASSWORD -->
+        <button
+            type="button"
+            id="forgotPasswordBtn"
+            class="forgot-btn"
+        >
+            Forgot Password?
+        </button>
+
+        <!-- LOGIN -->
+        <button
+            type="submit"
+            id="loginBtn"
+            class="login-btn"
+        >
             Login as Admin
         </button>
 
-        <div id="message"></div>
-
     </form>
 
-    <a class="back" href="index.html">← Back to Home</a>
+    <div id="message"></div>
+
+    <a href="index.html" class="back">
+        ← Back to Home
+    </a>
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
 const SUPABASE_URL =
-"https://jsjkxpsnuizngofyjvdl.supabase.co";
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
-"sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
-document
-.getElementById("adminLoginForm")
-.addEventListener("submit", async function(e){
+const loginForm =
+    document.getElementById("loginForm");
 
-    e.preventDefault();
+const loginBtn =
+    document.getElementById("loginBtn");
 
-    const email =
-        document.getElementById("email").value.trim();
+const forgotPasswordBtn =
+    document.getElementById("forgotPasswordBtn");
 
-    const password =
-        document.getElementById("password").value;
+const message =
+    document.getElementById("message");
 
-    const message =
-        document.getElementById("message");
 
-    const loginButton =
-        document.getElementById("loginButton");
+function showMessage(text, color) {
 
-    message.style.color = "#2563eb";
-    message.textContent = "Logging in...";
+    message.textContent = text;
+    message.style.color = color;
 
-    loginButton.disabled = true;
-    loginButton.textContent = "Logging in...";
+}
 
-    try{
 
-        const { data, error } =
-            await supabaseClient.auth.signInWithPassword({
+/* =========================
+   ADMIN LOGIN
+========================= */
 
-                email: email,
-                password: password
+loginForm.addEventListener(
+    "submit",
+    async function(event) {
 
-            });
+        event.preventDefault();
 
-        if(error){
+        const email =
+            document.getElementById("email")
+            .value
+            .trim();
 
-            message.style.color = "#dc2626";
-            message.textContent = error.message;
+        const password =
+            document.getElementById("password")
+            .value;
 
-            loginButton.disabled = false;
-            loginButton.textContent = "Login as Admin";
+        if (!email || !password) {
 
-            return;
-        }
-
-        const user = data.user;
-
-        if(!user || !data.session){
-
-            message.style.color = "#dc2626";
-            message.textContent =
-                "Login session could not be created.";
-
-            loginButton.disabled = false;
-            loginButton.textContent = "Login as Admin";
+            showMessage(
+                "Please enter email and password.",
+                "#dc2626"
+            );
 
             return;
         }
 
-        const { data: admin, error: adminError } =
-            await supabaseClient
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Logging in...";
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.auth
+                .signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.user) {
+                throw new Error("Login failed.");
+            }
+
+
+            /* VERIFY ADMIN */
+
+            const {
+                data: admin,
+                error: adminError
+            } =
+                await supabaseClient
                 .from("admins")
-                .select("id, full_name, email")
-                .eq("auth_user_id", user.id)
-                .single();
+                .select("*")
+                .eq(
+                    "auth_user_id",
+                    data.user.id
+                )
+                .maybeSingle();
 
-        if(adminError || !admin){
+            if (adminError) {
+                throw adminError;
+            }
 
-            await supabaseClient.auth.signOut();
+            if (!admin) {
 
-            message.style.color = "#dc2626";
-            message.textContent =
-                "This account is not an authorized admin.";
+                await supabaseClient
+                    .auth
+                    .signOut();
 
-            loginButton.disabled = false;
-            loginButton.textContent = "Login as Admin";
+                throw new Error(
+                    "This account is not an admin account."
+                );
+            }
 
-            return;
+
+            /* SAVE SESSION */
+
+            localStorage.setItem(
+                "porikkhahub_admin",
+                JSON.stringify(admin)
+            );
+
+            localStorage.setItem(
+                "porikkhahub_admin_access_token",
+                data.session.access_token
+            );
+
+            localStorage.setItem(
+                "porikkhahub_admin_refresh_token",
+                data.session.refresh_token
+            );
+
+
+            showMessage(
+                "Login successful! Redirecting...",
+                "#16a34a"
+            );
+
+            setTimeout(function() {
+
+                window.location.href =
+                    "admin-dashboard.html";
+
+            }, 700);
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                error.message ||
+                "Login failed.",
+                "#dc2626"
+            );
+
+        } finally {
+
+            loginBtn.disabled = false;
+            loginBtn.textContent =
+                "Login as Admin";
+
         }
-
-        /*
-         * Save admin profile
-         */
-        localStorage.setItem(
-            "porikkhahub_admin",
-            JSON.stringify(admin)
-        );
-
-        /*
-         * Save ACCESS TOKEN
-         */
-        localStorage.setItem(
-            "porikkhahub_admin_access_token",
-            data.session.access_token
-        );
-
-        /*
-         * Save REFRESH TOKEN
-         * This is important for maintaining the session.
-         */
-        localStorage.setItem(
-            "porikkhahub_admin_refresh_token",
-            data.session.refresh_token
-        );
-
-        message.style.color = "#16a34a";
-        message.textContent =
-            "Login successful! Opening Admin Panel...";
-
-        setTimeout(() => {
-
-            window.location.href =
-                "admin-dashboard.html";
-
-        }, 700);
-
-    }catch(error){
-
-        console.error(error);
-
-        message.style.color = "#dc2626";
-        message.textContent =
-            "Something went wrong. Please try again.";
-
-        loginButton.disabled = false;
-        loginButton.textContent = "Login as Admin";
 
     }
+);
 
-});
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+
+forgotPasswordBtn.addEventListener(
+    "click",
+    async function() {
+
+        const email =
+            document.getElementById("email")
+            .value
+            .trim();
+
+        if (!email) {
+
+            showMessage(
+                "First enter your admin email.",
+                "#dc2626"
+            );
+
+            document
+                .getElementById("email")
+                .focus();
+
+            return;
+        }
+
+        forgotPasswordBtn.disabled = true;
+
+        forgotPasswordBtn.textContent =
+            "Sending reset email...";
+
+        showMessage(
+            "Sending password reset email...",
+            "#2563eb"
+        );
+
+
+        try {
+
+            const resetUrl =
+                new URL(
+                    "admin-reset.html",
+                    window.location.href
+                ).href;
+
+
+            const {
+                error
+            } =
+                await supabaseClient.auth
+                .resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo: resetUrl
+                    }
+                );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            showMessage(
+                "Password reset email sent. Check your email.",
+                "#16a34a"
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Reset error:",
+                error
+            );
+
+            showMessage(
+                error.message ||
+                "Could not send reset email.",
+                "#dc2626"
+            );
+
+        } finally {
+
+            forgotPasswordBtn.disabled = false;
+
+            forgotPasswordBtn.textContent =
+                "Forgot Password?";
+
+        }
+
+    }
+);
 
 </script>
 
 </body>
 </html>
-'@ | Set-Content -Encoding UTF8 .\admin-login.html
-
-
-
