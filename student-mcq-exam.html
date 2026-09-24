@@ -1,222 +1,224 @@
+```html
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MCQ Exam | PorikkhaHub</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f5f7fb;
-        color: #1f2937;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
 
-    .header {
-        background: #2563eb;
-        color: white;
-        padding: 16px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 15px;
-    }
+.header {
+    background: #2563eb;
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
 
-    .header h2 {
-        margin: 0;
-        font-size: 20px;
-    }
+.header h2 {
+    margin: 0;
+    font-size: 20px;
+}
 
-    .timer {
-        background: white;
-        color: #dc2626;
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-weight: bold;
-    }
+.timer {
+    background: white;
+    color: #dc2626;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+}
 
-    .container {
-        max-width: 1000px;
-        margin: 25px auto;
-        padding: 0 15px;
-    }
+.container {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 18px;
+}
+
+.exam-info {
+    margin-bottom: 20px;
+}
+
+.exam-info h1 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.question-number {
+    color: #2563eb;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.question-text {
+    font-size: 19px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.option {
+    display: block;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.option:hover {
+    background: #f3f4f6;
+}
+
+.option.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.option input {
+    margin-right: 10px;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+button {
+    border: none;
+    border-radius: 8px;
+    padding: 11px 18px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.btn-submit {
+    background: #dc2626;
+    color: white;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.palette button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: #e5e7eb;
+}
+
+.palette button.answered {
+    background: #22c55e;
+    color: white;
+}
+
+.palette button.active {
+    outline: 3px solid #2563eb;
+}
+
+.result {
+    text-align: center;
+}
+
+.result h1 {
+    color: #16a34a;
+}
+
+.result-score {
+    font-size: 35px;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
 
     .card {
-        background: white;
-        border-radius: 14px;
-        padding: 25px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        margin-bottom: 20px;
-    }
-
-    .loading {
-        text-align: center;
-        padding: 60px 20px;
-        font-size: 18px;
-    }
-
-    .exam-info {
-        margin-bottom: 20px;
-    }
-
-    .exam-info h1 {
-        margin-top: 0;
-        margin-bottom: 8px;
-    }
-
-    .question-number {
-        color: #2563eb;
-        font-weight: bold;
-        margin-bottom: 10px;
+        padding: 18px;
     }
 
     .question-text {
-        font-size: 19px;
-        line-height: 1.6;
-        margin-bottom: 20px;
-    }
-
-    .option {
-        display: block;
-        border: 1px solid #d1d5db;
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 12px;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .option:hover {
-        background: #f3f4f6;
-    }
-
-    .option.selected {
-        border-color: #2563eb;
-        background: #eff6ff;
-    }
-
-    .option input {
-        margin-right: 10px;
+        font-size: 17px;
     }
 
     .navigation {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-        margin-top: 25px;
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    button {
-        border: none;
-        border-radius: 8px;
-        padding: 11px 18px;
-        font-size: 15px;
-        cursor: pointer;
+    .navigation button {
+        width: 100%;
     }
-
-    .btn-secondary {
-        background: #e5e7eb;
-        color: #111827;
-    }
-
-    .btn-primary {
-        background: #2563eb;
-        color: white;
-    }
-
-    .btn-submit {
-        background: #dc2626;
-        color: white;
-    }
-
-    button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .palette {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 20px;
-    }
-
-    .palette button {
-        width: 40px;
-        height: 40px;
-        padding: 0;
-        background: #e5e7eb;
-    }
-
-    .palette button.answered {
-        background: #22c55e;
-        color: white;
-    }
-
-    .palette button.active {
-        outline: 3px solid #2563eb;
-    }
-
-    .result {
-        text-align: center;
-    }
-
-    .result h1 {
-        color: #16a34a;
-    }
-
-    .result-score {
-        font-size: 35px;
-        font-weight: bold;
-        margin: 20px 0;
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    @media (max-width: 600px) {
-        .card {
-            padding: 18px;
-        }
-
-        .question-text {
-            font-size: 17px;
-        }
-
-        .navigation {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .navigation button {
-            width: 100%;
-        }
-    }
+}
 </style>
-```
 
 </head>
 
 <body>
 
-```
 <div class="header">
+
     <h2>PorikkhaHub</h2>
 
     <div id="timer" class="timer">
         Loading...
     </div>
+
 </div>
 
 <div class="container">
@@ -228,7 +230,10 @@
     <div id="examArea" class="hidden">
 
         <div class="card exam-info">
-            <h1 id="examTitle">Exam</h1>
+
+            <h1 id="examTitle">
+                Exam
+            </h1>
 
             <p id="examDescription"></p>
 
@@ -236,6 +241,7 @@
                 <strong>Total Marks:</strong>
                 <span id="totalMarks">0</span>
             </div>
+
         </div>
 
         <div class="card">
@@ -309,12 +315,16 @@
 
         <h1>Exam Submitted!</h1>
 
-        <p>Your exam has been submitted successfully.</p>
+        <p>
+            Your exam has been submitted successfully.
+        </p>
 
         <div class="result-score">
+
             <span id="obtainedMarks">0</span>
             /
             <span id="resultTotalMarks">0</span>
+
         </div>
 
         <p>
@@ -341,114 +351,348 @@
     </div>
 
 </div>
-```
 
 <script>
 
-    const SUPABASE_URL =
-        "https://jsjkxpsnuizngofyjvdl.supabase.co";
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
 
-    const SUPABASE_KEY =
-        "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
 
-    const supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_KEY
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let examId = null;
+let exam = null;
+let questions = [];
+let answers = {};
+
+let currentQuestion = 0;
+let attemptId = null;
+
+let timerInterval = null;
+let remainingSeconds = 0;
+
+let submitted = false;
+
+
+/* =========================
+   RESTORE STUDENT SESSION
+========================= */
+
+async function restoreStudentSession() {
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_access_token"
+        );
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_refresh_token"
         );
 
 
-    let examId = null;
-    let exam = null;
-    let questions = [];
-    let answers = {};
+    if (!accessToken) {
 
-    let currentQuestion = 0;
-    let attemptId = null;
+        throw new Error(
+            "Student login session not found. Please login again."
+        );
 
-    let timerInterval = null;
-    let remainingSeconds = 0;
-
-    let submitted = false;
-
-
-    async function initialize() {
-
-        try {
-
-            const urlParams =
-                new URLSearchParams(
-                    window.location.search
-                );
-
-            const urlExamId =
-                urlParams.get("exam");
-
-            const savedExamId =
-                localStorage.getItem(
-                    "porikkhahub_student_exam_id"
-                );
-
-
-            if (urlExamId) {
-
-                examId = urlExamId;
-
-            } else if (savedExamId) {
-
-                examId = savedExamId;
-
-            } else {
-
-                alert("No exam selected.");
-
-                window.location.href =
-                    "student-dashboard.html";
-
-                return;
-            }
-
-
-            localStorage.setItem(
-                "porikkhahub_student_exam_id",
-                examId
-            );
-
-
-            await loadExam();
-
-            await startAttempt();
-
-            await loadQuestions();
-
-            renderPalette();
-
-            showQuestion();
-
-        } catch (error) {
-
-            console.error(error);
-
-            document.getElementById(
-                "loading"
-            ).textContent =
-                error.message ||
-                "Exam could not be loaded.";
-
-            alert(
-                error.message ||
-                "Exam could not be loaded."
-            );
-        }
     }
 
 
-    async function loadExam() {
+    try {
+
+        /*
+         * First try to restore the existing
+         * access/refresh token session.
+         */
+
+        if (refreshToken) {
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.setSession({
+
+                access_token:
+                    accessToken,
+
+                refresh_token:
+                    refreshToken
+
+            });
+
+
+            if (error) {
+
+                console.error(
+                    "Session restore error:",
+                    error
+                );
+
+                /*
+                 * If refresh token is still usable,
+                 * Supabase may refresh the session.
+                 * Try getSession after setSession.
+                 */
+
+            }
+
+
+            if (
+                data &&
+                data.session
+            ) {
+
+                /*
+                 * Save the latest tokens.
+                 */
+
+                localStorage.setItem(
+                    "porikkhahub_access_token",
+                    data.session.access_token
+                );
+
+                if (
+                    data.session.refresh_token
+                ) {
+
+                    localStorage.setItem(
+                        "porikkhahub_refresh_token",
+                        data.session.refresh_token
+                    );
+
+                }
+
+                return true;
+
+            }
+
+        }
+
+
+        /*
+         * Check whether Supabase currently
+         * has an authenticated session.
+         */
 
         const {
-            data,
+            data: sessionData
+        } =
+            await supabaseClient.auth.getSession();
+
+
+        if (
+            sessionData &&
+            sessionData.session
+        ) {
+
+            localStorage.setItem(
+                "porikkhahub_access_token",
+                sessionData.session.access_token
+            );
+
+            if (
+                sessionData.session.refresh_token
+            ) {
+
+                localStorage.setItem(
+                    "porikkhahub_refresh_token",
+                    sessionData.session.refresh_token
+                );
+
+            }
+
+            return true;
+
+        }
+
+
+        throw new Error(
+            "Student login session expired. Please login again."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Session restoration failed:",
             error
-        } = await supabaseClient
+        );
+
+        throw new Error(
+            "Student login session expired. Please login again."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   VERIFY AUTH USER
+========================= */
+
+async function verifyStudentAuth() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (error) {
+
+        console.error(
+            "Auth user error:",
+            error
+        );
+
+        throw new Error(
+            "Student authentication failed. Please login again."
+        );
+
+    }
+
+
+    if (
+        !data ||
+        !data.user
+    ) {
+
+        throw new Error(
+            "Student authentication failed. Please login again."
+        );
+
+    }
+
+
+    console.log(
+        "Authenticated student:",
+        data.user.id
+    );
+
+
+    return data.user;
+
+}
+
+
+/* =========================
+   INITIALIZE
+========================= */
+
+async function initialize() {
+
+    try {
+
+        /*
+         * VERY IMPORTANT:
+         * Restore Supabase Auth BEFORE
+         * calling any RPC.
+         */
+
+        await restoreStudentSession();
+
+        await verifyStudentAuth();
+
+
+        const urlParams =
+            new URLSearchParams(
+                window.location.search
+            );
+
+
+        const urlExamId =
+            urlParams.get("exam");
+
+
+        const savedExamId =
+            localStorage.getItem(
+                "porikkhahub_student_exam_id"
+            );
+
+
+        if (urlExamId) {
+
+            examId = urlExamId;
+
+        } else if (savedExamId) {
+
+            examId = savedExamId;
+
+        } else {
+
+            alert("No exam selected.");
+
+            window.location.href =
+                "student-dashboard.html";
+
+            return;
+
+        }
+
+
+        localStorage.setItem(
+            "porikkhahub_student_exam_id",
+            examId
+        );
+
+
+        await loadExam();
+
+        await startAttempt();
+
+        await loadQuestions();
+
+        renderPalette();
+
+        showQuestion();
+
+
+    } catch (error) {
+
+        console.error(
+            "Exam initialization error:",
+            error
+        );
+
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            error.message ||
+            "Exam could not be loaded.";
+
+
+        alert(
+            error.message ||
+            "Exam could not be loaded."
+        );
+
+    }
+
+}
+
+
+/* =========================
+   LOAD EXAM
+========================= */
+
+async function loadExam() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("exams")
             .select(`
                 id,
@@ -464,55 +708,69 @@
             .single();
 
 
-        if (error) {
+    if (error) {
 
-            console.error(
-                "Exam load error:",
-                error
-            );
+        console.error(
+            "Exam load error:",
+            error
+        );
 
-            throw new Error(
-                "Exam could not be loaded."
-            );
-        }
+        throw new Error(
+            "Exam could not be loaded."
+        );
 
-
-        if (!data) {
-
-            throw new Error(
-                "Exam not found."
-            );
-        }
-
-
-        exam = data;
-
-
-        document.getElementById(
-            "examTitle"
-        ).textContent =
-            exam.title;
-
-
-        document.getElementById(
-            "examDescription"
-        ).textContent =
-            exam.description || "";
-
-
-        document.getElementById(
-            "totalMarks"
-        ).textContent =
-            exam.total_marks || 0;
     }
 
 
-    async function startAttempt() {
+    if (!data) {
 
-        const {
-            data,
-            error
-        } = await supabaseClient
+        throw new Error(
+            "Exam not found."
+        );
+
+    }
+
+
+    exam = data;
+
+
+    document.getElementById(
+        "examTitle"
+    ).textContent =
+        exam.title;
+
+
+    document.getElementById(
+        "examDescription"
+    ).textContent =
+        exam.description || "";
+
+
+    document.getElementById(
+        "totalMarks"
+    ).textContent =
+        exam.total_marks || 0;
+
+}
+
+
+/* =========================
+   START ATTEMPT
+========================= */
+
+async function startAttempt() {
+
+    console.log(
+        "Starting exam with exam ID:",
+        examId
+    );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .rpc(
                 "start_student_exam",
                 {
@@ -521,55 +779,72 @@
             );
 
 
-        if (error) {
+    if (error) {
 
-            console.error(
-                "Start attempt error:",
-                error
-            );
+        console.error(
+            "Start attempt error:",
+            error
+        );
 
-            throw new Error(
-                error.message ||
-                "Could not start exam."
-            );
-        }
+        throw new Error(
+            error.message ||
+            "Could not start exam."
+        );
 
-
-        const attempt =
-            Array.isArray(data)
-                ? data[0]
-                : data;
-
-
-        if (!attempt) {
-
-            throw new Error(
-                "Could not create exam attempt."
-            );
-        }
-
-
-        attemptId =
-            attempt.attempt_id ||
-            attempt.id;
-
-
-        remainingSeconds =
-            Number(
-                exam.duration_minutes || 30
-            ) * 60;
-
-
-        startTimer();
     }
 
 
-    async function loadQuestions() {
+    const attempt =
+        Array.isArray(data)
+            ? data[0]
+            : data;
 
-        const {
-            data,
-            error
-        } = await supabaseClient
+
+    if (!attempt) {
+
+        throw new Error(
+            "Could not create exam attempt."
+        );
+
+    }
+
+
+    attemptId =
+        attempt.attempt_id ||
+        attempt.id;
+
+
+    if (!attemptId) {
+
+        throw new Error(
+            "Exam attempt ID was not returned."
+        );
+
+    }
+
+
+    remainingSeconds =
+        Number(
+            exam.duration_minutes || 30
+        ) * 60;
+
+
+    startTimer();
+
+}
+
+
+/* =========================
+   LOAD QUESTIONS
+========================= */
+
+async function loadQuestions() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .from("student_mcq_questions")
             .select(`
                 id,
@@ -591,54 +866,226 @@
             );
 
 
-        if (error) {
+    if (error) {
 
-            console.error(
-                "Question load error:",
-                error
-            );
+        console.error(
+            "Question load error:",
+            error
+        );
 
-            throw new Error(
-                "Questions could not be loaded."
-            );
-        }
+        throw new Error(
+            "Questions could not be loaded."
+        );
 
-
-        questions =
-            data || [];
-
-
-        if (questions.length === 0) {
-
-            throw new Error(
-                "No questions found for this exam."
-            );
-        }
-
-
-        document.getElementById(
-            "loading"
-        ).classList.add("hidden");
-
-
-        document.getElementById(
-            "examArea"
-        ).classList.remove("hidden");
     }
 
 
-    function showQuestion() {
+    questions =
+        data || [];
 
-        if (currentQuestion < 0) {
-            currentQuestion = 0;
-        }
 
+    if (
+        questions.length === 0
+    ) {
+
+        throw new Error(
+            "No questions found for this exam."
+        );
+
+    }
+
+
+    document.getElementById(
+        "loading"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "examArea"
+    ).classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =========================
+   SHOW QUESTION
+========================= */
+
+function showQuestion() {
+
+    if (currentQuestion < 0) {
+
+        currentQuestion = 0;
+
+    }
+
+
+    if (
+        currentQuestion >=
+        questions.length
+    ) {
+
+        currentQuestion =
+            questions.length - 1;
+
+    }
+
+
+    const q =
+        questions[currentQuestion];
+
+
+    document.getElementById(
+        "questionNumber"
+    ).textContent =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+
+
+    document.getElementById(
+        "questionText"
+    ).textContent =
+        q.question_text;
+
+
+    setOption(
+        "optionA",
+        q.option_a
+    );
+
+    setOption(
+        "optionB",
+        q.option_b
+    );
+
+    setOption(
+        "optionC",
+        q.option_c
+    );
+
+    setOption(
+        "optionD",
+        q.option_d
+    );
+
+
+    const selected =
+        answers[q.id] || null;
+
+
+    document
+        .querySelectorAll(
+            'input[name="answer"]'
+        )
+        .forEach(
+            radio => {
+
+                radio.checked =
+                    radio.value === selected;
+
+            }
+        );
+
+
+    updateOptionStyles();
+
+
+    document.getElementById(
+        "previousBtn"
+    ).disabled =
+        currentQuestion === 0;
+
+
+    const isLastQuestion =
+        currentQuestion ===
+        questions.length - 1;
+
+
+    const nextBtn =
+        document.getElementById(
+            "nextBtn"
+        );
+
+
+    const submitBtn =
+        document.getElementById(
+            "submitBtn"
+        );
+
+
+    if (isLastQuestion) {
+
+        nextBtn.classList.add(
+            "hidden"
+        );
+
+        submitBtn.classList.remove(
+            "hidden"
+        );
+
+    } else {
+
+        nextBtn.classList.remove(
+            "hidden"
+        );
+
+        submitBtn.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    updatePalette();
+
+}
+
+
+/* =========================
+   SET OPTION
+========================= */
+
+function setOption(
+    elementId,
+    text
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    const span =
+        element.querySelector(
+            "span"
+        );
+
+
+    span.textContent =
+        text || "";
+
+}
+
+
+/* =========================
+   ANSWER CHANGE
+========================= */
+
+document.addEventListener(
+    "change",
+    function(event) {
 
         if (
-            currentQuestion >= questions.length
+            event.target.name !==
+            "answer"
         ) {
-            currentQuestion =
-                questions.length - 1;
+
+            return;
+
         }
 
 
@@ -646,583 +1093,542 @@
             questions[currentQuestion];
 
 
-        document.getElementById(
-            "questionNumber"
-        ).textContent =
-            `Question ${currentQuestion + 1} of ${questions.length}`;
-
-
-        document.getElementById(
-            "questionText"
-        ).textContent =
-            q.question_text;
-
-
-        setOption(
-            "optionA",
-            q.option_a
-        );
-
-        setOption(
-            "optionB",
-            q.option_b
-        );
-
-        setOption(
-            "optionC",
-            q.option_c
-        );
-
-        setOption(
-            "optionD",
-            q.option_d
-        );
-
-
-        const selected =
-            answers[q.id] || null;
-
-
-        document
-            .querySelectorAll(
-                'input[name="answer"]'
-            )
-            .forEach(
-                radio => {
-
-                    radio.checked =
-                        radio.value === selected;
-                }
-            );
+        answers[q.id] =
+            event.target.value;
 
 
         updateOptionStyles();
 
-
-        document.getElementById(
-            "previousBtn"
-        ).disabled =
-            currentQuestion === 0;
-
-
-        const isLastQuestion =
-            currentQuestion ===
-            questions.length - 1;
-
-
-        const nextBtn =
-            document.getElementById(
-                "nextBtn"
-            );
-
-        const submitBtn =
-            document.getElementById(
-                "submitBtn"
-            );
-
-
-        if (isLastQuestion) {
-
-            nextBtn.classList.add(
-                "hidden"
-            );
-
-            submitBtn.classList.remove(
-                "hidden"
-            );
-
-        } else {
-
-            nextBtn.classList.remove(
-                "hidden"
-            );
-
-            submitBtn.classList.add(
-                "hidden"
-            );
-        }
-
-
         updatePalette();
+
     }
+);
 
 
-    function setOption(
-        elementId,
-        text
-    ) {
+/* =========================
+   OPTION STYLES
+========================= */
 
-        const element =
-            document.getElementById(
-                elementId
-            );
+function updateOptionStyles() {
 
-        const span =
-            element.querySelector(
-                "span"
-            );
+    document
+        .querySelectorAll(
+            ".option"
+        )
+        .forEach(
+            option => {
 
-        span.textContent =
-            text || "";
-    }
-
-
-    document.addEventListener(
-        "change",
-        function(event) {
-
-            if (
-                event.target.name !==
-                "answer"
-            ) {
-                return;
-            }
-
-
-            const q =
-                questions[currentQuestion];
-
-
-            answers[q.id] =
-                event.target.value;
-
-
-            updateOptionStyles();
-
-            updatePalette();
-        }
-    );
-
-
-    function updateOptionStyles() {
-
-        document
-            .querySelectorAll(
-                ".option"
-            )
-            .forEach(
-                option => {
-
-                    const radio =
-                        option.querySelector(
-                            "input"
-                        );
-
-
-                    option.classList.toggle(
-                        "selected",
-                        radio.checked
-                    );
-                }
-            );
-    }
-
-
-    function nextQuestion() {
-
-        saveCurrentAnswer();
-
-
-        if (
-            currentQuestion <
-            questions.length - 1
-        ) {
-
-            currentQuestion++;
-
-            showQuestion();
-        }
-    }
-
-
-    function previousQuestion() {
-
-        saveCurrentAnswer();
-
-
-        if (
-            currentQuestion > 0
-        ) {
-
-            currentQuestion--;
-
-            showQuestion();
-        }
-    }
-
-
-    function saveCurrentAnswer() {
-
-        const q =
-            questions[currentQuestion];
-
-
-        const selected =
-            document.querySelector(
-                'input[name="answer"]:checked'
-            );
-
-
-        if (selected) {
-
-            answers[q.id] =
-                selected.value;
-
-        } else {
-
-            if (
-                answers[q.id] === undefined
-            ) {
-
-                answers[q.id] = null;
-            }
-        }
-    }
-
-
-    function renderPalette() {
-
-        const palette =
-            document.getElementById(
-                "palette"
-            );
-
-
-        palette.innerHTML = "";
-
-
-        questions.forEach(
-            (q, index) => {
-
-                const button =
-                    document.createElement(
-                        "button"
+                const radio =
+                    option.querySelector(
+                        "input"
                     );
 
 
-                button.textContent =
-                    index + 1;
-
-
-                button.onclick =
-                    function() {
-
-                        saveCurrentAnswer();
-
-                        currentQuestion =
-                            index;
-
-                        showQuestion();
-                    };
-
-
-                palette.appendChild(
-                    button
+                option.classList.toggle(
+                    "selected",
+                    radio.checked
                 );
+
             }
         );
 
+}
 
-        updatePalette();
+
+/* =========================
+   NEXT
+========================= */
+
+function nextQuestion() {
+
+    saveCurrentAnswer();
+
+
+    if (
+        currentQuestion <
+        questions.length - 1
+    ) {
+
+        currentQuestion++;
+
+        showQuestion();
+
     }
 
+}
 
-    function updatePalette() {
 
-        const buttons =
-            document
-                .getElementById("palette")
-                .querySelectorAll(
+/* =========================
+   PREVIOUS
+========================= */
+
+function previousQuestion() {
+
+    saveCurrentAnswer();
+
+
+    if (
+        currentQuestion > 0
+    ) {
+
+        currentQuestion--;
+
+        showQuestion();
+
+    }
+
+}
+
+
+/* =========================
+   SAVE CURRENT ANSWER
+========================= */
+
+function saveCurrentAnswer() {
+
+    const q =
+        questions[currentQuestion];
+
+
+    const selected =
+        document.querySelector(
+            'input[name="answer"]:checked'
+        );
+
+
+    if (selected) {
+
+        answers[q.id] =
+            selected.value;
+
+    } else {
+
+        if (
+            answers[q.id] === undefined
+        ) {
+
+            answers[q.id] = null;
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   PALETTE
+========================= */
+
+function renderPalette() {
+
+    const palette =
+        document.getElementById(
+            "palette"
+        );
+
+
+    palette.innerHTML = "";
+
+
+    questions.forEach(
+        (q, index) => {
+
+            const button =
+                document.createElement(
                     "button"
                 );
 
 
-        buttons.forEach(
-            (button, index) => {
-
-                const q =
-                    questions[index];
+            button.textContent =
+                index + 1;
 
 
-                const answered =
-                    answers[q.id] != null;
-
-
-                button.classList.toggle(
-                    "answered",
-                    answered
-                );
-
-
-                button.classList.toggle(
-                    "active",
-                    index === currentQuestion
-                );
-            }
-        );
-    }
-
-
-    function startTimer() {
-
-        updateTimer();
-
-
-        timerInterval =
-            setInterval(
+            button.onclick =
                 function() {
 
-                    remainingSeconds--;
+                    saveCurrentAnswer();
+
+                    currentQuestion =
+                        index;
+
+                    showQuestion();
+
+                };
 
 
-                    updateTimer();
-
-
-                    if (
-                        remainingSeconds <= 0
-                    ) {
-
-                        clearInterval(
-                            timerInterval
-                        );
-
-                        autoSubmit();
-                    }
-
-                },
-                1000
-            );
-    }
-
-
-    function updateTimer() {
-
-        const minutes =
-            Math.floor(
-                remainingSeconds / 60
+            palette.appendChild(
+                button
             );
 
-
-        const seconds =
-            remainingSeconds % 60;
-
-
-        document.getElementById(
-            "timer"
-        ).textContent =
-            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-    }
-
-
-    function confirmSubmit() {
-
-        if (
-            currentQuestion !==
-            questions.length - 1
-        ) {
-            return;
         }
+    );
 
 
-        saveCurrentAnswer();
+    updatePalette();
+
+}
 
 
-        const unanswered =
-            questions.filter(
-                q =>
-                    !answers[q.id]
-            ).length;
+/* =========================
+   UPDATE PALETTE
+========================= */
+
+function updatePalette() {
+
+    const buttons =
+        document
+            .getElementById(
+                "palette"
+            )
+            .querySelectorAll(
+                "button"
+            );
 
 
-        let message =
-            "Are you sure you want to submit the exam?";
+    buttons.forEach(
+        (button, index) => {
+
+            const q =
+                questions[index];
 
 
-        if (unanswered > 0) {
+            const answered =
+                answers[q.id] != null;
 
-            message +=
-                `\n\nYou have ${unanswered} unanswered question(s).`;
+
+            button.classList.toggle(
+                "answered",
+                answered
+            );
+
+
+            button.classList.toggle(
+                "active",
+                index === currentQuestion
+            );
+
         }
+    );
+
+}
 
 
-        if (
-            confirm(message)
-        ) {
+/* =========================
+   TIMER
+========================= */
 
-            submitExam();
-        }
-    }
+function startTimer() {
 
-
-    async function autoSubmit() {
-
-        if (submitted) {
-            return;
-        }
+    updateTimer();
 
 
-        saveCurrentAnswer();
+    timerInterval =
+        setInterval(
+            function() {
+
+                remainingSeconds--;
 
 
-        alert(
-            "Time is over. Your exam will be submitted automatically."
+                updateTimer();
+
+
+                if (
+                    remainingSeconds <= 0
+                ) {
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+                    autoSubmit();
+
+                }
+
+            },
+            1000
+        );
+
+}
+
+
+/* =========================
+   UPDATE TIMER
+========================= */
+
+function updateTimer() {
+
+    const minutes =
+        Math.floor(
+            remainingSeconds / 60
         );
 
 
-        await submitExam();
+    const seconds =
+        remainingSeconds % 60;
+
+
+    document.getElementById(
+        "timer"
+    ).textContent =
+        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+}
+
+
+/* =========================
+   CONFIRM SUBMIT
+========================= */
+
+function confirmSubmit() {
+
+    if (
+        currentQuestion !==
+        questions.length - 1
+    ) {
+
+        return;
+
     }
 
 
-    async function submitExam() {
-
-        if (submitted) {
-            return;
-        }
+    saveCurrentAnswer();
 
 
-        submitted = true;
+    const unanswered =
+        questions.filter(
+            q =>
+                !answers[q.id]
+        ).length;
 
 
-        if (timerInterval) {
-
-            clearInterval(
-                timerInterval
-            );
-        }
+    let message =
+        "Are you sure you want to submit the exam?";
 
 
-        const answerPayload =
-            questions.map(
-                q => ({
+    if (
+        unanswered > 0
+    ) {
 
-                    question_id: q.id,
+        message +=
+            `\n\nYou have ${unanswered} unanswered question(s).`;
 
-                    selected_answer:
-                        answers[q.id] ||
-                        null
-
-                })
-            );
+    }
 
 
-        const {
-            data,
-            error
-        } = await supabaseClient
+    if (
+        confirm(message)
+    ) {
+
+        submitExam();
+
+    }
+
+}
+
+
+/* =========================
+   AUTO SUBMIT
+========================= */
+
+async function autoSubmit() {
+
+    if (submitted) {
+
+        return;
+
+    }
+
+
+    saveCurrentAnswer();
+
+
+    alert(
+        "Time is over. Your exam will be submitted automatically."
+    );
+
+
+    await submitExam();
+
+}
+
+
+/* =========================
+   SUBMIT EXAM
+========================= */
+
+async function submitExam() {
+
+    if (submitted) {
+
+        return;
+
+    }
+
+
+    submitted = true;
+
+
+    if (timerInterval) {
+
+        clearInterval(
+            timerInterval
+        );
+
+    }
+
+
+    const answerPayload =
+        questions.map(
+            q => ({
+
+                question_id:
+                    q.id,
+
+                selected_answer:
+                    answers[q.id] ||
+                    null
+
+            })
+        );
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
             .rpc(
                 "submit_student_exam",
                 {
+
                     p_attempt_id:
                         attemptId,
 
                     p_answers:
                         answerPayload
+
                 }
             );
 
 
-        if (error) {
+    if (error) {
 
-            console.error(
-                "Submit error:",
-                error
-            );
-
-
-            submitted = false;
+        console.error(
+            "Submit error:",
+            error
+        );
 
 
-            alert(
-                error.message ||
-                "Exam submission failed."
-            );
+        submitted = false;
 
 
-            startTimer();
-
-            return;
-        }
-
-
-        const result =
-            Array.isArray(data)
-                ? data[0]
-                : data;
+        alert(
+            error.message ||
+            "Exam submission failed."
+        );
 
 
-        showResult(result);
+        startTimer();
+
+        return;
+
     }
 
 
-    function showResult(result) {
-
-        document
-            .getElementById(
-                "examArea"
-            )
-            .classList.add(
-                "hidden"
-            );
+    const result =
+        Array.isArray(data)
+            ? data[0]
+            : data;
 
 
-        document
-            .getElementById(
-                "resultArea"
-            )
-            .classList.remove(
-                "hidden"
-            );
+    showResult(result);
+
+}
 
 
-        document.getElementById(
-            "obtainedMarks"
-        ).textContent =
-            result?.obtained_marks ??
-            0;
+/* =========================
+   SHOW RESULT
+========================= */
+
+function showResult(result) {
+
+    document
+        .getElementById(
+            "examArea"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 
-        document.getElementById(
-            "resultTotalMarks"
-        ).textContent =
-            result?.total_marks ??
-            exam.total_marks ??
-            0;
+    document
+        .getElementById(
+            "resultArea"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 
-        document.getElementById(
-            "correctCount"
-        ).textContent =
-            result?.correct_count ??
-            0;
+    document.getElementById(
+        "obtainedMarks"
+    ).textContent =
+        result?.obtained_marks ??
+        0;
 
 
-        document.getElementById(
-            "wrongCount"
-        ).textContent =
-            result?.wrong_count ??
-            0;
+    document.getElementById(
+        "resultTotalMarks"
+    ).textContent =
+        result?.total_marks ??
+        exam.total_marks ??
+        0;
 
 
-        document.getElementById(
-            "unansweredCount"
-        ).textContent =
-            result?.unanswered_count ??
-            0;
-    }
+    document.getElementById(
+        "correctCount"
+    ).textContent =
+        result?.correct_count ??
+        0;
 
 
-    function goToResults() {
+    document.getElementById(
+        "wrongCount"
+    ).textContent =
+        result?.wrong_count ??
+        0;
 
-        window.location.href =
-            "student-results.html";
-    }
+
+    document.getElementById(
+        "unansweredCount"
+    ).textContent =
+        result?.unanswered_count ??
+        0;
+
+}
 
 
-    initialize();
+/* =========================
+   GO TO RESULTS
+========================= */
+
+function goToResults() {
+
+    window.location.href =
+        "student-results.html";
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+initialize();
 
 </script>
 
 </body>
 </html>
-
-
+```
