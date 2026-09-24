@@ -1,0 +1,698 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Students | PorikkhaHub</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            padding: 18px 25px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar h2 {
+            margin: 0;
+        }
+
+        .back-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .header-card {
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            margin-bottom: 20px;
+        }
+
+        .header-card h1 {
+            margin: 0 0 8px;
+        }
+
+        .header-card p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .search-box {
+            background: white;
+            padding: 18px;
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+
+            border:
+                1px solid #d1d5db;
+
+            border-radius: 8px;
+
+            font-size: 15px;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom:
+                1px solid #e5e7eb;
+
+            text-align: left;
+        }
+
+        th {
+            background: #f9fafb;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .number {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .loading,
+        .empty,
+        .error {
+            padding: 35px;
+            text-align: center;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+
+        .count-badge {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 6px;
+
+            background: #eff6ff;
+
+            color: #2563eb;
+
+            font-weight: bold;
+        }
+
+        @media (max-width: 700px) {
+
+            .topbar {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+        }
+
+    </style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="topbar">
+
+    <h2>
+        PorikkhaHub Admin
+    </h2>
+
+    <button
+        class="back-btn"
+        onclick="goDashboard()">
+
+        Admin Dashboard
+
+    </button>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="header-card">
+
+        <h1>
+            Students
+        </h1>
+
+        <p>
+            View registered students and their examination activity.
+        </p>
+
+    </div>
+
+
+    <div class="search-box">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by student name or mobile..."
+            oninput="filterStudents()">
+
+    </div>
+
+
+    <div class="table-card">
+
+
+        <div
+            id="loading"
+            class="loading">
+
+            Loading students...
+
+        </div>
+
+
+        <div
+            id="error"
+            class="error"
+            style="display:none;">
+
+        </div>
+
+
+        <div
+            id="empty"
+            class="empty"
+            style="display:none;">
+
+            No students found.
+
+        </div>
+
+
+        <table
+            id="studentsTable"
+            style="display:none;">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        #
+                    </th>
+
+                    <th>
+                        Student Name
+                    </th>
+
+                    <th>
+                        Mobile
+                    </th>
+
+                    <th>
+                        Registered
+                    </th>
+
+                    <th>
+                        Total Attempts
+                    </th>
+
+                    <th>
+                        Submitted
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody
+                id="studentsBody">
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let allStudents = [];
+
+
+async function startPage() {
+
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_admin_access_token"
+        );
+
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_admin_refresh_token"
+        );
+
+
+    if (
+        !accessToken ||
+        !refreshToken
+    ) {
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+
+        });
+
+
+    if (error) {
+
+        alert(
+            "Admin session expired."
+        );
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+
+    }
+
+
+    await loadStudents();
+
+}
+
+
+
+async function loadStudents() {
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("admin_students")
+            .select("*")
+            .order(
+                "created_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
+
+
+    if (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "error"
+        ).textContent =
+            "Could not load students: " +
+            error.message;
+
+        document.getElementById(
+            "error"
+        ).style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    allStudents =
+        data || [];
+
+
+    if (
+        allStudents.length === 0
+    ) {
+
+        document.getElementById(
+            "empty"
+        ).style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    renderStudents(
+        allStudents
+    );
+
+}
+
+
+
+function renderStudents(
+    students
+) {
+
+
+    const table =
+        document.getElementById(
+            "studentsTable"
+        );
+
+
+    const body =
+        document.getElementById(
+            "studentsBody"
+        );
+
+
+    body.innerHTML = "";
+
+
+    students.forEach(
+        (student, index) => {
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const registered =
+                student.created_at
+                    ? new Date(
+                        student.created_at
+                      ).toLocaleString()
+                    : "-";
+
+
+            row.innerHTML = `
+
+                <td class="number">
+                    ${index + 1}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        student.full_name || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        student.mobile || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${registered}
+                </td>
+
+                <td>
+
+                    <span class="count-badge">
+                        ${student.total_attempts ?? 0}
+                    </span>
+
+                </td>
+
+                <td>
+
+                    <span class="count-badge">
+                        ${student.submitted_attempts ?? 0}
+                    </span>
+
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    table.style.display =
+        "table";
+
+}
+
+
+
+function filterStudents() {
+
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    if (!search) {
+
+        renderStudents(
+            allStudents
+        );
+
+        return;
+
+    }
+
+
+    const filtered =
+        allStudents.filter(
+            student => {
+
+                const name =
+                    (
+                        student.full_name ||
+                        ""
+                    ).toLowerCase();
+
+
+                const mobile =
+                    (
+                        student.mobile ||
+                        ""
+                    ).toLowerCase();
+
+
+                return (
+                    name.includes(search) ||
+                    mobile.includes(search)
+                );
+
+            }
+        );
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        document.getElementById(
+            "studentsTable"
+        ).style.display =
+            "none";
+
+
+        document.getElementById(
+            "empty"
+        ).textContent =
+            "No matching students found.";
+
+
+        document.getElementById(
+            "empty"
+        ).style.display =
+            "block";
+
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "empty"
+    ).style.display =
+        "none";
+
+
+    renderStudents(
+        filtered
+    );
+
+}
+
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+function goDashboard() {
+
+    window.location.href =
+        "admin-dashboard.html";
+
+}
+
+
+startPage();
+
+</script>
+
+
+</body>
+
+</html>
+
+
+

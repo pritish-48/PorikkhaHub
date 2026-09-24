@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCQ Exam | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f7fb;
+        color: #1f2937;
+    }
+
+    .header {
+        background: #2563eb;
+        color: white;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .timer {
+        background: white;
+        color: #dc2626;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+    .container {
+        max-width: 1000px;
+        margin: 25px auto;
+        padding: 0 15px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 60px 20px;
+        font-size: 18px;
+    }
+
+    .exam-info {
+        margin-bottom: 20px;
+    }
+
+    .exam-info h1 {
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+
+    .question-number {
+        color: #2563eb;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .question-text {
+        font-size: 19px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .option {
+        display: block;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .option:hover {
+        background: #f3f4f6;
+    }
+
+    .option.selected {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+
+    .option input {
+        margin-right: 10px;
+    }
+
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 25px;
+    }
+
+    button {
+        border: none;
+        border-radius: 8px;
+        padding: 11px 18px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-submit {
+        background: #dc2626;
+        color: white;
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .palette {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .palette button {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        background: #e5e7eb;
+    }
+
+    .palette button.answered {
+        background: #22c55e;
+        color: white;
+    }
+
+    .palette button.active {
+        outline: 3px solid #2563eb;
+    }
+
+    .result {
+        text-align: center;
+    }
+
+    .result h1 {
+        color: #16a34a;
+    }
+
+    .result-score {
+        font-size: 35px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    @media (max-width: 600px) {
+        .card {
+            padding: 18px;
+        }
+
+        .question-text {
+            font-size: 17px;
+        }
+
+        .navigation {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .navigation button {
+            width: 100%;
+        }
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+```
+<div class="header">
+    <h2>PorikkhaHub</h2>
+
+    <div id="timer" class="timer">
+        Loading...
+    </div>
+</div>
+
+<div class="container">
+
+    <div id="loading" class="card loading">
+        Loading exam...
+    </div>
+
+    <div id="examArea" class="hidden">
+
+        <div class="card exam-info">
+            <h1 id="examTitle">Exam</h1>
+
+            <p id="examDescription"></p>
+
+            <div>
+                <strong>Total Marks:</strong>
+                <span id="totalMarks">0</span>
+            </div>
+        </div>
+
+        <div class="card">
+
+            <div id="questionNumber" class="question-number">
+                Question 1
+            </div>
+
+            <div id="questionText" class="question-text">
+                Question
+            </div>
+
+            <label id="optionA" class="option">
+                <input type="radio" name="answer" value="A">
+                <span></span>
+            </label>
+
+            <label id="optionB" class="option">
+                <input type="radio" name="answer" value="B">
+                <span></span>
+            </label>
+
+            <label id="optionC" class="option">
+                <input type="radio" name="answer" value="C">
+                <span></span>
+            </label>
+
+            <label id="optionD" class="option">
+                <input type="radio" name="answer" value="D">
+                <span></span>
+            </label>
+
+            <div class="navigation">
+
+                <button
+                    id="previousBtn"
+                    class="btn-secondary"
+                    onclick="previousQuestion()">
+                    ← Previous
+                </button>
+
+                <button
+                    id="nextBtn"
+                    class="btn-primary"
+                    onclick="nextQuestion()">
+                    Next →
+                </button>
+
+                <button
+                    id="submitBtn"
+                    class="btn-submit hidden"
+                    onclick="confirmSubmit()">
+                    Submit Exam
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <strong>Questions</strong>
+
+            <div id="palette" class="palette"></div>
+
+        </div>
+
+    </div>
+
+    <div id="resultArea" class="card result hidden">
+
+        <h1>Exam Submitted!</h1>
+
+        <p>Your exam has been submitted successfully.</p>
+
+        <div class="result-score">
+            <span id="obtainedMarks">0</span>
+            /
+            <span id="resultTotalMarks">0</span>
+        </div>
+
+        <p>
+            Correct:
+            <strong id="correctCount">0</strong>
+        </p>
+
+        <p>
+            Wrong:
+            <strong id="wrongCount">0</strong>
+        </p>
+
+        <p>
+            Unanswered:
+            <strong id="unansweredCount">0</strong>
+        </p>
+
+        <button
+            class="btn-primary"
+            onclick="goToResults()">
+            View My Results
+        </button>
+
+    </div>
+
+</div>
+```
+
+<script>
+
+    const SUPABASE_URL =
+        "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+    const SUPABASE_KEY =
+        "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
+
+
+    let examId = null;
+    let exam = null;
+    let questions = [];
+    let answers = {};
+
+    let currentQuestion = 0;
+    let attemptId = null;
+
+    let timerInterval = null;
+    let remainingSeconds = 0;
+
+    let submitted = false;
+
+
+    async function initialize() {
+
+        try {
+
+            const urlParams =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            const urlExamId =
+                urlParams.get("exam");
+
+            const savedExamId =
+                localStorage.getItem(
+                    "porikkhahub_student_exam_id"
+                );
+
+
+            if (urlExamId) {
+
+                examId = urlExamId;
+
+            } else if (savedExamId) {
+
+                examId = savedExamId;
+
+            } else {
+
+                alert("No exam selected.");
+
+                window.location.href =
+                    "student-dashboard.html";
+
+                return;
+            }
+
+
+            localStorage.setItem(
+                "porikkhahub_student_exam_id",
+                examId
+            );
+
+
+            await loadExam();
+
+            await startAttempt();
+
+            await loadQuestions();
+
+            renderPalette();
+
+            showQuestion();
+
+        } catch (error) {
+
+            console.error(error);
+
+            document.getElementById(
+                "loading"
+            ).textContent =
+                error.message ||
+                "Exam could not be loaded.";
+
+            alert(
+                error.message ||
+                "Exam could not be loaded."
+            );
+        }
+    }
+
+
+    async function loadExam() {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("exams")
+            .select(`
+                id,
+                title,
+                description,
+                exam_type,
+                duration_minutes,
+                total_marks,
+                is_published
+            `)
+            .eq("id", examId)
+            .eq("is_published", true)
+            .single();
+
+
+        if (error) {
+
+            console.error(
+                "Exam load error:",
+                error
+            );
+
+            throw new Error(
+                "Exam could not be loaded."
+            );
+        }
+
+
+        if (!data) {
+
+            throw new Error(
+                "Exam not found."
+            );
+        }
+
+
+        exam = data;
+
+
+        document.getElementById(
+            "examTitle"
+        ).textContent =
+            exam.title;
+
+
+        document.getElementById(
+            "examDescription"
+        ).textContent =
+            exam.description || "";
+
+
+        document.getElementById(
+            "totalMarks"
+        ).textContent =
+            exam.total_marks || 0;
+    }
+
+
+    async function startAttempt() {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .rpc(
+                "start_student_exam",
+                {
+                    p_exam_id: examId
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "Start attempt error:",
+                error
+            );
+
+            throw new Error(
+                error.message ||
+                "Could not start exam."
+            );
+        }
+
+
+        const attempt =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+
+        if (!attempt) {
+
+            throw new Error(
+                "Could not create exam attempt."
+            );
+        }
+
+
+        attemptId =
+            attempt.attempt_id ||
+            attempt.id;
+
+
+        remainingSeconds =
+            Number(
+                exam.duration_minutes || 30
+            ) * 60;
+
+
+        startTimer();
+    }
+
+
+    async function loadQuestions() {
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("student_mcq_questions")
+            .select(`
+                id,
+                exam_id,
+                question_number,
+                question_text,
+                option_a,
+                option_b,
+                option_c,
+                option_d,
+                marks
+            `)
+            .eq("exam_id", examId)
+            .order(
+                "question_number",
+                {
+                    ascending: true
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "Question load error:",
+                error
+            );
+
+            throw new Error(
+                "Questions could not be loaded."
+            );
+        }
+
+
+        questions =
+            data || [];
+
+
+        if (questions.length === 0) {
+
+            throw new Error(
+                "No questions found for this exam."
+            );
+        }
+
+
+        document.getElementById(
+            "loading"
+        ).classList.add("hidden");
+
+
+        document.getElementById(
+            "examArea"
+        ).classList.remove("hidden");
+    }
+
+
+    function showQuestion() {
+
+        if (currentQuestion < 0) {
+            currentQuestion = 0;
+        }
+
+
+        if (
+            currentQuestion >= questions.length
+        ) {
+            currentQuestion =
+                questions.length - 1;
+        }
+
+
+        const q =
+            questions[currentQuestion];
+
+
+        document.getElementById(
+            "questionNumber"
+        ).textContent =
+            `Question ${currentQuestion + 1} of ${questions.length}`;
+
+
+        document.getElementById(
+            "questionText"
+        ).textContent =
+            q.question_text;
+
+
+        setOption(
+            "optionA",
+            q.option_a
+        );
+
+        setOption(
+            "optionB",
+            q.option_b
+        );
+
+        setOption(
+            "optionC",
+            q.option_c
+        );
+
+        setOption(
+            "optionD",
+            q.option_d
+        );
+
+
+        const selected =
+            answers[q.id] || null;
+
+
+        document
+            .querySelectorAll(
+                'input[name="answer"]'
+            )
+            .forEach(
+                radio => {
+
+                    radio.checked =
+                        radio.value === selected;
+                }
+            );
+
+
+        updateOptionStyles();
+
+
+        document.getElementById(
+            "previousBtn"
+        ).disabled =
+            currentQuestion === 0;
+
+
+        const isLastQuestion =
+            currentQuestion ===
+            questions.length - 1;
+
+
+        const nextBtn =
+            document.getElementById(
+                "nextBtn"
+            );
+
+        const submitBtn =
+            document.getElementById(
+                "submitBtn"
+            );
+
+
+        if (isLastQuestion) {
+
+            nextBtn.classList.add(
+                "hidden"
+            );
+
+            submitBtn.classList.remove(
+                "hidden"
+            );
+
+        } else {
+
+            nextBtn.classList.remove(
+                "hidden"
+            );
+
+            submitBtn.classList.add(
+                "hidden"
+            );
+        }
+
+
+        updatePalette();
+    }
+
+
+    function setOption(
+        elementId,
+        text
+    ) {
+
+        const element =
+            document.getElementById(
+                elementId
+            );
+
+        const span =
+            element.querySelector(
+                "span"
+            );
+
+        span.textContent =
+            text || "";
+    }
+
+
+    document.addEventListener(
+        "change",
+        function(event) {
+
+            if (
+                event.target.name !==
+                "answer"
+            ) {
+                return;
+            }
+
+
+            const q =
+                questions[currentQuestion];
+
+
+            answers[q.id] =
+                event.target.value;
+
+
+            updateOptionStyles();
+
+            updatePalette();
+        }
+    );
+
+
+    function updateOptionStyles() {
+
+        document
+            .querySelectorAll(
+                ".option"
+            )
+            .forEach(
+                option => {
+
+                    const radio =
+                        option.querySelector(
+                            "input"
+                        );
+
+
+                    option.classList.toggle(
+                        "selected",
+                        radio.checked
+                    );
+                }
+            );
+    }
+
+
+    function nextQuestion() {
+
+        saveCurrentAnswer();
+
+
+        if (
+            currentQuestion <
+            questions.length - 1
+        ) {
+
+            currentQuestion++;
+
+            showQuestion();
+        }
+    }
+
+
+    function previousQuestion() {
+
+        saveCurrentAnswer();
+
+
+        if (
+            currentQuestion > 0
+        ) {
+
+            currentQuestion--;
+
+            showQuestion();
+        }
+    }
+
+
+    function saveCurrentAnswer() {
+
+        const q =
+            questions[currentQuestion];
+
+
+        const selected =
+            document.querySelector(
+                'input[name="answer"]:checked'
+            );
+
+
+        if (selected) {
+
+            answers[q.id] =
+                selected.value;
+
+        } else {
+
+            if (
+                answers[q.id] === undefined
+            ) {
+
+                answers[q.id] = null;
+            }
+        }
+    }
+
+
+    function renderPalette() {
+
+        const palette =
+            document.getElementById(
+                "palette"
+            );
+
+
+        palette.innerHTML = "";
+
+
+        questions.forEach(
+            (q, index) => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.textContent =
+                    index + 1;
+
+
+                button.onclick =
+                    function() {
+
+                        saveCurrentAnswer();
+
+                        currentQuestion =
+                            index;
+
+                        showQuestion();
+                    };
+
+
+                palette.appendChild(
+                    button
+                );
+            }
+        );
+
+
+        updatePalette();
+    }
+
+
+    function updatePalette() {
+
+        const buttons =
+            document
+                .getElementById("palette")
+                .querySelectorAll(
+                    "button"
+                );
+
+
+        buttons.forEach(
+            (button, index) => {
+
+                const q =
+                    questions[index];
+
+
+                const answered =
+                    answers[q.id] != null;
+
+
+                button.classList.toggle(
+                    "answered",
+                    answered
+                );
+
+
+                button.classList.toggle(
+                    "active",
+                    index === currentQuestion
+                );
+            }
+        );
+    }
+
+
+    function startTimer() {
+
+        updateTimer();
+
+
+        timerInterval =
+            setInterval(
+                function() {
+
+                    remainingSeconds--;
+
+
+                    updateTimer();
+
+
+                    if (
+                        remainingSeconds <= 0
+                    ) {
+
+                        clearInterval(
+                            timerInterval
+                        );
+
+                        autoSubmit();
+                    }
+
+                },
+                1000
+            );
+    }
+
+
+    function updateTimer() {
+
+        const minutes =
+            Math.floor(
+                remainingSeconds / 60
+            );
+
+
+        const seconds =
+            remainingSeconds % 60;
+
+
+        document.getElementById(
+            "timer"
+        ).textContent =
+            `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    }
+
+
+    function confirmSubmit() {
+
+        if (
+            currentQuestion !==
+            questions.length - 1
+        ) {
+            return;
+        }
+
+
+        saveCurrentAnswer();
+
+
+        const unanswered =
+            questions.filter(
+                q =>
+                    !answers[q.id]
+            ).length;
+
+
+        let message =
+            "Are you sure you want to submit the exam?";
+
+
+        if (unanswered > 0) {
+
+            message +=
+                `\n\nYou have ${unanswered} unanswered question(s).`;
+        }
+
+
+        if (
+            confirm(message)
+        ) {
+
+            submitExam();
+        }
+    }
+
+
+    async function autoSubmit() {
+
+        if (submitted) {
+            return;
+        }
+
+
+        saveCurrentAnswer();
+
+
+        alert(
+            "Time is over. Your exam will be submitted automatically."
+        );
+
+
+        await submitExam();
+    }
+
+
+    async function submitExam() {
+
+        if (submitted) {
+            return;
+        }
+
+
+        submitted = true;
+
+
+        if (timerInterval) {
+
+            clearInterval(
+                timerInterval
+            );
+        }
+
+
+        const answerPayload =
+            questions.map(
+                q => ({
+
+                    question_id: q.id,
+
+                    selected_answer:
+                        answers[q.id] ||
+                        null
+
+                })
+            );
+
+
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .rpc(
+                "submit_student_exam",
+                {
+                    p_attempt_id:
+                        attemptId,
+
+                    p_answers:
+                        answerPayload
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                "Submit error:",
+                error
+            );
+
+
+            submitted = false;
+
+
+            alert(
+                error.message ||
+                "Exam submission failed."
+            );
+
+
+            startTimer();
+
+            return;
+        }
+
+
+        const result =
+            Array.isArray(data)
+                ? data[0]
+                : data;
+
+
+        showResult(result);
+    }
+
+
+    function showResult(result) {
+
+        document
+            .getElementById(
+                "examArea"
+            )
+            .classList.add(
+                "hidden"
+            );
+
+
+        document
+            .getElementById(
+                "resultArea"
+            )
+            .classList.remove(
+                "hidden"
+            );
+
+
+        document.getElementById(
+            "obtainedMarks"
+        ).textContent =
+            result?.obtained_marks ??
+            0;
+
+
+        document.getElementById(
+            "resultTotalMarks"
+        ).textContent =
+            result?.total_marks ??
+            exam.total_marks ??
+            0;
+
+
+        document.getElementById(
+            "correctCount"
+        ).textContent =
+            result?.correct_count ??
+            0;
+
+
+        document.getElementById(
+            "wrongCount"
+        ).textContent =
+            result?.wrong_count ??
+            0;
+
+
+        document.getElementById(
+            "unansweredCount"
+        ).textContent =
+            result?.unanswered_count ??
+            0;
+    }
+
+
+    function goToResults() {
+
+        window.location.href =
+            "student-results.html";
+    }
+
+
+    initialize();
+
+</script>
+
+</body>
+</html>
+
+

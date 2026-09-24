@@ -1,0 +1,1830 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>CQ Exam | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+.header {
+    background: #2563eb;
+    color: white;
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-inner {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.exam-title {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.timer {
+    background: white;
+    color: #dc2626;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    min-width: 100px;
+    text-align: center;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+}
+
+.exam-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    color: #475569;
+}
+
+.question-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.question-number {
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.marks {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.question-text {
+    white-space: pre-wrap;
+    line-height: 1.8;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.answer-box {
+    width: 100%;
+    min-height: 230px;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 9px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.answer-box:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.image-section {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.image-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.image-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-btn {
+    display: inline-block;
+    background: #2563eb;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.image-btn.gallery {
+    background: #7c3aed;
+}
+
+.image-btn input {
+    display: none;
+}
+
+.image-note {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.preview-item {
+    position: relative;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8fafc;
+}
+
+.preview-item img {
+    display: block;
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.remove-image {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: #dc2626;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.image-number {
+    padding: 7px;
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.submit-area {
+    text-align: center;
+    padding: 25px;
+}
+
+.submit-btn {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 13px 30px;
+    border-radius: 9px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #15803d;
+}
+
+.submit-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.hidden {
+    display: none;
+}
+
+.error {
+    color: #dc2626;
+    text-align: center;
+}
+
+.notice {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    padding: 14px;
+    border-radius: 9px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.success-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.result-mark {
+    font-size: 32px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.result-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.progress {
+    font-size: 13px;
+    color: #64748b;
+    margin-top: 8px;
+}
+
+@media (max-width: 650px) {
+
+    .header-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .timer {
+        width: 100%;
+    }
+
+    .question-card {
+        padding: 15px;
+    }
+
+    .preview-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div class="header">
+
+    <div class="header-inner">
+
+        <div
+            class="exam-title"
+            id="examTitle">
+            CQ Exam
+        </div>
+
+        <div
+            class="timer"
+            id="timer">
+            --:--
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="container">
+
+
+    <div
+        id="loading"
+        class="card loading">
+
+        Loading exam...
+
+    </div>
+
+
+    <div
+        id="examArea"
+        class="hidden">
+
+
+        <div class="card">
+
+            <h2 id="pageTitle">
+                CQ Examination
+            </h2>
+
+            <div class="exam-info">
+
+                <div>
+                    Duration:
+                    <b id="durationText">--</b>
+                    minutes
+                </div>
+
+                <div>
+                    Total Marks:
+                    <b id="totalMarksText">--</b>
+                </div>
+
+                <div>
+                    Questions:
+                    <b id="questionCountText">--</b>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="notice">
+
+            ✍️ চাইলে Answer Box-এ লিখিত উত্তর দিতে পারবে।
+
+            <br>
+
+            📷 চাইলে খাতার ছবি তুলে অথবা Gallery থেকে ছবি দিতে পারবে।
+
+            <br>
+
+            🔄 Submit করার আগ পর্যন্ত ভুল ছবি বা উত্তর পরিবর্তন করা যাবে।
+
+            <br>
+
+            🔒 Final Submit করার পর আর কোনো পরিবর্তন করা যাবে না।
+
+        </div>
+
+
+        <div id="questionsContainer">
+        </div>
+
+
+        <div class="card submit-area">
+
+            <button
+                id="submitButton"
+                class="submit-btn"
+                onclick="submitExam()">
+
+                Submit Exam
+
+            </button>
+
+            <div class="progress"
+                 id="submitProgress">
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div
+        id="resultArea"
+        class="hidden">
+
+        <div class="card success-box">
+
+            <h2>
+                Exam Submitted Successfully
+            </h2>
+
+            <div
+                class="result-mark"
+                id="resultMark">
+                Submitted
+            </div>
+
+            <p>
+                তোমার CQ answer এবং খাতার ছবি সফলভাবে জমা হয়েছে।
+            </p>
+
+            <button
+                class="result-btn"
+                onclick="location.href='student-results.html'">
+
+                View My Results
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="errorArea"
+        class="card hidden">
+
+        <h3 class="error">
+            <span id="errorMessage"></span>
+        </h3>
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let examId = null;
+
+let attemptId = null;
+
+let examDuration = 0;
+
+let startedAt = null;
+
+let timerInterval = null;
+
+let questions = [];
+
+let submitted = false;
+
+
+/*
+    Each question keeps its images here.
+
+    Example:
+
+    imageStore[questionId] = [
+        {
+            data: "data:image/jpeg;base64,..."
+        }
+    ]
+*/
+
+const imageStore = {};
+
+
+/* =========================
+   GET EXAM ID
+========================= */
+
+
+function getExamId() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const urlExamId =
+        params.get("exam");
+
+
+    const savedExamId =
+        localStorage.getItem(
+            "porikkhahub_student_exam_id"
+        );
+
+
+    if (urlExamId) {
+
+        examId =
+            urlExamId;
+
+    } else if (savedExamId) {
+
+        examId =
+            savedExamId;
+
+    } else {
+
+        showError(
+            "No CQ exam selected."
+        );
+
+        return false;
+    }
+
+
+    localStorage.setItem(
+        "porikkhahub_student_exam_id",
+        examId
+    );
+
+
+    return true;
+}
+
+
+/* =========================
+   INITIALIZE
+========================= */
+
+
+async function initialize() {
+
+    try {
+
+        if (!getExamId()) {
+            return;
+        }
+
+
+        const accessToken =
+            localStorage.getItem(
+                "porikkhahub_access_token"
+            );
+
+        const refreshToken =
+            localStorage.getItem(
+                "porikkhahub_refresh_token"
+            );
+
+
+        if (
+            !accessToken ||
+            !refreshToken
+        ) {
+
+            showError(
+                "Student login session not found. Please login again."
+            );
+
+            return;
+        }
+
+
+        const {
+            data: sessionData,
+            error: sessionError
+        } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+        });
+
+
+        if (
+            sessionError ||
+            !sessionData.session
+        ) {
+
+            console.error(
+                sessionError
+            );
+
+            showError(
+                "Student session could not be restored: " +
+                (
+                    sessionError?.message ||
+                    "Unknown error"
+                )
+            );
+
+            return;
+        }
+
+
+        console.log(
+            "Student Auth ID:",
+            sessionData.session.user.id
+        );
+
+
+        await loadExam();
+
+        await startExam();
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showError(
+            error.message ||
+            "Could not load exam."
+        );
+    }
+}
+
+
+/* =========================
+   LOAD EXAM
+========================= */
+
+
+async function loadExam() {
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("exams")
+        .select(`
+            id,
+            title,
+            description,
+            exam_type,
+            duration_minutes,
+            total_marks,
+            is_published
+        `)
+        .eq(
+            "id",
+            examId
+        )
+        .eq(
+            "is_published",
+            true
+        );
+
+
+    if (error) {
+
+        throw new Error(
+            error.message
+        );
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        throw new Error(
+            "Exam not found or not published."
+        );
+    }
+
+
+    const exam =
+        data[0];
+
+
+    if (
+        String(
+            exam.exam_type || ""
+        )
+        .trim()
+        .toLowerCase() !== "cq"
+    ) {
+
+        throw new Error(
+            "This is not a CQ exam. Database value: " +
+            String(exam.exam_type)
+        );
+    }
+
+
+    document.getElementById(
+        "examTitle"
+    ).textContent =
+        exam.title;
+
+
+    document.getElementById(
+        "pageTitle"
+    ).textContent =
+        exam.title;
+
+
+    examDuration =
+        Number(
+            exam.duration_minutes
+        ) || 30;
+
+
+    document.getElementById(
+        "durationText"
+    ).textContent =
+        examDuration;
+
+
+    document.getElementById(
+        "totalMarksText"
+    ).textContent =
+        exam.total_marks;
+
+
+    await loadQuestions();
+}
+
+
+/* =========================
+   LOAD QUESTIONS
+========================= */
+
+
+async function loadQuestions() {
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("student_cq_questions")
+        .select(`
+            id,
+            exam_id,
+            question_number,
+            question_text,
+            marks
+        `)
+        .eq(
+            "exam_id",
+            examId
+        )
+        .order(
+            "question_number",
+            {
+                ascending: true
+            }
+        );
+
+
+    if (error) {
+
+        throw new Error(
+            error.message
+        );
+    }
+
+
+    questions =
+        data || [];
+
+
+    if (
+        questions.length === 0
+    ) {
+
+        throw new Error(
+            "No CQ questions found for this exam."
+        );
+    }
+
+
+    document.getElementById(
+        "questionCountText"
+    ).textContent =
+        questions.length;
+
+
+    questions.forEach(
+        question => {
+
+            imageStore[
+                question.id
+            ] = [];
+
+        }
+    );
+
+
+    renderQuestions();
+}
+
+
+/* =========================
+   RENDER QUESTIONS
+========================= */
+
+
+function renderQuestions() {
+
+    const container =
+        document.getElementById(
+            "questionsContainer"
+        );
+
+
+    container.innerHTML = "";
+
+
+    questions.forEach(
+        question => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "question-card";
+
+
+            card.innerHTML = `
+
+                <div class="question-header">
+
+                    <div class="question-number">
+
+                        Question
+                        ${question.question_number}
+
+                    </div>
+
+                    <div class="marks">
+
+                        ${question.marks}
+                        marks
+
+                    </div>
+
+                </div>
+
+
+                <div class="question-text">
+
+                    ${escapeHtml(
+                        question.question_text
+                    )}
+
+                </div>
+
+
+                <textarea
+                    class="answer-box"
+                    id="answer-${question.id}"
+                    placeholder="Write your answer here...">
+                </textarea>
+
+
+                <div class="image-section">
+
+                    <div class="image-title">
+
+                        📷 Khatar Photo
+
+                    </div>
+
+
+                    <div class="image-buttons">
+
+                        <label class="image-btn">
+
+                            📷 Take Photo
+
+                            <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                onchange="handleImages(event, '${question.id}')">
+
+                        </label>
+
+
+                        <label class="image-btn gallery">
+
+                            🖼️ Choose from Gallery
+
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onchange="handleImages(event, '${question.id}')">
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="image-note">
+
+                        ভুল ছবি হলে নিচের ❌ চাপ দিয়ে
+                        remove করে আবার ছবি দিতে পারবে।
+
+                    </div>
+
+
+                    <div
+                        class="preview-grid"
+                        id="preview-${question.id}">
+                    </div>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
+}
+
+
+/* =========================
+   IMAGE SELECT
+========================= */
+
+
+async function handleImages(
+    event,
+    questionId
+) {
+
+    if (submitted) {
+        return;
+    }
+
+
+    const files =
+        Array.from(
+            event.target.files || []
+        );
+
+
+    if (
+        files.length === 0
+    ) {
+        return;
+    }
+
+
+    for (
+        const file of files
+    ) {
+
+        if (
+            !file.type.startsWith(
+                "image/"
+            )
+        ) {
+
+            continue;
+        }
+
+
+        try {
+
+            const compressed =
+                await compressImage(
+                    file
+                );
+
+
+            imageStore[
+                questionId
+            ].push({
+
+                data:
+                    compressed
+
+            });
+
+
+        } catch (error) {
+
+            console.error(
+                error
+            );
+
+            alert(
+                "Could not process one of the selected images."
+            );
+        }
+    }
+
+
+    renderImagePreviews(
+        questionId
+    );
+
+
+    event.target.value = "";
+}
+
+
+/* =========================
+   COMPRESS IMAGE
+========================= */
+
+
+function compressImage(
+    file
+) {
+
+    return new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(e) {
+
+                    const img =
+                        new Image();
+
+
+                    img.onload =
+                        function() {
+
+                            const MAX_WIDTH =
+                                1400;
+
+
+                            let width =
+                                img.width;
+
+                            let height =
+                                img.height;
+
+
+                            if (
+                                width >
+                                MAX_WIDTH
+                            ) {
+
+                                height =
+                                    Math.round(
+                                        height *
+                                        MAX_WIDTH /
+                                        width
+                                    );
+
+                                width =
+                                    MAX_WIDTH;
+                            }
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+
+                            canvas.width =
+                                width;
+
+                            canvas.height =
+                                height;
+
+
+                            const ctx =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            ctx.drawImage(
+                                img,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            const result =
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    0.65
+                                );
+
+
+                            resolve(
+                                result
+                            );
+
+                        };
+
+
+                    img.onerror =
+                        reject;
+
+
+                    img.src =
+                        e.target.result;
+                };
+
+
+            reader.onerror =
+                reject;
+
+
+            reader.readAsDataURL(
+                file
+            );
+
+        }
+    );
+}
+
+
+/* =========================
+   RENDER IMAGE PREVIEWS
+========================= */
+
+
+function renderImagePreviews(
+    questionId
+) {
+
+    const container =
+        document.getElementById(
+            `preview-${questionId}`
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    const images =
+        imageStore[
+            questionId
+        ] || [];
+
+
+    images.forEach(
+        (
+            image,
+            index
+        ) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "preview-item";
+
+
+            item.innerHTML = `
+
+                <img
+                    src="${image.data}"
+                    alt="Answer image ${index + 1}"
+                >
+
+                <button
+                    class="remove-image"
+                    onclick="removeImage('${questionId}', ${index})"
+                    title="Remove image">
+
+                    ×
+
+                </button>
+
+                <div class="image-number">
+
+                    Photo ${index + 1}
+
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+}
+
+
+/* =========================
+   REMOVE IMAGE
+========================= */
+
+
+function removeImage(
+    questionId,
+    index
+) {
+
+    if (submitted) {
+        return;
+    }
+
+
+    if (
+        !imageStore[
+            questionId
+        ]
+    ) {
+        return;
+    }
+
+
+    imageStore[
+        questionId
+    ].splice(
+        index,
+        1
+    );
+
+
+    renderImagePreviews(
+        questionId
+    );
+}
+
+
+/* =========================
+   START EXAM
+========================= */
+
+
+async function startExam() {
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .rpc(
+            "start_student_cq_exam",
+            {
+                p_exam_id:
+                    examId
+            }
+        );
+
+
+    if (error) {
+
+        throw new Error(
+            error.message
+        );
+    }
+
+
+    if (
+        !data ||
+        data.length === 0
+    ) {
+
+        throw new Error(
+            "Could not start exam."
+        );
+    }
+
+
+    const attempt =
+        data[0];
+
+
+    attemptId =
+        attempt.attempt_id;
+
+
+    startedAt =
+        new Date(
+            attempt.started_at
+        );
+
+
+    examDuration =
+        Number(
+            attempt.duration_minutes
+        ) ||
+        examDuration;
+
+
+    document.getElementById(
+        "loading"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "examArea"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    startTimer();
+}
+
+
+/* =========================
+   TIMER
+========================= */
+
+
+function startTimer() {
+
+    updateTimer();
+
+
+    timerInterval =
+        setInterval(
+            updateTimer,
+            1000
+        );
+}
+
+
+function updateTimer() {
+
+    if (!startedAt) {
+        return;
+    }
+
+
+    const deadline =
+        startedAt.getTime() +
+        (
+            examDuration *
+            60 *
+            1000
+        );
+
+
+    const remaining =
+        deadline -
+        Date.now();
+
+
+    if (
+        remaining <= 0
+    ) {
+
+        document.getElementById(
+            "timer"
+        ).textContent =
+            "00:00";
+
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        autoSubmit();
+
+        return;
+    }
+
+
+    const totalSeconds =
+        Math.floor(
+            remaining / 1000
+        );
+
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    document.getElementById(
+        "timer"
+    ).textContent =
+        `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}`;
+}
+
+
+/* =========================
+   COLLECT ANSWERS
+========================= */
+
+
+function collectAnswers() {
+
+    return questions.map(
+        question => {
+
+            const textarea =
+                document.getElementById(
+                    `answer-${question.id}`
+                );
+
+
+            const images =
+                imageStore[
+                    question.id
+                ] || [];
+
+
+            return {
+
+                question_id:
+                    question.id,
+
+                answer_text:
+                    textarea
+                        ? textarea.value.trim()
+                        : "",
+
+                answer_images:
+                    images.map(
+                        image => image.data
+                    )
+
+            };
+
+        }
+    );
+}
+
+
+/* =========================
+   SUBMIT
+========================= */
+
+
+async function submitExam() {
+
+    if (submitted) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to submit this exam?\n\nAfter submission, you cannot edit answers or photos."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    await submitToServer(
+        false
+    );
+}
+
+
+/* =========================
+   AUTO SUBMIT
+========================= */
+
+
+async function autoSubmit() {
+
+    if (submitted) {
+        return;
+    }
+
+
+    await submitToServer(
+        true
+    );
+}
+
+
+/* =========================
+   SERVER SUBMIT
+========================= */
+
+
+async function submitToServer(
+    autoSubmitted
+) {
+
+    if (submitted) {
+        return;
+    }
+
+
+    submitted = true;
+
+
+    const button =
+        document.getElementById(
+            "submitButton"
+        );
+
+
+    const progress =
+        document.getElementById(
+            "submitProgress"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Submitting...";
+
+
+    progress.textContent =
+        "Preparing answers and photos...";
+
+
+    const answers =
+        collectAnswers();
+
+
+    try {
+
+        const {
+            data,
+            error
+        } =
+        await supabaseClient
+            .rpc(
+                "submit_student_cq_exam",
+                {
+                    p_attempt_id:
+                        attemptId,
+
+                    p_answers:
+                        answers
+                }
+            );
+
+
+        if (error) {
+
+            console.error(
+                error
+            );
+
+
+            submitted = false;
+
+
+            button.disabled =
+                false;
+
+
+            button.textContent =
+                "Submit Exam";
+
+
+            progress.textContent =
+                "";
+
+
+            if (
+                autoSubmitted
+            ) {
+
+                showError(
+                    "Exam time ended, but submission failed: " +
+                    error.message
+                );
+
+            } else {
+
+                alert(
+                    error.message
+                );
+            }
+
+
+            return;
+        }
+
+
+        clearInterval(
+            timerInterval
+        );
+
+
+        showResult(
+            data
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        submitted = false;
+
+
+        button.disabled =
+            false;
+
+
+        button.textContent =
+            "Submit Exam";
+
+
+        progress.textContent =
+            "";
+
+
+        showError(
+            error.message ||
+            "Submission failed."
+        );
+    }
+}
+
+
+/* =========================
+   RESULT
+========================= */
+
+
+function showResult(
+    result
+) {
+
+    document.getElementById(
+        "examArea"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "resultArea"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    if (
+        result &&
+        result.obtained_marks !== undefined
+    ) {
+
+        document.getElementById(
+            "resultMark"
+        ).textContent =
+            `${result.obtained_marks} / ${result.total_marks}`;
+
+    } else {
+
+        document.getElementById(
+            "resultMark"
+        ).textContent =
+            "Submitted";
+    }
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+
+function showError(
+    message
+) {
+
+    document.getElementById(
+        "loading"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "examArea"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "errorArea"
+    ).classList.remove(
+        "hidden"
+    );
+
+
+    document.getElementById(
+        "errorMessage"
+    ).textContent =
+        message;
+}
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+
+function escapeHtml(
+    text
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        text || "";
+
+
+    return div.innerHTML;
+}
+
+
+/* =========================
+   START
+========================= */
+
+
+initialize();
+
+</script>
+
+</body>
+
+</html>

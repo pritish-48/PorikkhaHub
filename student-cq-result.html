@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CQ Result | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f6fb;
+    color:#172033;
+}
+
+header{
+    background:#111827;
+    color:white;
+    padding:16px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:21px;
+    font-weight:800;
+}
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.gray{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+main{
+    max-width:1000px;
+    margin:25px auto;
+    padding:0 16px;
+}
+
+.panel{
+    background:white;
+    padding:22px;
+    border-radius:15px;
+    margin-bottom:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.07);
+}
+
+.result{
+    text-align:center;
+}
+
+.exam-title{
+    font-size:25px;
+    font-weight:800;
+}
+
+.score{
+    font-size:42px;
+    font-weight:900;
+    margin:15px 0;
+}
+
+.question{
+    border:1px solid #ddd;
+    border-radius:14px;
+    padding:18px;
+    margin-top:18px;
+}
+
+.qtitle{
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.question-text{
+    background:#f8fafc;
+    padding:14px;
+    border-radius:10px;
+    white-space:pre-wrap;
+    line-height:1.7;
+}
+
+.answer{
+    background:#fffdf0;
+    border:1px solid #e5d98b;
+    padding:14px;
+    border-radius:10px;
+    white-space:pre-wrap;
+    line-height:1.7;
+}
+
+.feedback{
+    background:#eff6ff;
+    border-left:4px solid #2563eb;
+    padding:13px;
+    border-radius:8px;
+    margin-top:12px;
+    white-space:pre-wrap;
+    line-height:1.6;
+}
+
+.images{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+    margin-top:12px;
+}
+
+.images img{
+    width:100%;
+    max-height:500px;
+    object-fit:contain;
+    border:1px solid #ddd;
+    border-radius:9px;
+    background:#eee;
+}
+
+.marks{
+    margin-top:15px;
+    font-size:18px;
+    font-weight:800;
+}
+
+.status{
+    padding:13px;
+    border-radius:9px;
+    background:#f3f4f6;
+}
+
+.hidden{
+    display:none;
+}
+
+@media(max-width:600px){
+
+    .score{
+        font-size:34px;
+    }
+
+    .exam-title{
+        font-size:21px;
+    }
+
+    header{
+        padding:14px;
+    }
+
+    .logo{
+        font-size:18px;
+    }
+}
+</style>
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        📖 PorikkhaHub
+    </div>
+
+    <button
+        class="gray"
+        onclick="goBack()"
+    >
+        ← My Results
+    </button>
+
+</header>
+
+
+<main>
+
+
+<div
+    id="loading"
+    class="panel"
+>
+    Loading result...
+</div>
+
+
+<div
+    id="resultPanel"
+    class="hidden"
+>
+
+
+    <div class="panel result">
+
+        <div
+            class="exam-title"
+            id="examTitle"
+        ></div>
+
+
+        <div class="score">
+
+            <span id="obtained">
+                0
+            </span>
+
+            /
+
+            <span id="total">
+                0
+            </span>
+
+        </div>
+
+
+        <div id="submitted"></div>
+
+    </div>
+
+
+
+    <div class="panel">
+
+        <h2>
+            📝 Question-wise Result
+        </h2>
+
+        <div id="questions"></div>
+
+    </div>
+
+
+</div>
+
+
+</main>
+
+
+
+<script>
+
+
+/* =========================
+   SUPABASE
+========================= */
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+
+/* =========================
+   BACK
+========================= */
+
+function goBack(){
+
+    window.location.href =
+        "student-results.html";
+
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+
+/* =========================
+   STUDENT SESSION
+========================= */
+
+async function restoreStudent(){
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_access_token"
+        );
+
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_refresh_token"
+        );
+
+
+    if(
+        accessToken &&
+        refreshToken
+    ){
+
+        const {error} =
+            await supabaseClient.auth.setSession({
+
+                access_token:
+                    accessToken,
+
+                refresh_token:
+                    refreshToken
+
+            });
+
+
+        if(error){
+
+            console.error(
+                "Session restore error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    const {data,error} =
+        await supabaseClient.auth.getUser();
+
+
+    if(
+        error ||
+        !data.user
+    ){
+
+        alert(
+            "Student login required."
+        );
+
+
+        window.location.href =
+            "login.html";
+
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+
+/* =========================
+   GET ATTEMPT ID
+========================= */
+
+function getAttemptId(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    return params.get(
+        "attempt"
+    );
+
+}
+
+
+
+/* =========================
+   LOAD RESULT
+========================= */
+
+async function loadResult(){
+
+    const attemptId =
+        getAttemptId();
+
+
+    if(!attemptId){
+
+        showError(
+            "Result attempt পাওয়া যায়নি।"
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "Loading CQ result:",
+        attemptId
+    );
+
+
+    const {data,error} =
+        await supabaseClient.rpc(
+            "get_my_cq_result",
+            {
+                p_attempt_id:
+                    attemptId
+            }
+        );
+
+
+    if(error){
+
+        console.error(
+            "CQ result error:",
+            error
+        );
+
+
+        showError(
+            "Result load failed:<br><br>" +
+            escapeHtml(
+                error.message
+            )
+        );
+
+
+        return;
+
+    }
+
+
+    console.log(
+        "CQ result:",
+        data
+    );
+
+
+    if(
+        !data ||
+        !data.length
+    ){
+
+        showError(
+            "এই পরীক্ষার result পাওয়া যায়নি।"
+        );
+
+
+        return;
+
+    }
+
+
+    renderResult(data);
+
+}
+
+
+
+/* =========================
+   RENDER RESULT
+========================= */
+
+function renderResult(rows){
+
+    const first =
+        rows[0];
+
+
+    document
+        .getElementById("loading")
+        .classList.add("hidden");
+
+
+    document
+        .getElementById("resultPanel")
+        .classList.remove("hidden");
+
+
+
+    document
+        .getElementById("examTitle")
+        .textContent =
+            first.exam_title;
+
+
+
+    let calculatedObtained = 0;
+let calculatedTotal = 0;
+
+rows.forEach(row => {
+
+    calculatedObtained +=
+        Number(row.obtained_question_marks || 0);
+
+    calculatedTotal +=
+        Number(row.question_marks || 0);
+
+});
+
+document
+    .getElementById("obtained")
+    .textContent =
+        calculatedObtained;
+
+document
+    .getElementById("total")
+    .textContent =
+        calculatedTotal;
+
+
+
+    document
+        .getElementById("submitted")
+        .textContent =
+            first.submitted_at
+            ? "Submitted: " +
+              new Date(
+                  first.submitted_at
+              ).toLocaleString()
+            : "";
+
+
+
+    const box =
+        document.getElementById(
+            "questions"
+        );
+
+
+    box.innerHTML = "";
+
+
+
+    rows.forEach(
+        row => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "question";
+
+
+
+            let images = [];
+
+
+            try{
+
+                if(
+                    Array.isArray(
+                        row.answer_images
+                    )
+                ){
+
+                    images =
+                        row.answer_images;
+
+                }else{
+
+                    images =
+                        JSON.parse(
+                            row.answer_images ||
+                            "[]"
+                        );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    "Image parse error:",
+                    error
+                );
+
+                images = [];
+
+            }
+
+
+
+            let imageHTML = "";
+
+
+
+            if(images.length){
+
+                imageHTML = `
+
+                    <h3>
+                        📷 Your Handwritten Answer
+                    </h3>
+
+                    <div class="images">
+
+                        ${
+                            images.map(
+                                (img,i) => `
+
+                                    <div>
+
+                                        <img
+                                            src="${img}"
+                                            alt="Answer page ${i+1}"
+                                        >
+
+                                        <div
+                                            class="small"
+                                            style="margin-top:5px"
+                                        >
+                                            Page ${i+1}
+                                        </div>
+
+                                    </div>
+
+                                `
+                            ).join("")
+                        }
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            div.innerHTML = `
+
+                <div class="qtitle">
+
+                    Question
+                    ${Number(
+                        row.question_number
+                    )}
+
+                    — ${Number(
+                        row.question_marks || 0
+                    )} marks
+
+                </div>
+
+
+                <div class="question-text">
+
+                    ${escapeHtml(
+                        row.question_text
+                    )}
+
+                </div>
+
+
+                <div class="marks">
+
+                    Obtained:
+
+                    ${Number(
+                        row.obtained_question_marks || 0
+                    )}
+
+                    /
+
+                    ${Number(
+                        row.question_marks || 0
+                    )}
+
+                </div>
+
+
+                ${
+                    row.answer_text
+                    ? `
+
+                        <h3>
+                            📝 Your Answer
+                        </h3>
+
+                        <div class="answer">
+
+                            ${escapeHtml(
+                                row.answer_text
+                            )}
+
+                        </div>
+
+                    `
+                    : ""
+                }
+
+
+                ${imageHTML}
+
+
+                ${
+                    row.teacher_feedback
+                    ? `
+
+                        <h3>
+                            👨‍🏫 Teacher Feedback
+                        </h3>
+
+                        <div class="feedback">
+
+                            ${escapeHtml(
+                                row.teacher_feedback
+                            )}
+
+                        </div>
+
+                    `
+                    : `
+
+                        <div
+                            class="status"
+                            style="margin-top:15px"
+                        >
+                            👨‍🏫 Teacher feedback
+                            এখনো দেওয়া হয়নি।
+                        </div>
+
+                    `
+                }
+
+            `;
+
+
+            box.appendChild(
+                div
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================
+   ERROR
+========================= */
+
+function showError(message){
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+
+    loading.innerHTML = `
+
+        <div class="status">
+
+            ❌ ${message}
+
+        </div>
+
+    `;
+
+}
+
+
+
+/* =========================
+   START
+========================= */
+
+(async function(){
+
+    const ok =
+        await restoreStudent();
+
+
+    if(!ok){
+        return;
+    }
+
+
+    await loadResult();
+
+})();
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1488 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MMCQ Question Bank | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f7fb;
+    color:#172033;
+}
+
+header{
+    background:#111827;
+    color:white;
+    padding:18px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    margin:0;
+    font-size:22px;
+}
+
+header button{
+    background:#ef4444;
+    border:0;
+    color:white;
+    padding:9px 16px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.container{
+    max-width:1100px;
+    margin:30px auto;
+    padding:0 20px;
+}
+
+.card{
+    background:white;
+    border-radius:14px;
+    padding:24px;
+    margin-bottom:22px;
+    box-shadow:0 5px 20px rgba(0,0,0,.07);
+}
+
+h2{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+select,
+textarea,
+input{
+    width:100%;
+    padding:12px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    font-size:15px;
+}
+
+textarea{
+    min-height:280px;
+    resize:vertical;
+}
+
+button{
+    border:0;
+    padding:11px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.primary{
+    background:#2563eb;
+    color:white;
+}
+
+.success{
+    background:#16a34a;
+    color:white;
+}
+
+.danger{
+    background:#dc2626;
+    color:white;
+}
+
+.secondary{
+    background:#64748b;
+    color:white;
+}
+
+.row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+}
+
+.message{
+    padding:12px;
+    border-radius:8px;
+    margin-top:12px;
+    display:none;
+}
+
+.ok{
+    display:block;
+    background:#dcfce7;
+    color:#166534;
+}
+
+.err{
+    display:block;
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.preview-item,
+.question-item{
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:16px;
+    margin-top:12px;
+}
+
+.preview-item div{
+    margin-top:5px;
+}
+
+.answer{
+    font-weight:bold;
+    color:#15803d;
+}
+
+.small{
+    font-size:13px;
+    color:#64748b;
+    margin-top:8px;
+}
+
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#64748b;
+}
+
+.loading{
+    color:#2563eb;
+    font-weight:bold;
+}
+
+.badge{
+    display:inline-block;
+    padding:4px 9px;
+    border-radius:20px;
+    font-size:12px;
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+@media(max-width:700px){
+    header{
+        padding:15px;
+    }
+
+    .container{
+        padding:0 12px;
+    }
+
+    .card{
+        padding:17px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>MMCQ Question Bank</h1>
+    <button onclick="logout()">Logout</button>
+</header>
+
+<div class="container">
+
+    <!-- SELECT EXAM -->
+    <div class="card">
+
+        <h2>1. Select Exam</h2>
+
+        <label for="examSelect">
+            MCQ Exam
+        </label>
+
+        <select id="examSelect">
+            <option value="">
+                Loading exams...
+            </option>
+        </select>
+
+        <div id="examMessage"
+             class="message">
+        </div>
+
+    </div>
+
+
+    <!-- MANUAL QUESTION -->
+    <div class="card">
+
+        <h2>2. Add MCQ Manually</h2>
+
+        <label>Question</label>
+        <textarea
+            id="manualQuestion"
+            style="min-height:100px"
+            placeholder="Question text">
+        </textarea>
+
+        <label style="margin-top:12px">
+            Option A
+        </label>
+        <input id="manualA">
+
+        <label style="margin-top:12px">
+            Option B
+        </label>
+        <input id="manualB">
+
+        <label style="margin-top:12px">
+            Option C
+        </label>
+        <input id="manualC">
+
+        <label style="margin-top:12px">
+            Option D
+        </label>
+        <input id="manualD">
+
+        <label style="margin-top:12px">
+            Correct Answer
+        </label>
+
+        <select id="manualAnswer">
+            <option value="">Select answer</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+        </select>
+
+        <label style="margin-top:12px">
+            Marks
+        </label>
+
+        <input
+            id="manualMarks"
+            type="number"
+            value="1"
+            min="0"
+            step="0.5">
+
+        <div class="row">
+
+            <button
+                class="success"
+                type="button"
+                onclick="addManualQuestion()">
+                Add Question
+            </button>
+
+        </div>
+
+        <div id="manualMessage"
+             class="message">
+        </div>
+
+    </div>
+
+
+    <!-- BULK IMPORT -->
+    <div class="card">
+
+        <h2>3. Bulk Import MCQ</h2>
+
+        <p class="small">
+            Format:
+            <br><br>
+
+            1. বাংলাদেশের রাজধানী কোনটি?<br>
+            A. চট্টগ্রাম<br>
+            B. ঢাকা<br>
+            C. খুলনা<br>
+            D. রাজশাহী<br>
+            Answer: B<br>
+            Marks: 1
+        </p>
+
+        <textarea
+            id="bulkText"
+            placeholder="এখানে একসাথে অনেক MCQ paste করো..."></textarea>
+
+        <div class="row">
+
+            <button
+                class="primary"
+                type="button"
+                onclick="detectPreview()">
+                Detect & Preview
+            </button>
+
+            <button
+                class="success"
+                type="button"
+                id="importButton"
+                onclick="importAll()">
+                Import All
+            </button>
+
+            <button
+                class="secondary"
+                type="button"
+                onclick="clearBulk()">
+                Clear
+            </button>
+
+        </div>
+
+        <div id="bulkMessage"
+             class="message">
+        </div>
+
+    </div>
+
+
+    <!-- PREVIEW -->
+    <div class="card">
+
+        <h2>4. Preview</h2>
+
+        <div id="preview"
+             class="empty">
+            No questions detected yet.
+        </div>
+
+    </div>
+
+
+    <!-- EXISTING -->
+    <div class="card">
+
+        <h2>5. Existing Questions</h2>
+
+        <div id="existingQuestions"
+             class="loading">
+            Loading...
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let selectedExamId = "";
+let parsedQuestions = [];
+
+
+/* =========================
+   SESSION
+========================= */
+
+async function restoreAdminSession(){
+
+    const access =
+        localStorage.getItem(
+            "porikkhahub_admin_access_token"
+        );
+
+    const refresh =
+        localStorage.getItem(
+            "porikkhahub_admin_refresh_token"
+        );
+
+    if(access && refresh){
+
+        await supabaseClient.auth.setSession({
+            access_token: access,
+            refresh_token: refresh
+        });
+    }
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.getUser();
+
+    if(error || !data.user){
+
+        window.location.href =
+            "admin-login.html";
+
+        return false;
+    }
+
+    const {
+        data: admin,
+        error: adminError
+    } =
+        await supabaseClient.rpc(
+            "is_admin"
+        );
+
+    if(adminError || admin !== true){
+
+        alert("Admin access required.");
+
+        window.location.href =
+            "admin-login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+/* =========================
+   LOAD EXAMS
+========================= */
+
+async function loadExams(){
+
+    const select =
+        document.getElementById(
+            "examSelect"
+        );
+
+    select.innerHTML =
+        '<option value="">Loading exams...</option>';
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            "get_admin_exams"
+        );
+
+    if(error){
+
+        console.error(error);
+
+        select.innerHTML =
+            '<option value="">Exam loading failed</option>';
+
+        show(
+            "examMessage",
+            "❌ Exam load failed: " +
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+    const exams =
+        (data || []).filter(
+            exam =>
+                String(exam.exam_type || "")
+                    .trim()
+                    .toUpperCase() === "MCQ"
+        );
+
+    if(!exams.length){
+
+        select.innerHTML =
+            '<option value="">No MCQ exam found</option>';
+
+        return;
+    }
+
+    select.innerHTML =
+        '<option value="">-- Select MCQ Exam --</option>';
+
+    exams.forEach(exam => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            exam.id;
+
+        option.textContent =
+            exam.title +
+            " | " +
+            (exam.is_published
+                ? "Published"
+                : "Draft");
+
+        select.appendChild(option);
+
+    });
+
+    select.onchange =
+        async function(){
+
+            selectedExamId =
+                this.value;
+
+            parsedQuestions = [];
+
+            document.getElementById(
+                "preview"
+            ).innerHTML =
+                '<div class="empty">No questions detected yet.</div>';
+
+            if(selectedExamId){
+
+                await loadExistingQuestions();
+            }
+        };
+}
+
+
+/* =========================
+   PARSER
+========================= */
+
+function parseBulkQuestions(text){
+
+    const lines =
+        text
+            .replace(/\r\n/g,"\n")
+            .replace(/\r/g,"\n")
+            .split("\n")
+            .map(x => x.trim());
+
+    const result = [];
+
+    let current = null;
+    let currentOption = null;
+
+    function save(){
+
+        if(!current) return;
+
+        current.question_text =
+            current.question_text.trim();
+
+        if(current.question_text){
+
+            result.push(current);
+        }
+    }
+
+    for(const line of lines){
+
+        if(!line) continue;
+
+
+        /* QUESTION */
+
+        const q =
+            line.match(
+                /^(?:Q(?:uestion)?\s*)?(\d+)\s*[\.\):\-]\s*(.*)$/i
+            );
+
+        if(q){
+
+            save();
+
+            current = {
+
+                question_number:
+                    Number(q[1]),
+
+                question_text:
+                    q[2].trim(),
+
+                option_a:"",
+                option_b:"",
+                option_c:"",
+                option_d:"",
+
+                correct_answer:"",
+
+                marks:1
+            };
+
+            currentOption = null;
+
+            continue;
+        }
+
+
+        if(!current) continue;
+
+
+        /* OPTION */
+
+        const o =
+            line.match(
+                /^([ABCD])\s*[\.\):\-]\s*(.+)$/i
+            );
+
+        if(o){
+
+            currentOption =
+                o[1].toUpperCase();
+
+            current[
+                "option_" +
+                currentOption.toLowerCase()
+            ] =
+                o[2].trim();
+
+            continue;
+        }
+
+
+        /* ANSWER */
+
+        const a =
+            line.match(
+                /^(?:Answer|Ans|Correct Answer|Correct|উত্তর|সঠিক উত্তর)\s*[:=\-]?\s*([ABCD])\b/i
+            );
+
+        if(a){
+
+            current.correct_answer =
+                a[1].toUpperCase();
+
+            continue;
+        }
+
+
+        /* MARKS */
+
+        const m =
+            line.match(
+                /^(?:Marks?|মান|নম্বর)\s*[:=\-]?\s*(\d+(?:\.\d+)?)$/i
+            );
+
+        if(m){
+
+            current.marks =
+                Number(m[1]);
+
+            continue;
+        }
+
+
+        /* QUESTION CONTINUATION */
+
+        if(!currentOption){
+
+            current.question_text +=
+                " " + line;
+        }
+
+    }
+
+    save();
+
+    return result;
+}
+
+
+/* =========================
+   PREVIEW
+========================= */
+
+function detectPreview(){
+
+    const text =
+        document.getElementById(
+            "bulkText"
+        ).value.trim();
+
+    if(!text){
+
+        show(
+            "bulkMessage",
+            "আগে MCQ paste করো.",
+            false
+        );
+
+        return;
+    }
+
+    parsedQuestions =
+        parseBulkQuestions(text);
+
+    if(!parsedQuestions.length){
+
+        document.getElementById(
+            "preview"
+        ).innerHTML =
+            '<div class="empty">❌ কোনো MCQ detect হয়নি.</div>';
+
+        show(
+            "bulkMessage",
+            "Question format ভুল.",
+            false
+        );
+
+        return;
+    }
+
+    renderPreview();
+
+    show(
+        "bulkMessage",
+        "✅ " +
+        parsedQuestions.length +
+        "টি question detect হয়েছে.",
+        true
+    );
+}
+
+
+function renderPreview(){
+
+    const preview =
+        document.getElementById(
+            "preview"
+        );
+
+    preview.innerHTML =
+        parsedQuestions.map(
+            (q,i) => `
+
+            <div class="preview-item">
+
+                <strong>
+                    ${i+1}.
+                    ${escapeHtml(q.question_text)}
+                </strong>
+
+                <div>
+                    A. ${escapeHtml(q.option_a)}
+                </div>
+
+                <div>
+                    B. ${escapeHtml(q.option_b)}
+                </div>
+
+                <div>
+                    C. ${escapeHtml(q.option_c)}
+                </div>
+
+                <div>
+                    D. ${escapeHtml(q.option_d)}
+                </div>
+
+                <div class="answer">
+                    Answer: ${q.correct_answer}
+                </div>
+
+                <div class="small">
+                    Marks: ${q.marks}
+                </div>
+
+            </div>
+        `
+        ).join("");
+}
+
+
+/* =========================
+   IMPORT
+========================= */
+
+async function importAll(){
+
+    console.log("IMPORT ALL STARTED");
+
+    if(!selectedExamId){
+
+        alert(
+            "আগে একটি MCQ exam select করো."
+        );
+
+        return;
+    }
+
+    const text =
+        document.getElementById(
+            "bulkText"
+        ).value.trim();
+
+    if(!text){
+
+        alert(
+            "আগে MCQ questions paste করো."
+        );
+
+        return;
+    }
+
+    parsedQuestions =
+        parseBulkQuestions(text);
+
+    if(!parsedQuestions.length){
+
+        alert(
+            "কোনো valid MCQ পাওয়া যায়নি."
+        );
+
+        return;
+    }
+
+
+    /* VALIDATE */
+
+    for(let i=0;
+        i<parsedQuestions.length;
+        i++){
+
+        const q =
+            parsedQuestions[i];
+
+        if(
+            !q.question_text ||
+            !q.option_a ||
+            !q.option_b ||
+            !q.option_c ||
+            !q.option_d
+        ){
+
+            alert(
+                "Question " +
+                (i+1) +
+                " অসম্পূর্ণ."
+            );
+
+            return;
+        }
+
+        if(
+            !["A","B","C","D"]
+                .includes(
+                    q.correct_answer
+                )
+        ){
+
+            alert(
+                "Question " +
+                (i+1) +
+                " এর Answer ভুল."
+            );
+
+            return;
+        }
+    }
+
+
+    /* NEXT NUMBER */
+
+    const {
+        data: existing,
+        error: existingError
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .select("question_number")
+            .eq(
+                "exam_id",
+                selectedExamId
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:false
+                }
+            )
+            .limit(1);
+
+    if(existingError){
+
+        alert(
+            "Existing question load error:\n\n" +
+            existingError.message
+        );
+
+        console.error(
+            existingError
+        );
+
+        return;
+    }
+
+    let startNumber = 1;
+
+    if(
+        existing &&
+        existing.length
+    ){
+
+        startNumber =
+            Number(
+                existing[0]
+                    .question_number
+            ) + 1;
+    }
+
+
+    /* BUILD ROWS */
+
+    const rows =
+        parsedQuestions.map(
+            (q,i) => ({
+
+                exam_id:
+                    selectedExamId,
+
+                question_number:
+                    startNumber + i,
+
+                question_text:
+                    q.question_text,
+
+                option_a:
+                    q.option_a,
+
+                option_b:
+                    q.option_b,
+
+                option_c:
+                    q.option_c,
+
+                option_d:
+                    q.option_d,
+
+                correct_answer:
+                    q.correct_answer,
+
+                marks:
+                    Number(q.marks) || 1
+
+            })
+        );
+
+
+    console.log(
+        "INSERT ROWS:",
+        rows
+    );
+
+
+    /* INSERT */
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .insert(rows);
+
+
+    if(error){
+
+        console.error(
+            "IMPORT ERROR:",
+            error
+        );
+
+        alert(
+            "❌ Import failed:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        "✅ " +
+        rows.length +
+        "টি MCQ successfully imported!"
+    );
+
+
+    document.getElementById(
+        "bulkText"
+    ).value = "";
+
+    parsedQuestions = [];
+
+    document.getElementById(
+        "preview"
+    ).innerHTML =
+        '<div class="empty">No questions detected yet.</div>';
+
+    await loadExistingQuestions();
+}
+
+
+/* =========================
+   MANUAL ADD
+========================= */
+
+async function addManualQuestion(){
+
+    if(!selectedExamId){
+
+        alert(
+            "আগে exam select করো."
+        );
+
+        return;
+    }
+
+    const question =
+        document.getElementById(
+            "manualQuestion"
+        ).value.trim();
+
+    const A =
+        document.getElementById(
+            "manualA"
+        ).value.trim();
+
+    const B =
+        document.getElementById(
+            "manualB"
+        ).value.trim();
+
+    const C =
+        document.getElementById(
+            "manualC"
+        ).value.trim();
+
+    const D =
+        document.getElementById(
+            "manualD"
+        ).value.trim();
+
+    const answer =
+        document.getElementById(
+            "manualAnswer"
+        ).value;
+
+    const marks =
+        Number(
+            document.getElementById(
+                "manualMarks"
+            ).value
+        ) || 1;
+
+
+    if(
+        !question ||
+        !A ||
+        !B ||
+        !C ||
+        !D ||
+        !answer
+    ){
+
+        show(
+            "manualMessage",
+            "সব field পূরণ করো.",
+            false
+        );
+
+        return;
+    }
+
+
+    const {
+        data: existing,
+        error: e1
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .select("question_number")
+            .eq(
+                "exam_id",
+                selectedExamId
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:false
+                }
+            )
+            .limit(1);
+
+
+    if(e1){
+
+        alert(
+            e1.message
+        );
+
+        return;
+    }
+
+
+    const number =
+        existing &&
+        existing.length
+            ? Number(
+                existing[0]
+                    .question_number
+              ) + 1
+            : 1;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .insert({
+
+                exam_id:
+                    selectedExamId,
+
+                question_number:
+                    number,
+
+                question_text:
+                    question,
+
+                option_a:A,
+                option_b:B,
+                option_c:C,
+                option_d:D,
+
+                correct_answer:
+                    answer,
+
+                marks:marks
+            });
+
+
+    if(error){
+
+        alert(
+            "Add failed:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    show(
+        "manualMessage",
+        "✅ Question added successfully.",
+        true
+    );
+
+
+    document.getElementById(
+        "manualQuestion"
+    ).value = "";
+
+    document.getElementById(
+        "manualA"
+    ).value = "";
+
+    document.getElementById(
+        "manualB"
+    ).value = "";
+
+    document.getElementById(
+        "manualC"
+    ).value = "";
+
+    document.getElementById(
+        "manualD"
+    ).value = "";
+
+    document.getElementById(
+        "manualAnswer"
+    ).value = "";
+
+    await loadExistingQuestions();
+}
+
+
+/* =========================
+   EXISTING QUESTIONS
+========================= */
+
+async function loadExistingQuestions(){
+
+    const box =
+        document.getElementById(
+            "existingQuestions"
+        );
+
+    if(!selectedExamId){
+
+        box.innerHTML =
+            '<div class="empty">Exam select করলে questions দেখাবে.</div>';
+
+        return;
+    }
+
+    box.innerHTML =
+        '<div class="loading">Loading questions...</div>';
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .select(
+                "id,question_number,question_text,option_a,option_b,option_c,option_d,correct_answer,marks"
+            )
+            .eq(
+                "exam_id",
+                selectedExamId
+            )
+            .order(
+                "question_number",
+                {
+                    ascending:true
+                }
+            );
+
+
+    if(error){
+
+        box.innerHTML =
+            '<div class="message err">Load failed: ' +
+            escapeHtml(error.message) +
+            '</div>';
+
+        return;
+    }
+
+
+    if(!data || !data.length){
+
+        box.innerHTML =
+            '<div class="empty">এই exam-এ কোনো question নেই.</div>';
+
+        return;
+    }
+
+
+    box.innerHTML =
+        data.map(
+            q => `
+
+            <div class="question-item">
+
+                <strong>
+                    ${q.question_number}.
+                    ${escapeHtml(q.question_text)}
+                </strong>
+
+                <div>
+                    A. ${escapeHtml(q.option_a)}
+                </div>
+
+                <div>
+                    B. ${escapeHtml(q.option_b)}
+                </div>
+
+                <div>
+                    C. ${escapeHtml(q.option_c)}
+                </div>
+
+                <div>
+                    D. ${escapeHtml(q.option_d)}
+                </div>
+
+                <div class="small">
+                    Answer:
+                    <span class="answer">
+                        ${q.correct_answer}
+                    </span>
+                    |
+                    Marks:
+                    ${q.marks}
+                </div>
+
+                <div class="row">
+
+                    <button
+                        class="danger"
+                        type="button"
+                        onclick="deleteQuestion('${q.id}')">
+                        Delete
+                    </button>
+
+                </div>
+
+            </div>
+        `
+        ).join("");
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+async function deleteQuestion(id){
+
+    if(
+        !confirm(
+            "এই question delete করতে চাও?"
+        )
+    ){
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+            .from("mcq_questions")
+            .delete()
+            .eq(
+                "id",
+                id
+            );
+
+
+    if(error){
+
+        alert(
+            "Delete failed:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    await loadExistingQuestions();
+}
+
+
+/* =========================
+   CLEAR
+========================= */
+
+function clearBulk(){
+
+    document.getElementById(
+        "bulkText"
+    ).value = "";
+
+    parsedQuestions = [];
+
+    document.getElementById(
+        "preview"
+    ).innerHTML =
+        '<div class="empty">No questions detected yet.</div>';
+
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function show(
+    id,
+    message,
+    success
+){
+
+    const el =
+        document.getElementById(id);
+
+    el.textContent =
+        message;
+
+    el.className =
+        "message " +
+        (
+            success
+                ? "ok"
+                : "err"
+        );
+}
+
+
+/* =========================
+   ESCAPE
+========================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    localStorage.removeItem(
+        "porikkhahub_admin"
+    );
+
+    localStorage.removeItem(
+        "porikkhahub_admin_access_token"
+    );
+
+    localStorage.removeItem(
+        "porikkhahub_admin_refresh_token"
+    );
+
+    window.location.href =
+        "admin-login.html";
+}
+
+
+/* =========================
+   START
+========================= */
+
+(async function(){
+
+    const ok =
+        await restoreAdminSession();
+
+    if(!ok) return;
+
+    await loadExams();
+
+})();
+
+</script>
+
+</body>
+</html>
+

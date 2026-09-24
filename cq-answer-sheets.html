@@ -1,0 +1,1761 @@
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CQ Answer Sheets | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#f4f6fb;
+    color:#172033;
+}
+
+header{
+    background:#111827;
+    color:white;
+    padding:16px 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:800;
+}
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.primary{
+    background:#2563eb;
+    color:white;
+}
+
+.success{
+    background:#16a34a;
+    color:white;
+}
+
+.danger{
+    background:#dc2626;
+    color:white;
+}
+
+.gray{
+    background:#e5e7eb;
+    color:#111827;
+}
+
+main{
+    max-width:1200px;
+    margin:25px auto;
+    padding:0 16px;
+}
+
+.panel{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.07);
+}
+
+h1,h2,h3{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    font-weight:700;
+    margin-bottom:7px;
+}
+
+select,input,textarea{
+    width:100%;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    padding:11px;
+    font-size:15px;
+}
+
+textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.student-list{
+    display:grid;
+    gap:10px;
+    margin-top:15px;
+}
+
+.student{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:13px;
+    cursor:pointer;
+    background:#fff;
+}
+
+.student:hover{
+    background:#f1f5ff;
+}
+
+.student.active{
+    border:2px solid #2563eb;
+    background:#eff6ff;
+}
+
+.status{
+    margin:12px 0;
+    padding:12px;
+    border-radius:8px;
+    background:#f3f4f6;
+}
+
+.question{
+    border:1px solid #ddd;
+    border-radius:14px;
+    padding:18px;
+    margin-top:18px;
+}
+
+.question-title{
+    font-size:18px;
+    font-weight:800;
+    margin-bottom:12px;
+}
+
+.question-text{
+    white-space:pre-wrap;
+    line-height:1.7;
+    background:#f8fafc;
+    padding:14px;
+    border-radius:10px;
+    margin-bottom:18px;
+}
+
+.images{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:12px;
+    margin-top:12px;
+}
+
+.answer-image{
+    width:100%;
+    max-height:500px;
+    object-fit:contain;
+    background:#eee;
+    border-radius:8px;
+    border:1px solid #ddd;
+}
+
+.answer-text{
+    white-space:pre-wrap;
+    background:#fffdf0;
+    border:1px solid #e5d98b;
+    border-radius:10px;
+    padding:14px;
+    line-height:1.7;
+}
+
+.mark-row{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:12px;
+    align-items:center;
+    margin-top:15px;
+}
+
+canvas{
+    width:100%;
+    background:white;
+    border:2px dashed #9ca3af;
+    border-radius:10px;
+    touch-action:none;
+    margin-top:12px;
+}
+
+.tools{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+}
+
+.hidden{
+    display:none;
+}
+
+.big-save{
+    position:sticky;
+    bottom:10px;
+    padding:16px;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 4px 20px rgba(0,0,0,.15);
+    margin-top:20px;
+}
+
+.small{
+    color:#6b7280;
+    font-size:13px;
+}
+
+@media(max-width:700px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .mark-row{
+        grid-template-columns:1fr;
+    }
+
+    header{
+        gap:10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">📖 PorikkhaHub — CQ Answer Sheets</div>
+    <button class="gray" onclick="goDashboard()">Dashboard</button>
+</header>
+
+<main>
+
+<div class="panel">
+    <h2>📚 Select CQ Exam</h2>
+
+    <div class="grid">
+        <div>
+            <label>Exam</label>
+            <select id="examSelect">
+                <option value="">Loading exams...</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Student</label>
+            <select id="studentSelect">
+                <option value="">Select exam first</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="status" class="status">
+        Loading...
+    </div>
+
+    <button class="primary" onclick="openSelectedSheet()">
+        📖 Open Answer Sheet
+    </button>
+</div>
+
+
+<div id="sheetPanel" class="panel hidden">
+
+    <h2>📝 Student Answer Sheet</h2>
+
+    <div id="studentInfo" class="status"></div>
+
+    <div id="questions"></div>
+
+    <div class="big-save">
+        <button class="success" onclick="saveAllMarks()">
+            💾 Save All Marks
+        </button>
+
+        <button class="gray" onclick="downloadAllMarked()">
+            ⬇️ Download Marked Images
+        </button>
+    </div>
+
+</div>
+
+</main>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+const supabaseClient =
+    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+let exams = [];
+let students = [];
+let currentAttempt = null;
+let currentAnswers = [];
+let canvases = {};
+let selectedTool = "pen";
+
+
+const examSelect =
+    document.getElementById("examSelect");
+
+const studentSelect =
+    document.getElementById("studentSelect");
+
+const statusBox =
+    document.getElementById("status");
+
+const sheetPanel =
+    document.getElementById("sheetPanel");
+
+const questionsBox =
+    document.getElementById("questions");
+
+
+
+function setStatus(message){
+    statusBox.innerHTML = message;
+}
+
+
+function goDashboard(){
+    window.location.href = "admin-dashboard.html";
+}
+
+
+
+/* =========================
+   ADMIN SESSION
+========================= */
+
+async function restoreAdminSession(){
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_admin_access_token"
+        );
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_admin_refresh_token"
+        );
+
+    if(accessToken && refreshToken){
+
+        const {error} =
+            await supabaseClient.auth.setSession({
+                access_token:accessToken,
+                refresh_token:refreshToken
+            });
+
+        if(error){
+            console.error(error);
+        }
+    }
+
+    const {data,error} =
+        await supabaseClient.auth.getUser();
+
+    if(error || !data.user){
+
+        alert("Admin login required.");
+
+        window.location.href =
+            "admin-login.html";
+
+        return false;
+    }
+
+    const {data:isAdmin,error:adminError} =
+        await supabaseClient.rpc("is_admin");
+
+    if(adminError){
+
+        console.error(adminError);
+
+        alert(
+            "Admin verification failed: " +
+            adminError.message
+        );
+
+        return false;
+    }
+
+    if(!isAdmin){
+
+        alert("You are not authorized as admin.");
+
+        window.location.href =
+            "admin-login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+
+/* =========================
+   LOAD EXAMS
+========================= */
+
+async function loadExams(){
+
+    setStatus("Loading CQ exams...");
+
+    const {data,error} =
+        await supabaseClient.rpc(
+            "get_admin_exams"
+        );
+
+    if(error){
+
+        console.error(error);
+
+        setStatus(
+            "❌ Exam loading failed:<br>" +
+            error.message
+        );
+
+        return;
+    }
+
+    exams =
+        (data || []).filter(
+            e =>
+                String(e.exam_type || "")
+                .trim()
+                .toUpperCase() === "CQ"
+        );
+
+    examSelect.innerHTML =
+        '<option value="">Select CQ exam</option>';
+
+    exams.forEach(exam => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = exam.id;
+
+        option.textContent =
+            exam.title +
+            " — " +
+            (exam.is_published
+                ? "Published"
+                : "Draft");
+
+        examSelect.appendChild(option);
+    });
+
+    setStatus(
+        exams.length
+        ? "✅ CQ exams loaded."
+        : "⚠️ No CQ exams found."
+    );
+}
+
+
+
+/* =========================
+   LOAD STUDENTS
+========================= */
+
+async function loadStudents(){
+
+    const examId =
+        examSelect.value;
+
+    studentSelect.innerHTML =
+        '<option value="">Loading students...</option>';
+
+    if(!examId){
+
+        studentSelect.innerHTML =
+            '<option value="">Select exam first</option>';
+
+        return;
+    }
+
+
+    const {data,error} =
+        await supabaseClient.rpc(
+            "get_cq_answer_sheets",
+            {
+                p_exam_id:examId
+            }
+        );
+
+
+    if(error){
+
+        console.error(error);
+
+        studentSelect.innerHTML =
+            '<option value="">Failed</option>';
+
+        setStatus(
+            "❌ Student answer sheets failed:<br>" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    students = data || [];
+
+    studentSelect.innerHTML =
+        '<option value="">Select student</option>';
+
+
+    students.forEach(student => {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            student.attempt_id;
+
+        option.textContent =
+            student.student_name +
+            " — " +
+            student.student_mobile +
+            " — " +
+            Number(student.obtained_marks || 0) +
+            "/" +
+            Number(student.total_marks || 0);
+
+        studentSelect.appendChild(option);
+
+    });
+
+
+    if(students.length){
+
+        setStatus(
+            "✅ " +
+            students.length +
+            " submitted CQ answer sheet found."
+        );
+
+    }else{
+
+        setStatus(
+            "⚠️ এই exam-এর কোনো submitted answer sheet পাওয়া যায়নি।"
+        );
+    }
+}
+
+
+
+/* =========================
+   OPEN SHEET
+========================= */
+
+async function openSelectedSheet(){
+
+    const attemptId =
+        studentSelect.value;
+
+    if(!attemptId){
+
+        alert("একজন student select করো।");
+
+        return;
+    }
+
+
+    currentAttempt =
+        students.find(
+            s => s.attempt_id === attemptId
+        );
+
+
+    if(!currentAttempt){
+
+        alert("Attempt information পাওয়া যায়নি.");
+
+        return;
+    }
+
+
+    const {data,error} =
+        await supabaseClient.rpc(
+            "get_cq_answer_sheet",
+            {
+                p_attempt_id:attemptId
+            }
+        );
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Answer sheet load failed:\n\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    currentAnswers =
+        data || [];
+
+
+    renderSheet();
+
+}
+
+
+
+/* =========================
+   RENDER SHEET
+========================= */
+
+function renderSheet(){
+
+    sheetPanel.classList.remove("hidden");
+
+
+    document.getElementById("studentInfo")
+        .innerHTML = `
+            <b>Student:</b>
+            ${escapeHtml(currentAttempt.student_name)}
+            <br>
+            <b>Mobile:</b>
+            ${escapeHtml(currentAttempt.student_mobile)}
+            <br>
+            <b>Submitted:</b>
+            ${currentAttempt.submitted_at
+                ? new Date(currentAttempt.submitted_at)
+                    .toLocaleString()
+                : "—"}
+            <br>
+            <b>Status:</b>
+            ${escapeHtml(currentAttempt.attempt_status)}
+            <br>
+            <b>Current Marks:</b>
+            ${Number(currentAttempt.obtained_marks || 0)}
+            /
+            ${Number(currentAttempt.total_marks || 0)}
+        `;
+
+
+    questionsBox.innerHTML = "";
+
+    canvases = {};
+
+
+    if(!currentAnswers.length){
+
+        questionsBox.innerHTML =
+            `<div class="status">
+                ⚠️ কোনো answer পাওয়া যায়নি।
+            </div>`;
+
+        return;
+    }
+
+
+    currentAnswers.forEach(
+        (answer,index) => {
+
+            questionsBox.appendChild(
+                createQuestionCard(
+                    answer,
+                    index
+                )
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================
+   QUESTION CARD
+========================= */
+
+function createQuestionCard(answer,index){
+
+    const div =
+        document.createElement("div");
+
+    div.className = "question";
+
+
+    let images = [];
+
+    try{
+
+        images =
+            Array.isArray(answer.answer_images)
+            ? answer.answer_images
+            : JSON.parse(
+                answer.answer_images || "[]"
+            );
+
+    }catch(e){
+
+        images = [];
+    }
+
+
+    let imageHTML = "";
+
+
+    if(images.length){
+
+        imageHTML =
+            `<h3>📷 Handwritten Answer</h3>
+             <div class="images">
+                ${
+                    images.map(
+                        (img,i) => `
+                            <div>
+                                <img
+                                    class="answer-image"
+                                    src="${img}"
+                                    alt="Answer ${i+1}"
+                                >
+
+                                <button
+                                    class="primary"
+                                    style="margin-top:7px;width:100%"
+                                    onclick="createMarker(${index}, ${i})"
+                                >
+                                    ✏️ Mark This Page
+                                </button>
+
+                                <div
+                                    id="canvasWrap_${index}_${i}"
+                                    class="hidden"
+                                ></div>
+                            </div>
+                        `
+                    ).join("")
+                }
+             </div>`;
+    }else{
+
+        imageHTML =
+            `<div class="status">
+                📷 No handwritten image uploaded.
+            </div>`;
+    }
+
+
+    div.innerHTML = `
+
+        <div class="question-title">
+            Question ${answer.question_number}
+            — ${Number(answer.question_marks || 0)} marks
+        </div>
+
+        <div class="question-text">
+            ${escapeHtml(answer.question_text)}
+        </div>
+
+        ${
+            answer.answer_text
+            ? `
+                <h3>📝 Typed Answer</h3>
+
+                <div class="answer-text">
+                    ${escapeHtml(answer.answer_text)}
+                </div>
+            `
+            : ""
+        }
+
+        ${imageHTML}
+
+        <div class="mark-row">
+
+            <div>
+                <label>
+                    Obtained Marks
+                </label>
+
+                <input
+                    type="number"
+                    min="0"
+                    max="${Number(answer.question_marks || 0)}"
+                    step="0.5"
+                    value="${Number(answer.obtained_marks || 0)}"
+                    id="marks_${answer.answer_id}"
+                >
+            </div>
+
+            <div>
+                <label>
+                    Teacher Feedback
+                </label>
+
+                <textarea
+                    id="feedback_${answer.answer_id}"
+                    placeholder="Write feedback for student..."
+                >${escapeHtml(answer.teacher_feedback || "")}</textarea>
+            </div>
+
+        </div>
+
+        <div class="tools">
+
+            <button
+                class="success"
+                onclick="saveQuestion('${answer.answer_id}')"
+            >
+                💾 Save Question
+            </button>
+
+        </div>
+    `;
+
+
+    return div;
+}
+
+
+
+/* =========================
+   MARK IMAGE
+========================= */
+
+async function createMarker(answerIndex,imageIndex){
+
+    const answer =
+        currentAnswers[answerIndex];
+
+
+    let images = [];
+
+    try{
+
+        images =
+            Array.isArray(answer.answer_images)
+            ? answer.answer_images
+            : JSON.parse(
+                answer.answer_images || "[]"
+            );
+
+    }catch(e){
+
+        images = [];
+    }
+
+
+    const image =
+        images[imageIndex];
+
+
+    if(!image) return;
+
+
+    const wrap =
+        document.getElementById(
+            `canvasWrap_${answerIndex}_${imageIndex}`
+        );
+
+
+    wrap.classList.remove("hidden");
+
+    wrap.innerHTML = "";
+
+
+    const toolbar =
+        document.createElement("div");
+
+    toolbar.className = "tools";
+
+
+    const pen =
+        document.createElement("button");
+
+    pen.className = "primary";
+
+    pen.textContent = "🖊️ Pen";
+
+    pen.onclick =
+        () => selectedTool = "pen";
+
+
+    const eraser =
+        document.createElement("button");
+
+    eraser.className = "gray";
+
+    eraser.textContent = "🧽 Eraser";
+
+    eraser.onclick =
+        () => selectedTool = "eraser";
+
+
+    const undo =
+        document.createElement("button");
+
+    undo.className = "gray";
+
+    undo.textContent = "↩ Undo";
+
+    undo.onclick =
+        () => undoCanvas(answerIndex,imageIndex);
+
+
+    const clear =
+        document.createElement("button");
+
+    clear.className = "danger";
+
+    clear.textContent = "🗑 Clear";
+
+    clear.onclick =
+        () => clearCanvas(answerIndex,imageIndex);
+
+
+    const save =
+        document.createElement("button");
+
+    save.className = "success";
+
+    save.textContent = "💾 Save Marking";
+
+    save.onclick =
+        () => saveCanvas(answerIndex,imageIndex);
+
+
+    const download =
+        document.createElement("button");
+
+    download.className = "gray";
+
+    download.textContent = "⬇️ Download";
+
+    download.onclick =
+        () => downloadCanvas(answerIndex,imageIndex);
+
+
+    toolbar.append(
+        pen,
+        eraser,
+        undo,
+        clear,
+        save,
+        download
+    );
+
+
+    wrap.appendChild(toolbar);
+
+
+    const canvas =
+        document.createElement("canvas");
+
+
+    wrap.appendChild(canvas);
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    const img =
+        new Image();
+
+
+    img.onload = function(){
+
+        const maxWidth =
+            Math.min(
+                1200,
+                window.innerWidth - 50
+            );
+
+
+        const scale =
+            Math.min(
+                1,
+                maxWidth / img.naturalWidth
+            );
+
+
+        canvas.width =
+            img.naturalWidth * scale;
+
+        canvas.height =
+            img.naturalHeight * scale;
+
+
+        ctx.drawImage(
+            img,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+    };
+
+
+    img.src = image;
+
+
+    const history = [];
+
+
+    function saveHistory(){
+
+        history.push(
+            ctx.getImageData(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            )
+        );
+
+        if(history.length > 20){
+            history.shift();
+        }
+    }
+
+
+    let drawing = false;
+
+
+    function position(e){
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+        return {
+            x:
+                (e.clientX - rect.left)
+                * canvas.width /
+                rect.width,
+
+            y:
+                (e.clientY - rect.top)
+                * canvas.height /
+                rect.height
+        };
+    }
+
+
+    canvas.addEventListener(
+        "pointerdown",
+        e => {
+
+            e.preventDefault();
+
+            saveHistory();
+
+            drawing = true;
+
+            canvas.setPointerCapture(
+                e.pointerId
+            );
+
+            const p =
+                position(e);
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                p.x,
+                p.y
+            );
+
+        }
+    );
+
+
+    canvas.addEventListener(
+        "pointermove",
+        e => {
+
+            if(!drawing) return;
+
+            e.preventDefault();
+
+            const p =
+                position(e);
+
+
+            if(selectedTool === "eraser"){
+
+                ctx.globalCompositeOperation =
+                    "destination-out";
+
+                ctx.lineWidth = 30;
+
+            }else{
+
+                ctx.globalCompositeOperation =
+                    "source-over";
+
+                ctx.strokeStyle =
+                    "red";
+
+                ctx.lineWidth = 3;
+
+            }
+
+
+            ctx.lineCap = "round";
+
+            ctx.lineJoin = "round";
+
+
+            ctx.lineTo(
+                p.x,
+                p.y
+            );
+
+            ctx.stroke();
+
+        }
+    );
+
+
+    canvas.addEventListener(
+        "pointerup",
+        () => {
+
+            drawing = false;
+
+            ctx.closePath();
+
+            ctx.globalCompositeOperation =
+                "source-over";
+
+        }
+    );
+
+
+    canvases[
+        `${answerIndex}_${imageIndex}`
+    ] = {
+        canvas,
+        original:image,
+        history
+    };
+
+}
+
+
+
+/* =========================
+   UNDO
+========================= */
+
+function undoCanvas(answerIndex,imageIndex){
+
+    const obj =
+        canvases[
+            `${answerIndex}_${imageIndex}`
+        ];
+
+    if(!obj) return;
+
+
+    const history =
+        obj.history;
+
+
+    if(!history.length){
+
+        alert("Nothing to undo.");
+
+        return;
+    }
+
+
+    obj.canvas
+        .getContext("2d")
+        .putImageData(
+            history.pop(),
+            0,
+            0
+        );
+}
+
+
+
+/* =========================
+   CLEAR
+========================= */
+
+function clearCanvas(answerIndex,imageIndex){
+
+    const obj =
+        canvases[
+            `${answerIndex}_${imageIndex}`
+        ];
+
+    if(!obj) return;
+
+
+    const ctx =
+        obj.canvas.getContext("2d");
+
+
+    obj.history.push(
+        ctx.getImageData(
+            0,
+            0,
+            obj.canvas.width,
+            obj.canvas.height
+        )
+    );
+
+
+    const img =
+        new Image();
+
+
+    img.onload = function(){
+
+        ctx.clearRect(
+            0,
+            0,
+            obj.canvas.width,
+            obj.canvas.height
+        );
+
+
+        ctx.globalCompositeOperation =
+            "source-over";
+
+
+        ctx.drawImage(
+            img,
+            0,
+            0,
+            obj.canvas.width,
+            obj.canvas.height
+        );
+
+    };
+
+
+    img.src =
+        obj.original;
+}
+
+
+
+/* =========================
+   SAVE MARKED IMAGE
+========================= */
+
+async function saveCanvas(answerIndex,imageIndex){
+
+    const obj =
+        canvases[
+            `${answerIndex}_${imageIndex}`
+        ];
+
+    if(!obj) return;
+
+
+    const markedImage =
+        obj.canvas.toDataURL(
+            "image/jpeg",
+            0.85
+        );
+
+
+    const answer =
+        currentAnswers[answerIndex];
+
+
+    const annotationData = {
+        image_index:imageIndex,
+        marked_image:markedImage
+    };
+
+
+    const {error} =
+        await supabaseClient
+            .from("cq_answer_annotations")
+            .upsert({
+                answer_id:answer.answer_id,
+                annotation_data:[annotationData],
+                updated_at:new Date().toISOString()
+            },{
+                onConflict:"answer_id"
+            });
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Marking save failed:\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    alert(
+        `Question ${answer.question_number} marking saved.`
+    );
+}
+
+
+
+/* =========================
+   DOWNLOAD
+========================= */
+
+function downloadCanvas(answerIndex,imageIndex){
+
+    const obj =
+        canvases[
+            `${answerIndex}_${imageIndex}`
+        ];
+
+    if(!obj) return;
+
+
+    const link =
+        document.createElement("a");
+
+    link.download =
+        `question-${currentAnswers[answerIndex].question_number}-marked.jpg`;
+
+    link.href =
+        obj.canvas.toDataURL(
+            "image/jpeg",
+            0.9
+        );
+
+    link.click();
+}
+
+
+
+/* =========================
+   SAVE QUESTION
+========================= */
+
+async function saveQuestion(answerId){
+
+    const answer =
+        currentAnswers.find(
+            a => a.answer_id === answerId
+        );
+
+
+    if(!answer) return;
+
+
+    const marks =
+        Number(
+            document.getElementById(
+                `marks_${answerId}`
+            ).value
+        );
+
+
+    const maxMarks =
+        Number(answer.question_marks || 0);
+
+
+    if(
+        Number.isNaN(marks) ||
+        marks < 0 ||
+        marks > maxMarks
+    ){
+
+        alert(
+            `Marks must be between 0 and ${maxMarks}.`
+        );
+
+        return;
+    }
+
+
+    const feedback =
+        document.getElementById(
+            `feedback_${answerId}`
+        ).value;
+
+
+    const {error} =
+        await supabaseClient
+            .from("student_cq_answers")
+            .update({
+                obtained_marks:marks,
+                teacher_feedback:feedback
+            })
+            .eq("id",answerId);
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Save failed:\n" +
+            error.message
+        );
+
+        return;
+    }
+
+
+    answer.obtained_marks = marks;
+
+    answer.teacher_feedback = feedback;
+
+
+    await updateTotalMarks();
+
+
+    alert(
+        `Question ${answer.question_number} saved.`
+    );
+}
+
+
+
+/* =========================
+   SAVE ALL
+========================= */
+
+async function saveAllMarks(){
+
+    if(!currentAnswers.length){
+
+        alert("No answers.");
+
+        return;
+    }
+
+
+    let total = 0;
+
+
+    for(const answer of currentAnswers){
+
+        const input =
+            document.getElementById(
+                `marks_${answer.answer_id}`
+            );
+
+
+        const feedbackInput =
+            document.getElementById(
+                `feedback_${answer.answer_id}`
+            );
+
+
+        const marks =
+            Number(input.value);
+
+
+        const maxMarks =
+            Number(answer.question_marks || 0);
+
+
+        if(
+            Number.isNaN(marks) ||
+            marks < 0 ||
+            marks > maxMarks
+        ){
+
+            alert(
+                `Question ${answer.question_number}: marks must be between 0 and ${maxMarks}.`
+            );
+
+            return;
+        }
+
+
+        const {error} =
+            await supabaseClient
+                .from("student_cq_answers")
+                .update({
+                    obtained_marks:marks,
+                    teacher_feedback:
+                        feedbackInput.value
+                })
+                .eq("id",answer.answer_id);
+
+
+        if(error){
+
+            console.error(error);
+
+            alert(
+                "Save failed:\n" +
+                error.message
+            );
+
+            return;
+        }
+
+
+        answer.obtained_marks =
+            marks;
+
+        answer.teacher_feedback =
+            feedbackInput.value;
+
+
+        total += marks;
+    }
+
+
+    const {error:attemptError} =
+        await supabaseClient
+            .from("student_exam_attempts")
+            .update({
+                obtained_marks:total
+            })
+            .eq(
+                "id",
+                currentAttempt.attempt_id
+            );
+
+
+    if(attemptError){
+
+        console.error(attemptError);
+
+        alert(
+            "Question marks saved, but total marks update failed:\n" +
+            attemptError.message
+        );
+
+        return;
+    }
+
+
+    currentAttempt.obtained_marks =
+        total;
+
+
+    renderStudentInfo();
+
+
+    alert(
+        `✅ All marks saved.\n\nTotal: ${total}/${currentAttempt.total_marks}`
+    );
+}
+
+
+
+/* =========================
+   UPDATE TOTAL
+========================= */
+
+async function updateTotalMarks(){
+
+    let total = 0;
+
+
+    currentAnswers.forEach(
+        a => {
+
+            total +=
+                Number(
+                    a.obtained_marks || 0
+                );
+
+        }
+    );
+
+
+    const {error} =
+        await supabaseClient
+            .from("student_exam_attempts")
+            .update({
+                obtained_marks:total
+            })
+            .eq(
+                "id",
+                currentAttempt.attempt_id
+            );
+
+
+    if(!error){
+
+        currentAttempt.obtained_marks =
+            total;
+
+        renderStudentInfo();
+    }
+}
+
+
+
+/* =========================
+   STUDENT INFO
+========================= */
+
+function renderStudentInfo(){
+
+    document.getElementById("studentInfo")
+        .innerHTML = `
+            <b>Student:</b>
+            ${escapeHtml(currentAttempt.student_name)}
+            <br>
+            <b>Mobile:</b>
+            ${escapeHtml(currentAttempt.student_mobile)}
+            <br>
+            <b>Submitted:</b>
+            ${currentAttempt.submitted_at
+                ? new Date(currentAttempt.submitted_at)
+                    .toLocaleString()
+                : "—"}
+            <br>
+            <b>Status:</b>
+            ${escapeHtml(currentAttempt.attempt_status)}
+            <br>
+            <b>Current Marks:</b>
+            ${Number(currentAttempt.obtained_marks || 0)}
+            /
+            ${Number(currentAttempt.total_marks || 0)}
+        `;
+}
+
+
+
+/* =========================
+   DOWNLOAD ALL MARKED
+========================= */
+
+function downloadAllMarked(){
+
+    const keys =
+        Object.keys(canvases);
+
+
+    if(!keys.length){
+
+        alert(
+            "আগে অন্তত একটি answer page-এ Mark This Page চাপো।"
+        );
+
+        return;
+    }
+
+
+    keys.forEach(
+        key => {
+
+            const obj =
+                canvases[key];
+
+            const parts =
+                key.split("_");
+
+            const answerIndex =
+                Number(parts[0]);
+
+            const imageIndex =
+                Number(parts[1]);
+
+
+            const link =
+                document.createElement("a");
+
+            link.download =
+                `Q${currentAnswers[answerIndex].question_number}-page${imageIndex+1}-marked.jpg`;
+
+            link.href =
+                obj.canvas.toDataURL(
+                    "image/jpeg",
+                    0.9
+                );
+
+            link.click();
+
+        }
+    );
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+
+/* =========================
+   EVENTS
+========================= */
+
+examSelect.addEventListener(
+    "change",
+    loadStudents
+);
+
+
+
+/* =========================
+   START
+========================= */
+
+(async function(){
+
+    const ok =
+        await restoreAdminSession();
+
+    if(!ok) return;
+
+    await loadExams();
+
+})();
+
+</script>
+
+</body>
+</html>

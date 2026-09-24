@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Manage Questions | PorikkhaHub</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f1f5f9;
+    min-height:100vh;
+    padding:25px 15px;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+.header{
+    background:#1e3a8a;
+    color:white;
+    padding:24px;
+    border-radius:18px;
+    margin-bottom:20px;
+}
+
+.header h1{
+    font-size:25px;
+    margin-bottom:7px;
+}
+
+.header p{
+    opacity:.85;
+}
+
+.exam-info{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 6px 20px rgba(0,0,0,.06);
+}
+
+.exam-info h2{
+    color:#0f172a;
+    margin-bottom:8px;
+}
+
+.exam-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
+
+.exam-meta span{
+    background:#f1f5f9;
+    padding:7px 10px;
+    border-radius:8px;
+    font-size:13px;
+    color:#475569;
+}
+
+.card{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 6px 20px rgba(0,0,0,.06);
+    margin-bottom:20px;
+}
+
+.card h2{
+    color:#0f172a;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin:15px 0 7px;
+    font-weight:600;
+    color:#334155;
+}
+
+textarea,
+input,
+select{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    font-size:14px;
+    outline:none;
+}
+
+textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+textarea:focus,
+input:focus,
+select:focus{
+    border-color:#2563eb;
+}
+
+.option-row{
+    margin-top:12px;
+}
+
+.option-label{
+    font-size:13px;
+    font-weight:700;
+    color:#475569;
+    margin-bottom:5px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 180px;
+    gap:15px;
+}
+
+.button-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+button{
+    border:none;
+    border-radius:9px;
+    padding:12px 16px;
+    cursor:pointer;
+    font-weight:700;
+}
+
+.save-btn{
+    background:#2563eb;
+    color:white;
+    flex:1;
+}
+
+.clear-btn{
+    background:#e2e8f0;
+    color:#334155;
+}
+
+.import-btn{
+    background:#16a34a;
+    color:white;
+    flex:1;
+}
+
+.preview-btn{
+    background:#7c3aed;
+    color:white;
+    flex:1;
+}
+
+button:hover{
+    opacity:.85;
+}
+
+button:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+#message{
+    min-height:22px;
+    text-align:center;
+    margin:12px 0;
+    font-size:14px;
+}
+
+.import-help{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:15px;
+    color:#475569;
+    font-size:13px;
+    line-height:1.7;
+}
+
+.import-help strong{
+    color:#0f172a;
+}
+
+.preview-box{
+    margin-top:18px;
+    display:none;
+}
+
+.preview-box h3{
+    color:#0f172a;
+    margin-bottom:12px;
+}
+
+.preview-item{
+    border:1px solid #e2e8f0;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:10px;
+    background:#fff;
+}
+
+.preview-item.error{
+    border-color:#fecaca;
+    background:#fff1f2;
+}
+
+.preview-title{
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:8px;
+}
+
+.preview-options{
+    color:#475569;
+    font-size:14px;
+    line-height:1.7;
+}
+
+.preview-answer{
+    margin-top:8px;
+    font-weight:700;
+    color:#166534;
+}
+
+.preview-marks{
+    margin-top:4px;
+    color:#64748b;
+    font-size:13px;
+}
+
+.question-list{
+    display:grid;
+    gap:15px;
+}
+
+.question{
+    border:1px solid #e2e8f0;
+    border-radius:14px;
+    padding:18px;
+}
+
+.question-number{
+    font-size:13px;
+    color:#64748b;
+    margin-bottom:8px;
+}
+
+.question-text{
+    font-size:17px;
+    font-weight:700;
+    color:#0f172a;
+    line-height:1.5;
+    margin-bottom:12px;
+}
+
+.options{
+    display:grid;
+    gap:7px;
+}
+
+.option{
+    padding:9px 11px;
+    background:#f8fafc;
+    border-radius:8px;
+    font-size:14px;
+    color:#475569;
+}
+
+.correct{
+    background:#dcfce7;
+    color:#166534;
+    font-weight:700;
+}
+
+.question-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:15px;
+    gap:10px;
+}
+
+.marks{
+    font-size:13px;
+    color:#64748b;
+}
+
+.action-group{
+    display:flex;
+    gap:8px;
+}
+
+.action-btn{
+    padding:8px 12px;
+    font-size:12px;
+}
+
+.edit-btn{
+    background:#e0e7ff;
+    color:#3730a3;
+}
+
+.delete-btn{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.loading,
+.empty{
+    text-align:center;
+    padding:35px;
+    color:#64748b;
+}
+
+.back{
+    display:block;
+    text-align:center;
+    color:#2563eb;
+    text-decoration:none;
+    margin:20px 0;
+}
+
+@media(max-width:650px){
+
+    body{
+        padding:15px 10px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .button-row{
+        flex-direction:column;
+    }
+
+    .question-footer{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .action-group{
+        width:100%;
+    }
+
+    .action-btn{
+        flex:1;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <h1>Manage Questions</h1>
+    <p>PorikkhaHub Admin Panel</p>
+</div>
+
+
+<div id="examInfo" class="exam-info" style="display:none;">
+
+    <h2 id="examTitle">Loading exam...</h2>
+
+    <div class="exam-meta">
+        <span id="examType"></span>
+        <span id="examDuration"></span>
+        <span id="examMarks"></span>
+    </div>
+
+</div>
+
+
+<!-- MANUAL MCQ -->
+
+<div class="card">
+
+<h2 id="formTitle">
+    Add MCQ Question
+</h2>
+
+<form id="questionForm">
+
+<label>Question</label>
+
+<textarea
+    id="questionText"
+    placeholder="Write the question here..."
+    required
+></textarea>
+
+
+<div class="option-row">
+
+<div class="option-label">
+Option A
+</div>
+
+<input
+    type="text"
+    id="optionA"
+    placeholder="Enter option A"
+    required
+>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-label">
+Option B
+</div>
+
+<input
+    type="text"
+    id="optionB"
+    placeholder="Enter option B"
+    required
+>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-label">
+Option C
+</div>
+
+<input
+    type="text"
+    id="optionC"
+    placeholder="Enter option C"
+    required
+>
+
+</div>
+
+
+<div class="option-row">
+
+<div class="option-label">
+Option D
+</div>
+
+<input
+    type="text"
+    id="optionD"
+    placeholder="Enter option D"
+    required
+>
+
+</div>
+
+
+<div class="form-grid">
+
+<div>
+
+<label>
+Correct Answer
+</label>
+
+<select id="correctAnswer" required>
+
+<option value="">
+Select correct answer
+</option>
+
+<option value="A">A</option>
+<option value="B">B</option>
+<option value="C">C</option>
+<option value="D">D</option>
+
+</select>
+
+</div>
+
+
+<div>
+
+<label>
+Marks
+</label>
+
+<input
+    type="number"
+    id="marks"
+    value="1"
+    min="0"
+    step="1"
+    required
+>
+
+</div>
+
+</div>
+
+
+<div class="button-row">
+
+<button
+    type="submit"
+    class="save-btn"
+    id="saveButton"
+>
+Add Question
+</button>
+
+<button
+    type="button"
+    class="clear-btn"
+    onclick="clearForm()"
+>
+Clear
+</button>
+
+</div>
+
+</form>
+
+<div id="message"></div>
+
+</div>
+
+
+<!-- COPY PASTE IMPORT -->
+
+<div class="card">
+
+<h2>
+📋 Copy-Paste MCQ Import
+</h2>
+
+<div class="import-help">
+
+<strong>এখানে একসাথে অনেকগুলো MCQ paste করো।</strong>
+
+<br><br>
+
+Question format:
+
+<br>
+<strong>1. Question</strong>
+
+<br>
+<strong>A. Option A</strong>
+
+<br>
+<strong>B. Option B</strong>
+
+<br>
+<strong>C. Option C</strong>
+
+<br>
+<strong>D. Option D</strong>
+
+<br>
+<strong>Answer: B</strong>
+
+<br><br>
+
+<strong>Marks না দিলে automatically Marks = 1 হবে।</strong>
+
+<br><br>
+
+Answer হিসেবে এগুলোও কাজ করবে:
+
+<br>
+Answer: B
+
+<br>
+Ans: B
+
+<br>
+Correct Answer: B
+
+<br>
+উত্তর: B
+
+<br>
+সঠিক উত্তর: B
+
+</div>
+
+
+<textarea
+    id="bulkInput"
+    style="min-height:320px;"
+    placeholder="এখানে MCQগুলো paste করো..."
+></textarea>
+
+
+<div class="button-row">
+
+<button
+    type="button"
+    class="preview-btn"
+    onclick="previewBulkQuestions()"
+>
+🔍 Detect & Preview
+</button>
+
+<button
+    type="button"
+    class="import-btn"
+    id="importButton"
+    onclick="importBulkQuestions()"
+>
+💾 Import All
+</button>
+
+</div>
+
+
+<div
+    id="previewBox"
+    class="preview-box"
+>
+
+<h3>
+Detected Questions:
+<span id="previewCount">0</span>
+</h3>
+
+<div id="previewList"></div>
+
+</div>
+
+</div>
+
+
+<!-- QUESTION LIST -->
+
+<div class="card">
+
+<h2>
+Questions
+(<span id="questionCount">0</span>)
+</h2>
+
+<div
+    id="loading"
+    class="loading"
+>
+Loading questions...
+</div>
+
+<div
+    id="empty"
+    class="empty"
+    style="display:none;"
+>
+No questions added yet.
+</div>
+
+<div
+    id="questionList"
+    class="question-list"
+></div>
+
+</div>
+
+
+<a
+    href="manage-exams.html"
+    class="back"
+>
+← Back to Manage Exams
+</a>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const SUPABASE_URL =
+"https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+"sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY
+);
+
+
+let examId = null;
+
+let questions = [];
+
+let editingQuestionId = null;
+
+let parsedBulkQuestions = [];
+
+
+/* Restore Admin Session */
+
+async function restoreSession(){
+
+const accessToken =
+localStorage.getItem(
+    "porikkhahub_admin_access_token"
+);
+
+const refreshToken =
+localStorage.getItem(
+    "porikkhahub_admin_refresh_token"
+);
+
+
+if(!accessToken || !refreshToken){
+
+window.location.href =
+    "admin-login.html";
+
+return false;
+
+}
+
+
+const {error} =
+await supabaseClient.auth.setSession({
+
+access_token:accessToken,
+
+refresh_token:refreshToken
+
+});
+
+
+if(error){
+
+console.error(error);
+
+window.location.href =
+    "admin-login.html";
+
+return false;
+
+}
+
+
+const {
+data,
+error:userError
+} =
+await supabaseClient.auth.getUser();
+
+
+if(userError || !data.user){
+
+window.location.href =
+    "admin-login.html";
+
+return false;
+
+}
+
+
+return true;
+
+}
+
+
+/* Load Exam */
+
+async function loadExam(){
+
+const {
+data,
+error
+} =
+await supabaseClient
+.from("exams")
+.select(`
+id,
+title,
+exam_type,
+duration_minutes,
+total_marks
+`)
+.eq("id",examId)
+.single();
+
+
+if(error){
+
+console.error(error);
+
+showMessage(
+"Could not load exam: " +
+error.message,
+"error"
+);
+
+return;
+
+}
+
+
+document.getElementById(
+"examInfo"
+).style.display="block";
+
+
+document.getElementById(
+"examTitle"
+).textContent =
+data.title;
+
+
+document.getElementById(
+"examType"
+).textContent =
+"📚 " + data.exam_type;
+
+
+document.getElementById(
+"examDuration"
+).textContent =
+"⏱️ " + data.duration_minutes +
+" minutes";
+
+
+document.getElementById(
+"examMarks"
+).textContent =
+"🎯 " + data.total_marks +
+" marks";
+
+}
+
+
+/* Load Questions */
+
+async function loadQuestions(){
+
+document.getElementById(
+"loading"
+).style.display="block";
+
+
+const {
+data,
+error
+} =
+await supabaseClient
+.from("mcq_questions")
+.select("*")
+.eq("exam_id",examId)
+.order("question_number",{
+ascending:true
+});
+
+
+document.getElementById(
+"loading"
+).style.display="none";
+
+
+if(error){
+
+console.error(error);
+
+showMessage(
+"Could not load questions: " +
+error.message,
+"error"
+);
+
+return;
+
+}
+
+
+questions=data || [];
+
+renderQuestions();
+
+}
+
+
+/* Render Questions */
+
+function renderQuestions(){
+
+const list =
+document.getElementById(
+"questionList"
+);
+
+const empty =
+document.getElementById(
+"empty"
+);
+
+
+document.getElementById(
+"questionCount"
+).textContent =
+questions.length;
+
+
+list.innerHTML="";
+
+
+if(questions.length===0){
+
+empty.style.display="block";
+
+return;
+
+}
+
+
+empty.style.display="none";
+
+
+questions.forEach(
+(question,index)=>{
+
+const item =
+document.createElement("div");
+
+item.className="question";
+
+
+item.innerHTML=`
+
+<div class="question-number">
+Question ${index+1}
+</div>
+
+<div class="question-text">
+${escapeHtml(question.question_text)}
+</div>
+
+<div class="options">
+
+<div class="option ${
+question.correct_answer==="A"
+?"correct":""
+}">
+A. ${escapeHtml(question.option_a)}
+</div>
+
+<div class="option ${
+question.correct_answer==="B"
+?"correct":""
+}">
+B. ${escapeHtml(question.option_b)}
+</div>
+
+<div class="option ${
+question.correct_answer==="C"
+?"correct":""
+}">
+C. ${escapeHtml(question.option_c)}
+</div>
+
+<div class="option ${
+question.correct_answer==="D"
+?"correct":""
+}">
+D. ${escapeHtml(question.option_d)}
+</div>
+
+</div>
+
+<div class="question-footer">
+
+<div class="marks">
+Marks: ${question.marks || 0}
+</div>
+
+<div class="action-group">
+
+<button
+class="action-btn edit-btn"
+onclick="editQuestion('${question.id}')"
+>
+Edit
+</button>
+
+<button
+class="action-btn delete-btn"
+onclick="deleteQuestion('${question.id}')"
+>
+Delete
+</button>
+
+</div>
+
+</div>
+`;
+
+list.appendChild(item);
+
+});
+
+}
+
+
+/* Parse Bulk MCQ */
+
+function parseBulkQuestions(text){
+
+const normalized =
+text
+.replace(/\r\n/g,"\n")
+.replace(/\r/g,"\n")
+.trim();
+
+
+if(!normalized){
+return [];
+}
+
+
+/*
+Supports:
+
+1.
+1)
+Q1.
+Q1)
+*/
+
+const questionRegex =
+/(?:^|\n)\s*(?:Q\s*)?(\d+)\s*[\.\):\-]\s*/gi;
+
+
+const matches =
+[...normalized.matchAll(questionRegex)];
+
+
+if(matches.length===0){
+
+return [];
+
+}
+
+
+const parsed=[];
+
+
+for(
+let i=0;
+i<matches.length;
+i++
+){
+
+const start =
+matches[i].index +
+matches[i][0].length;
+
+
+const end =
+i+1<matches.length
+?matches[i+1].index
+:normalized.length;
+
+
+const block =
+normalized
+.slice(start,end)
+.trim();
+
+
+const result =
+parseSingleQuestion(block);
+
+
+parsed.push(result);
+
+}
+
+
+return parsed;
+
+}
+
+
+/* Parse One Question */
+
+function parseSingleQuestion(block){
+
+const lines =
+block
+.split("\n")
+.map(line=>line.trim())
+.filter(line=>line.length>0);
+
+
+let questionText="";
+
+let optionA="";
+
+let optionB="";
+
+let optionC="";
+
+let optionD="";
+
+let correctAnswer="";
+
+/*
+IMPORTANT:
+Default Marks = 1
+*/
+
+let marks=1;
+
+let currentOption=null;
+
+
+for(const line of lines){
+
+/* Answer */
+
+const answerMatch =
+line.match(
+/^(?:answer|ans|correct\s*answer|উত্তর|সঠিক\s*উত্তর)\s*[:=\-]?\s*([ABCD])\b/i
+);
+
+
+if(answerMatch){
+
+correctAnswer =
+answerMatch[1].toUpperCase();
+
+currentOption=null;
+
+continue;
+
+}
+
+
+/* Marks */
+
+const marksMatch =
+line.match(
+/^(?:marks?|mark|মান|নম্বর)\s*[:=\-]?\s*(\d+(?:\.\d+)?)\s*$/i
+);
+
+
+if(marksMatch){
+
+marks=
+Number(marksMatch[1]);
+
+currentOption=null;
+
+continue;
+
+}
+
+
+/* Option A-D */
+
+const optionMatch =
+line.match(
+/^([ABCD])\s*[\.\):\-]\s*(.*)$/i
+);
+
+
+if(optionMatch){
+
+const letter =
+optionMatch[1].toUpperCase();
+
+const value =
+optionMatch[2].trim();
+
+
+currentOption=letter;
+
+
+if(letter==="A"){
+optionA=value;
+}
+
+if(letter==="B"){
+optionB=value;
+}
+
+if(letter==="C"){
+optionC=value;
+}
+
+if(letter==="D"){
+optionD=value;
+}
+
+continue;
+
+}
+
+
+/* Question text */
+
+if(!currentOption){
+
+if(questionText){
+
+questionText+=" "+line;
+
+}else{
+
+questionText=line;
+
+}
+
+}else{
+
+/* Multi-line option */
+
+if(currentOption==="A"){
+optionA+=" "+line;
+}
+
+if(currentOption==="B"){
+optionB+=" "+line;
+}
+
+if(currentOption==="C"){
+optionC+=" "+line;
+}
+
+if(currentOption==="D"){
+optionD+=" "+line;
+}
+
+}
+
+}
+
+
+const errors=[];
+
+
+if(!questionText){
+errors.push("Question missing");
+}
+
+if(!optionA){
+errors.push("Option A missing");
+}
+
+if(!optionB){
+errors.push("Option B missing");
+}
+
+if(!optionC){
+errors.push("Option C missing");
+}
+
+if(!optionD){
+errors.push("Option D missing");
+}
+
+if(!correctAnswer){
+errors.push("Answer missing");
+}
+
+
+return{
+
+question_text:questionText,
+
+option_a:optionA,
+
+option_b:optionB,
+
+option_c:optionC,
+
+option_d:optionD,
+
+correct_answer:correctAnswer,
+
+marks:marks,
+
+error:errors.join(", ")
+
+};
+
+}
+
+
+/* Preview */
+
+function previewBulkQuestions(){
+
+const text =
+document.getElementById(
+"bulkInput"
+).value;
+
+
+parsedBulkQuestions =
+parseBulkQuestions(text);
+
+
+const previewBox =
+document.getElementById(
+"previewBox"
+);
+
+const previewList =
+document.getElementById(
+"previewList"
+);
+
+const previewCount =
+document.getElementById(
+"previewCount"
+);
+
+
+previewList.innerHTML="";
+
+
+if(parsedBulkQuestions.length===0){
+
+previewBox.style.display="none";
+
+showMessage(
+"কোনো MCQ detect করা যায়নি। Question numbering check করো.",
+"error"
+);
+
+return;
+
+}
+
+
+previewBox.style.display="block";
+
+previewCount.textContent =
+parsedBulkQuestions.length;
+
+
+parsedBulkQuestions.forEach(
+(q,index)=>{
+
+const item =
+document.createElement("div");
+
+
+item.className =
+"preview-item" +
+(q.error ? " error":"");
+
+
+item.innerHTML=`
+
+<div class="preview-title">
+
+${index+1}.
+${escapeHtml(
+q.question_text ||
+"Question missing"
+)}
+
+</div>
+
+<div class="preview-options">
+
+A. ${escapeHtml(q.option_a || "Missing")}
+<br>
+
+B. ${escapeHtml(q.option_b || "Missing")}
+<br>
+
+C. ${escapeHtml(q.option_c || "Missing")}
+<br>
+
+D. ${escapeHtml(q.option_d || "Missing")}
+
+</div>
+
+<div class="preview-answer">
+
+Answer:
+${escapeHtml(
+q.correct_answer || "Missing"
+)}
+
+</div>
+
+<div class="preview-marks">
+
+Marks: ${q.marks}
+
+</div>
+
+${
+q.error
+?
+`
+<div style="
+margin-top:8px;
+color:#b91c1c;
+font-weight:700;
+">
+⚠️ ${escapeHtml(q.error)}
+</div>
+`
+:""
+}
+
+`;
+
+
+previewList.appendChild(item);
+
+});
+
+
+const hasErrors =
+parsedBulkQuestions.some(
+q=>q.error
+);
+
+
+if(hasErrors){
+
+showMessage(
+"কিছু MCQ-তে সমস্যা আছে। আগে ঠিক করো.",
+"error"
+);
+
+}else{
+
+showMessage(
+parsedBulkQuestions.length +
+" টি MCQ successfully detected.",
+"success"
+);
+
+}
+
+}
+
+
+/* Import All */
+
+async function importBulkQuestions(){
+
+const text =
+document.getElementById(
+"bulkInput"
+).value.trim();
+
+
+if(!text){
+
+showMessage(
+"আগে MCQ paste করো।",
+"error"
+);
+
+return;
+
+}
+
+
+parsedBulkQuestions =
+parseBulkQuestions(text);
+
+
+if(!parsedBulkQuestions.length){
+
+showMessage(
+"কোনো MCQ detect করা যায়নি।",
+"error"
+);
+
+return;
+
+}
+
+
+const hasErrors =
+parsedBulkQuestions.some(
+q=>q.error
+);
+
+
+if(hasErrors){
+
+previewBulkQuestions();
+
+showMessage(
+"কিছু MCQ-তে সমস্যা আছে। আগে ঠিক করে নাও.",
+"error"
+);
+
+return;
+
+}
+
+
+const confirmed =
+confirm(
+`${parsedBulkQuestions.length} টি MCQ database-এ add করা হবে। Continue?`
+);
+
+
+if(!confirmed){
+return;
+}
+
+
+const importButton =
+document.getElementById(
+"importButton"
+);
+
+
+importButton.disabled=true;
+
+importButton.textContent=
+"Importing...";
+
+
+try{
+
+await loadQuestions();
+
+
+const startingNumber =
+questions.length+1;
+
+
+const rows =
+parsedBulkQuestions.map(
+(q,index)=>({
+
+exam_id:examId,
+
+question_number:
+startingNumber+index,
+
+question_text:
+q.question_text,
+
+option_a:
+q.option_a,
+
+option_b:
+q.option_b,
+
+option_c:
+q.option_c,
+
+option_d:
+q.option_d,
+
+correct_answer:
+q.correct_answer,
+
+marks:
+q.marks
+
+})
+);
+
+
+const {
+error
+} =
+await supabaseClient
+.from("mcq_questions")
+.insert(rows);
+
+
+if(error){
+
+console.error(error);
+
+showMessage(
+"Import failed: "+
+error.message,
+"error"
+);
+
+return;
+
+}
+
+
+showMessage(
+parsedBulkQuestions.length+
+" MCQ imported successfully.",
+"success"
+);
+
+
+document.getElementById(
+"bulkInput"
+).value="";
+
+
+document.getElementById(
+"previewBox"
+).style.display="none";
+
+
+parsedBulkQuestions=[];
+
+
+await loadQuestions();
+
+
+}catch(error){
+
+console.error(error);
+
+showMessage(
+"Import failed: "+
+error.message,
+"error"
+);
+
+}finally{
+
+importButton.disabled=false;
+
+importButton.textContent=
+"💾 Import All";
+
+}
+
+}
+
+
+/* Add / Update */
+
+document
+.getElementById("questionForm")
+.addEventListener(
+"submit",
+async function(event){
+
+event.preventDefault();
+
+
+const questionText =
+document.getElementById(
+"questionText"
+).value.trim();
+
+
+const optionA =
+document.getElementById(
+"optionA"
+).value.trim();
+
+
+const optionB =
+document.getElementById(
+"optionB"
+).value.trim();
+
+
+const optionC =
+document.getElementById(
+"optionC"
+).value.trim();
+
+
+const optionD =
+document.getElementById(
+"optionD"
+).value.trim();
+
+
+const correctAnswer =
+document.getElementById(
+"correctAnswer"
+).value;
+
+
+const marks =
+parseInt(
+document.getElementById(
+"marks"
+).value
+);
+
+
+if(!correctAnswer){
+
+showMessage(
+"Please select correct answer.",
+"error"
+);
+
+return;
+
+}
+
+
+const saveButton =
+document.getElementById(
+"saveButton"
+);
+
+
+saveButton.disabled=true;
+
+
+saveButton.textContent =
+editingQuestionId
+?"Updating..."
+:"Adding...";
+
+
+const questionNumber =
+editingQuestionId
+?undefined
+:questions.length+1;
+
+
+let result;
+
+
+if(editingQuestionId){
+
+result =
+await supabaseClient
+.from("mcq_questions")
+.update({
+
+question_text:
+questionText,
+
+option_a:
+optionA,
+
+option_b:
+optionB,
+
+option_c:
+optionC,
+
+option_d:
+optionD,
+
+correct_answer:
+correctAnswer,
+
+marks:
+marks
+
+})
+.eq(
+"id",
+editingQuestionId
+);
+
+}else{
+
+result =
+await supabaseClient
+.from("mcq_questions")
+.insert({
+
+exam_id:
+examId,
+
+question_number:
+questionNumber,
+
+question_text:
+questionText,
+
+option_a:
+optionA,
+
+option_b:
+optionB,
+
+option_c:
+optionC,
+
+option_d:
+optionD,
+
+correct_answer:
+correctAnswer,
+
+marks:
+marks
+
+});
+
+}
+
+
+saveButton.disabled=false;
+
+
+saveButton.textContent =
+editingQuestionId
+?"Update Question"
+:"Add Question";
+
+
+if(result.error){
+
+console.error(
+result.error
+);
+
+showMessage(
+result.error.message,
+"error"
+);
+
+return;
+
+}
+
+
+showMessage(
+editingQuestionId
+?"Question updated successfully."
+:"Question added successfully.",
+"success"
+);
+
+
+clearForm();
+
+await loadQuestions();
+
+}
+);
+
+
+/* Edit */
+
+function editQuestion(questionId){
+
+const question =
+questions.find(
+item=>item.id===questionId
+);
+
+
+if(!question){
+return;
+}
+
+
+editingQuestionId =
+questionId;
+
+
+document.getElementById(
+"formTitle"
+).textContent =
+"Edit MCQ Question";
+
+
+document.getElementById(
+"saveButton"
+).textContent =
+"Update Question";
+
+
+document.getElementById(
+"questionText"
+).value =
+question.question_text || "";
+
+
+document.getElementById(
+"optionA"
+).value =
+question.option_a || "";
+
+
+document.getElementById(
+"optionB"
+).value =
+question.option_b || "";
+
+
+document.getElementById(
+"optionC"
+).value =
+question.option_c || "";
+
+
+document.getElementById(
+"optionD"
+).value =
+question.option_d || "";
+
+
+document.getElementById(
+"correctAnswer"
+).value =
+question.correct_answer || "";
+
+
+document.getElementById(
+"marks"
+).value =
+question.marks || 1;
+
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+/* Delete */
+
+async function deleteQuestion(
+questionId
+){
+
+const question =
+questions.find(
+item=>item.id===questionId
+);
+
+
+if(!question){
+return;
+}
+
+
+const confirmed =
+confirm(
+"Delete this question?"
+);
+
+
+if(!confirmed){
+return;
+}
+
+
+const {
+error
+} =
+await supabaseClient
+.from("mcq_questions")
+.delete()
+.eq(
+"id",
+questionId
+);
+
+
+if(error){
+
+console.error(error);
+
+showMessage(
+error.message,
+"error"
+);
+
+return;
+
+}
+
+
+showMessage(
+"Question deleted successfully.",
+"success"
+);
+
+
+await loadQuestions();
+
+}
+
+
+/* Clear */
+
+function clearForm(){
+
+editingQuestionId=null;
+
+
+document.getElementById(
+"questionForm"
+).reset();
+
+
+document.getElementById(
+"marks"
+).value=1;
+
+
+document.getElementById(
+"formTitle"
+).textContent =
+"Add MCQ Question";
+
+
+document.getElementById(
+"saveButton"
+).textContent =
+"Add Question";
+
+}
+
+
+/* Message */
+
+function showMessage(
+text,
+type
+){
+
+const message =
+document.getElementById(
+"message"
+);
+
+
+message.textContent=text;
+
+
+if(type==="error"){
+
+message.style.color="#dc2626";
+
+}else{
+
+message.style.color="#16a34a";
+
+}
+
+}
+
+
+/* Escape HTML */
+
+function escapeHtml(value){
+
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* Start */
+
+async function start(){
+
+examId =
+localStorage.getItem(
+"porikkhahub_selected_exam_id"
+);
+
+
+if(!examId){
+
+alert(
+"No exam selected."
+);
+
+window.location.href =
+"manage-exams.html";
+
+return;
+
+}
+
+
+const authenticated =
+await restoreSession();
+
+
+if(!authenticated){
+return;
+}
+
+
+await loadExam();
+
+await loadQuestions();
+
+}
+
+
+start();
+
+</script>
+
+</body>
+</html>

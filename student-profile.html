@@ -1,0 +1,856 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile | PorikkhaHub</title>
+
+
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    color:#222;
+}
+
+header{
+    background:white;
+    border-bottom:1px solid #ddd;
+    padding:16px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:bold;
+    color:#6c4df6;
+}
+
+.back{
+    text-decoration:none;
+    color:#6c4df6;
+    font-weight:bold;
+}
+
+.container{
+    max-width:800px;
+    margin:40px auto;
+    padding:0 20px;
+}
+
+.title{
+    margin-bottom:25px;
+}
+
+.title h1{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.title p{
+    color:#666;
+}
+
+.profile-card{
+    background:white;
+    border-radius:16px;
+    padding:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,.07);
+}
+
+.avatar{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:#6c4df6;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:38px;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+
+.info{
+    display:grid;
+    gap:18px;
+}
+
+.row{
+    border-bottom:1px solid #eee;
+    padding-bottom:15px;
+}
+
+.label{
+    font-size:13px;
+    color:#777;
+    margin-bottom:6px;
+}
+
+.value{
+    font-size:17px;
+    font-weight:bold;
+    word-break:break-word;
+}
+
+.status{
+    display:inline-block;
+    background:#dcfce7;
+    color:#166534;
+    padding:7px 12px;
+    border-radius:8px;
+    font-size:13px;
+}
+
+.edit-btn{
+    margin-top:25px;
+    background:#6c4df6;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:15px;
+}
+
+.form{
+    display:none;
+    margin-top:25px;
+    padding-top:25px;
+    border-top:1px solid #eee;
+}
+
+.form label{
+    display:block;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:8px;
+}
+
+.form input{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    margin-bottom:15px;
+}
+
+.save-btn{
+    background:#16a34a;
+    color:white;
+    border:none;
+    padding:11px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.cancel-btn{
+    background:#e5e7eb;
+    color:#222;
+    border:none;
+    padding:11px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    margin-left:8px;
+}
+
+.message{
+    margin-top:15px;
+    padding:12px;
+    border-radius:8px;
+    display:none;
+}
+
+.success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.loading{
+    background:white;
+    padding:30px;
+    border-radius:14px;
+    text-align:center;
+    color:#666;
+}
+
+@media(max-width:600px){
+    header{
+        padding:15px 18px;
+    }
+
+    .container{
+        margin:25px auto;
+        padding:0 15px;
+    }
+
+    .profile-card{
+        padding:22px;
+    }
+
+    .title h1{
+        font-size:26px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <div class="logo">PorikkhaHub</div>
+
+    <a class="back" href="student-dashboard.html">
+        ← Dashboard
+    </a>
+</header>
+
+<div class="container">
+
+    <div class="title">
+        <h1>My Profile</h1>
+        <p>Your PorikkhaHub student account information</p>
+    </div>
+
+    <div id="content">
+        <div class="loading">
+            Loading profile...
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+let currentStudent = null;
+
+
+/* =========================
+   Get Student Token
+========================= */
+
+function getToken(){
+
+    return localStorage.getItem(
+        "porikkhahub_access_token"
+    );
+
+}
+
+
+/* =========================
+   Escape HTML
+========================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   Get Auth User ID
+========================= */
+
+function getAuthUserId(){
+
+    const token = getToken();
+
+    if(!token){
+        return "";
+    }
+
+    try{
+
+        const parts = token.split(".");
+
+        if(parts.length !== 3){
+            return "";
+        }
+
+        let base64 = parts[1]
+            .replace(/-/g,"+")
+            .replace(/_/g,"/");
+
+        while(base64.length % 4){
+            base64 += "=";
+        }
+
+        const payload =
+            JSON.parse(atob(base64));
+
+        return payload.sub || "";
+
+    }catch(error){
+
+        console.error(
+            "Token decode error:",
+            error
+        );
+
+        return "";
+    }
+
+}
+
+
+/* =========================
+   Load Local Student
+========================= */
+
+function loadLocalProfile(){
+
+    try{
+
+        const saved =
+            localStorage.getItem(
+                "porikkhahub_student"
+            );
+
+        if(!saved){
+
+            document.getElementById(
+                "content"
+            ).innerHTML = `
+                <div class="loading">
+                    Student information not found.<br><br>
+                    Please login again.
+                </div>
+            `;
+
+            return;
+        }
+
+        currentStudent =
+            JSON.parse(saved);
+
+        showProfile(currentStudent);
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById(
+            "content"
+        ).innerHTML = `
+            <div class="loading">
+                Could not load profile.
+            </div>
+        `;
+
+    }
+
+}
+
+
+/* =========================
+   Load Profile
+========================= */
+
+async function loadProfile(){
+
+    const content =
+        document.getElementById("content");
+
+    const token = getToken();
+
+    if(!token){
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+    try{
+
+        const userId =
+            getAuthUserId();
+
+        if(!userId){
+
+            loadLocalProfile();
+
+            return;
+        }
+
+        const response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/students" +
+                "?select=id,full_name,mobile,created_at" +
+                "&auth_user_id=eq." +
+                encodeURIComponent(userId),
+                {
+                    method:"GET",
+
+                    headers:{
+                        "apikey":SUPABASE_KEY,
+                        "Authorization":
+                            "Bearer " + token
+                    }
+                }
+            );
+
+        if(!response.ok){
+
+            console.error(
+                await response.text()
+            );
+
+            loadLocalProfile();
+
+            return;
+        }
+
+        const students =
+            await response.json();
+
+        if(!students.length){
+
+            loadLocalProfile();
+
+            return;
+        }
+
+        currentStudent =
+            students[0];
+
+        localStorage.setItem(
+            "porikkhahub_student",
+            JSON.stringify(currentStudent)
+        );
+
+        showProfile(currentStudent);
+
+    }catch(error){
+
+        console.error(
+            "Profile loading error:",
+            error
+        );
+
+        loadLocalProfile();
+
+    }
+
+}
+
+
+/* =========================
+   Show Profile
+========================= */
+
+function showProfile(student){
+
+    const name =
+        student.full_name ||
+        "Student";
+
+    const mobile =
+        student.mobile ||
+        "Not available";
+
+    let initial =
+        name.trim().charAt(0).toUpperCase();
+
+    if(!initial){
+        initial = "S";
+    }
+
+    let created =
+        "Not available";
+
+    if(student.created_at){
+
+        const date =
+            new Date(student.created_at);
+
+        if(!isNaN(date.getTime())){
+
+            created =
+                date.toLocaleDateString(
+                    "en-GB",
+                    {
+                        day:"2-digit",
+                        month:"long",
+                        year:"numeric"
+                    }
+                );
+        }
+    }
+
+    document.getElementById(
+        "content"
+    ).innerHTML = `
+
+        <div class="profile-card">
+
+            <div class="avatar">
+                ${escapeHtml(initial)}
+            </div>
+
+            <div class="info">
+
+                <div class="row">
+
+                    <div class="label">
+                        Full Name
+                    </div>
+
+                    <div
+                        class="value"
+                        id="profileName"
+                    >
+                        ${escapeHtml(name)}
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="label">
+                        Mobile Number
+                    </div>
+
+                    <div class="value">
+                        ${escapeHtml(mobile)}
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="label">
+                        Account Status
+                    </div>
+
+                    <span class="status">
+                        Active
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="label">
+                        Student ID
+                    </div>
+
+                    <div class="value">
+                        ${escapeHtml(
+                            student.id ||
+                            "Not available"
+                        )}
+                    </div>
+
+                </div>
+
+
+                <div class="row">
+
+                    <div class="label">
+                        Account Created
+                    </div>
+
+                    <div class="value">
+                        ${escapeHtml(created)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="edit-btn"
+                onclick="showEditForm()"
+            >
+                ✏️ Edit Profile
+            </button>
+
+
+            <div
+                id="editForm"
+                class="form"
+            >
+
+                <label>
+                    Full Name
+                </label>
+
+                <input
+                    id="nameInput"
+                    type="text"
+                    maxlength="100"
+                    value="${escapeHtml(name)}"
+                >
+
+
+                <button
+                    class="save-btn"
+                    onclick="saveProfile()"
+                >
+                    Save Changes
+                </button>
+
+
+                <button
+                    class="cancel-btn"
+                    onclick="hideEditForm()"
+                >
+                    Cancel
+                </button>
+
+
+                <div
+                    id="message"
+                    class="message"
+                ></div>
+
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================
+   Edit Form
+========================= */
+
+function showEditForm(){
+
+    const form =
+        document.getElementById(
+            "editForm"
+        );
+
+    if(form){
+        form.style.display = "block";
+    }
+
+}
+
+
+function hideEditForm(){
+
+    const form =
+        document.getElementById(
+            "editForm"
+        );
+
+    if(form){
+        form.style.display = "none";
+    }
+
+}
+
+
+/* =========================
+   Save Profile
+========================= */
+
+async function saveProfile(){
+
+    if(!currentStudent){
+        return;
+    }
+
+    const input =
+        document.getElementById(
+            "nameInput"
+        );
+
+    const message =
+        document.getElementById(
+            "message"
+        );
+
+    if(!input || !message){
+        return;
+    }
+
+    const newName =
+        input.value.trim();
+
+    if(!newName){
+
+        message.className =
+            "message error";
+
+        message.textContent =
+            "Name cannot be empty.";
+
+        message.style.display =
+            "block";
+
+        return;
+    }
+
+    const token =
+        getToken();
+
+    if(!token){
+
+        window.location.href =
+            "login.html";
+
+        return;
+    }
+
+    try{
+
+        const response =
+            await fetch(
+                SUPABASE_URL +
+                "/rest/v1/students?id=eq." +
+                encodeURIComponent(
+                    currentStudent.id
+                ),
+                {
+                    method:"PATCH",
+
+                    headers:{
+                        "apikey":SUPABASE_KEY,
+                        "Authorization":
+                            "Bearer " + token,
+                        "Content-Type":
+                            "application/json",
+                        "Prefer":
+                            "return=representation"
+                    },
+
+                    body:JSON.stringify({
+                        full_name:newName
+                    })
+                }
+            );
+
+        if(!response.ok){
+
+            const errorText =
+                await response.text();
+
+            throw new Error(
+                errorText
+            );
+        }
+
+        const updated =
+            await response.json();
+
+        if(updated.length){
+
+            currentStudent =
+                updated[0];
+
+        }else{
+
+            currentStudent.full_name =
+                newName;
+
+        }
+
+        localStorage.setItem(
+            "porikkhahub_student",
+            JSON.stringify(currentStudent)
+        );
+
+        message.className =
+            "message success";
+
+        message.textContent =
+            "Profile updated successfully!";
+
+        message.style.display =
+            "block";
+
+        document.getElementById(
+            "profileName"
+        ).textContent =
+            newName;
+
+        setTimeout(
+            function(){
+
+                hideEditForm();
+
+                showProfile(
+                    currentStudent
+                );
+
+            },
+            1000
+        );
+
+    }catch(error){
+
+        console.error(
+            "Profile update error:",
+            error
+        );
+
+        message.className =
+            "message error";
+
+        message.textContent =
+            "Could not update profile. Please try again.";
+
+        message.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================
+   Start
+========================= */
+
+loadProfile();
+
+</script>
+
+</body>
+</html>
+
+
+

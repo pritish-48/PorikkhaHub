@@ -1,0 +1,361 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | PorikkhaHub</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            padding: 35px 30px;
+            border-radius: 22px;
+            box-shadow: 0 15px 45px rgba(15, 23, 42, 0.12);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 30px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #0f172a;
+            margin-bottom: 24px;
+        }
+
+        .field {
+            margin-bottom: 17px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.10);
+        }
+
+        button {
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            background: #4f46e5;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #4338ca;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .success {
+            display: block;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .error {
+            display: block;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .bottom-text {
+            text-align: center;
+            margin-top: 22px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .bottom-text a {
+            color: #4f46e5;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back:hover,
+        .bottom-text a:hover {
+            text-decoration: underline;
+        }
+
+        .password-note {
+            margin-top: 5px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="logo">PorikkhaHub</div>
+    <div class="subtitle">Learn. Practice. Perform.</div>
+
+    <h2>Create Student Account</h2>
+
+    <div id="message" class="message"></div>
+
+    <form id="registerForm">
+
+        <div class="field">
+            <label for="fullName">Full Name</label>
+            <input
+                type="text"
+                id="fullName"
+                placeholder="Enter your full name"
+                required
+                autocomplete="name"
+            >
+        </div>
+
+        <div class="field">
+            <label for="mobile">Mobile Number</label>
+            <input
+                type="tel"
+                id="mobile"
+                placeholder="01XXXXXXXXX"
+                required
+                autocomplete="tel"
+            >
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                placeholder="Minimum 6 characters"
+                required
+                minlength="6"
+                autocomplete="new-password"
+            >
+            <div class="password-note">
+                Password must contain at least 6 characters.
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Enter password again"
+                required
+                minlength="6"
+                autocomplete="new-password"
+            >
+        </div>
+
+        <button type="submit" id="registerButton">
+            Create Account
+        </button>
+
+    </form>
+
+    <div class="bottom-text">
+        Already have an account?
+        <a href="login.html">Login</a>
+    </div>
+
+    <a class="back" href="index.html">← Back to Home</a>
+
+</div>
+
+<script>
+    const FUNCTION_URL =
+        "https://jsjkxpsnuizngofyjvdl.supabase.co/functions/v1/student-register";
+
+    const form = document.getElementById("registerForm");
+    const button = document.getElementById("registerButton");
+    const message = document.getElementById("message");
+
+    function showMessage(text, type) {
+        message.textContent = text;
+        message.className = "message " + type;
+    }
+
+    function clearMessage() {
+        message.textContent = "";
+        message.className = "message";
+    }
+
+    form.addEventListener("submit", async function (event) {
+
+        event.preventDefault();
+        clearMessage();
+
+        const fullName =
+            document.getElementById("fullName").value.trim();
+
+        const mobile =
+            document.getElementById("mobile").value.trim();
+
+        const password =
+            document.getElementById("password").value;
+
+        const confirmPassword =
+            document.getElementById("confirmPassword").value;
+
+        if (!fullName) {
+            showMessage("Please enter your full name.", "error");
+            return;
+        }
+
+        if (!mobile) {
+            showMessage("Please enter your mobile number.", "error");
+            return;
+        }
+
+        if (password.length < 6) {
+            showMessage(
+                "Password must contain at least 6 characters.",
+                "error"
+            );
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            showMessage(
+                "Passwords do not match.",
+                "error"
+            );
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating Account...";
+
+        try {
+
+            const response = await fetch(FUNCTION_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    full_name: fullName,
+                    mobile: mobile,
+                    password: password
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || "Registration failed."
+                );
+            }
+
+            showMessage(
+                "Account created successfully! You can now login.",
+                "success"
+            );
+
+            form.reset();
+
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1800);
+
+        } catch (error) {
+
+            console.error(error);
+
+            showMessage(
+                error.message ||
+                "Something went wrong. Please try again.",
+                "error"
+            );
+
+        } finally {
+
+            button.disabled = false;
+            button.textContent = "Create Account";
+        }
+    });
+</script>
+
+</body>
+</html>
+
+
+
+

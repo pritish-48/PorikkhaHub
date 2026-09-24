@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Results | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    color:#111827;
+}
+
+header{
+    background:#fff;
+    border-bottom:1px solid #e5e7eb;
+    padding:18px 25px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:800;
+    color:#2563eb;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#111827;
+    color:white;
+
+    padding:10px 16px;
+
+    border-radius:8px;
+
+    font-size:14px;
+}
+
+.container{
+    max-width:950px;
+    margin:30px auto;
+    padding:0 18px;
+}
+
+.page-title{
+    background:white;
+
+    padding:25px;
+
+    border-radius:14px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.page-title h1{
+    margin-bottom:8px;
+}
+
+.page-title p{
+    color:#6b7280;
+}
+
+.result-card{
+    background:white;
+
+    padding:22px;
+
+    border-radius:14px;
+
+    margin-bottom:18px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.result-card h2{
+    font-size:20px;
+    margin-bottom:8px;
+}
+
+.exam-type{
+    display:inline-block;
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    padding:5px 10px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    margin-bottom:16px;
+}
+
+.info-grid{
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:12px;
+
+    margin:18px 0;
+}
+
+.info-box{
+    background:#f8fafc;
+
+    border-radius:10px;
+
+    padding:14px;
+}
+
+.info-label{
+    font-size:12px;
+
+    color:#6b7280;
+
+    margin-bottom:5px;
+}
+
+.info-value{
+    font-size:19px;
+
+    font-weight:700;
+}
+
+.correct{
+    color:#16a34a;
+}
+
+.wrong{
+    color:#dc2626;
+}
+
+.unanswered{
+    color:#6b7280;
+}
+
+.status{
+    display:inline-block;
+
+    background:#dcfce7;
+
+    color:#15803d;
+
+    padding:6px 10px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+.submitted-time{
+    color:#6b7280;
+
+    font-size:13px;
+
+    margin-top:12px;
+}
+
+.button-row{
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+    margin-top:18px;
+}
+
+.review-btn{
+    display:inline-block;
+
+    text-decoration:none;
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:11px 17px;
+
+    border-radius:9px;
+
+    font-weight:600;
+
+    font-size:14px;
+}
+
+.review-btn:hover{
+    background:#1d4ed8;
+}
+
+.cq-result-btn{
+    background:#16a34a;
+}
+
+.cq-result-btn:hover{
+    background:#15803d;
+}
+
+.loading{
+    text-align:center;
+
+    padding:50px;
+
+    color:#6b7280;
+}
+
+.empty{
+    background:white;
+
+    padding:35px;
+
+    border-radius:14px;
+
+    text-align:center;
+
+    color:#6b7280;
+}
+
+.error{
+    background:#fee2e2;
+
+    color:#991b1b;
+
+    padding:18px;
+
+    border-radius:10px;
+}
+
+@media(max-width:700px){
+
+    .info-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    header{
+        padding:15px;
+    }
+
+    .logo{
+        font-size:20px;
+    }
+}
+
+@media(max-width:420px){
+
+    .info-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .result-card{
+        padding:17px;
+    }
+
+    .button-row{
+        flex-direction:column;
+    }
+
+    .review-btn{
+        text-align:center;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        PorikkhaHub
+    </div>
+
+    <a
+        href="student-dashboard.html"
+        class="back-btn"
+    >
+        ← Dashboard
+    </a>
+
+</header>
+
+
+
+<div class="container">
+
+
+    <div class="page-title">
+
+        <h1>
+            My Results
+        </h1>
+
+        <p>
+            Your submitted exam results
+        </p>
+
+    </div>
+
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Loading results...
+    </div>
+
+
+
+    <div
+        id="errorBox"
+        class="error"
+        style="display:none;"
+    >
+    </div>
+
+
+
+    <div id="results"></div>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   SUPABASE
+===================================================== */
+
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+
+function escapeHtml(value){
+
+    if(
+        value === null ||
+        value === undefined
+    ){
+        return "";
+    }
+
+    return String(value)
+
+        .replace(/&/g,"&amp;")
+
+        .replace(/</g,"&lt;")
+
+        .replace(/>/g,"&gt;")
+
+        .replace(/"/g,"&quot;")
+
+        .replace(/'/g,"&#039;");
+}
+
+
+
+/* =====================================================
+   RESTORE STUDENT SESSION
+===================================================== */
+
+
+async function restoreSession(){
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_access_token"
+        );
+
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_refresh_token"
+        );
+
+
+    if(
+        !accessToken ||
+        !refreshToken
+    ){
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+
+    const { error } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+
+        });
+
+
+    if(error){
+
+        console.error(
+            "Session error:",
+            error
+        );
+
+
+        localStorage.removeItem(
+            "porikkhahub_access_token"
+        );
+
+
+        localStorage.removeItem(
+            "porikkhahub_refresh_token"
+        );
+
+
+        window.location.href =
+            "login.html";
+
+        return false;
+    }
+
+
+    return true;
+}
+
+
+
+/* =====================================================
+   SHOW ERROR
+===================================================== */
+
+
+function showError(message){
+
+    document
+        .getElementById("loading")
+        .style.display = "none";
+
+
+    const box =
+        document.getElementById(
+            "errorBox"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.style.display =
+        "block";
+}
+
+
+
+/* =====================================================
+   LOAD RESULTS
+===================================================== */
+
+
+async function loadResults(){
+
+
+    const sessionOK =
+        await restoreSession();
+
+
+    if(!sessionOK){
+        return;
+    }
+
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.rpc(
+            "get_my_exam_results"
+        );
+
+
+
+    if(error){
+
+        console.error(
+            "Results error:",
+            error
+        );
+
+
+        showError(
+            "Unable to load results. " +
+            (
+                error.message ||
+                ""
+            )
+        );
+
+
+        return;
+    }
+
+
+
+    document
+        .getElementById("loading")
+        .style.display = "none";
+
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        document
+            .getElementById("results")
+            .innerHTML = `
+
+                <div class="empty">
+
+                    <h3>
+                        No Results Yet
+                    </h3>
+
+                    <p style="margin-top:8px;">
+
+                        You have not submitted
+                        any exam yet.
+
+                    </p>
+
+                </div>
+
+            `;
+
+        return;
+    }
+
+
+
+    console.log(
+        "Exam results:",
+        data
+    );
+
+
+    renderResults(data);
+
+}
+
+
+
+/* =====================================================
+   RENDER RESULTS
+===================================================== */
+
+
+function renderResults(data){
+
+
+    const container =
+        document.getElementById(
+            "results"
+        );
+
+
+
+    container.innerHTML =
+
+        data.map(result => {
+
+
+            /* -----------------------------------------
+               SUBMITTED TIME
+            ----------------------------------------- */
+
+
+            const submittedTime =
+
+                result.submitted_at
+
+                ? new Date(
+                    result.submitted_at
+                  ).toLocaleString()
+
+                : "N/A";
+
+
+
+            /* -----------------------------------------
+               EXAM TYPE
+            ----------------------------------------- */
+
+
+            const examType =
+
+                String(
+                    result.exam_type || ""
+                )
+                .trim()
+                .toUpperCase();
+
+
+
+            const isCQ =
+                examType === "CQ";
+
+
+
+            /* -----------------------------------------
+               ACTION BUTTON
+            ----------------------------------------- */
+
+
+            let actionButton;
+
+
+
+            if(isCQ){
+
+                actionButton = `
+
+                    <a
+
+                        class="review-btn
+                               cq-result-btn"
+
+                        href="student-cq-result.html?attempt=${encodeURIComponent(
+                            result.attempt_id
+                        )}"
+
+                    >
+
+                        View Result
+
+                    </a>
+
+                `;
+
+            }
+
+            else{
+
+                actionButton = `
+
+                    <a
+
+                        class="review-btn"
+
+                        href="student-answer-review.html?attempt=${encodeURIComponent(
+                            result.attempt_id
+                        )}"
+
+                    >
+
+                        View Answers
+
+                    </a>
+
+                `;
+
+            }
+
+
+
+            /* -----------------------------------------
+               INFO GRID
+            ----------------------------------------- */
+
+
+            let infoGrid;
+
+
+
+            /*
+             * CQ EXAM
+             *
+             * CQ does not use:
+             * Correct
+             * Wrong
+             * Unanswered
+             *
+             * So only Marks is shown.
+             */
+
+
+            if(isCQ){
+
+                infoGrid = `
+
+                    <div
+                        class="info-grid"
+                        style="
+                            grid-template-columns:
+                            1fr;
+                        "
+                    >
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+
+                                Marks
+
+                            </div>
+
+
+                            <div class="info-value">
+
+                                ${escapeHtml(
+                                    result.obtained_marks ?? 0
+                                )}
+
+                                /
+
+                                ${escapeHtml(
+                                    result.total_marks ?? 0
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            /*
+             * MCQ EXAM
+             */
+
+
+            else{
+
+                infoGrid = `
+
+                    <div class="info-grid">
+
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+
+                                Marks
+
+                            </div>
+
+
+                            <div class="info-value">
+
+                                ${escapeHtml(
+                                    result.obtained_marks ?? 0
+                                )}
+
+                                /
+
+                                ${escapeHtml(
+                                    result.total_marks ?? 0
+                                )}
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+
+                                Correct
+
+                            </div>
+
+
+                            <div
+                                class="info-value correct"
+                            >
+
+                                ${escapeHtml(
+                                    result.correct_count ?? 0
+                                )}
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+
+                                Wrong
+
+                            </div>
+
+
+                            <div
+                                class="info-value wrong"
+                            >
+
+                                ${escapeHtml(
+                                    result.wrong_count ?? 0
+                                )}
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="info-box">
+
+                            <div class="info-label">
+
+                                Unanswered
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    info-value
+                                    unanswered
+                                "
+                            >
+
+                                ${escapeHtml(
+                                    result.unanswered_count ?? 0
+                                )}
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                `;
+
+            }
+
+
+
+            /* -----------------------------------------
+               RESULT CARD
+            ----------------------------------------- */
+
+
+            return `
+
+                <div class="result-card">
+
+
+                    <h2>
+
+                        ${escapeHtml(
+                            result.exam_title
+                        )}
+
+                    </h2>
+
+
+
+                    <div class="exam-type">
+
+                        ${escapeHtml(
+                            result.exam_type ||
+                            "Exam"
+                        )}
+
+                    </div>
+
+
+
+                    <div>
+
+                        <span class="status">
+
+                            ${escapeHtml(
+                                result.status
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+
+                    ${infoGrid}
+
+
+
+                    <div class="submitted-time">
+
+                        Submitted:
+
+                        ${escapeHtml(
+                            submittedTime
+                        )}
+
+                    </div>
+
+
+
+                    <div class="button-row">
+
+                        ${actionButton}
+
+                    </div>
+
+
+                </div>
+
+            `;
+
+
+        }).join("");
+
+}
+
+
+
+/* =====================================================
+   START
+===================================================== */
+
+
+loadResults();
+
+
+</script>
+
+
+</body>
+</html>

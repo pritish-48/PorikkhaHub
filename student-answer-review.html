@@ -1,0 +1,579 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Answer Review | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    background:#f4f7fb;
+    color:#111827;
+}
+
+header{
+    background:#ffffff;
+    border-bottom:1px solid #e5e7eb;
+    padding:18px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:24px;
+    font-weight:800;
+    color:#2563eb;
+}
+
+.back-btn{
+    text-decoration:none;
+    background:#111827;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    font-size:14px;
+}
+
+.container{
+    max-width:900px;
+    margin:30px auto;
+    padding:0 18px;
+}
+
+.page-title{
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    margin-bottom:20px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.05);
+}
+
+.page-title h1{
+    font-size:26px;
+    margin-bottom:8px;
+}
+
+.page-title p{
+    color:#6b7280;
+}
+
+.question-card{
+    background:white;
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:18px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.05);
+}
+
+.question-number{
+    font-weight:700;
+    color:#2563eb;
+    margin-bottom:10px;
+}
+
+.question-text{
+    font-size:17px;
+    font-weight:600;
+    line-height:1.6;
+    margin-bottom:18px;
+}
+
+.option{
+    padding:12px 14px;
+    border:1px solid #e5e7eb;
+    border-radius:9px;
+    margin:8px 0;
+    line-height:1.5;
+}
+
+.option.user-answer{
+    border:2px solid #f59e0b;
+    background:#fffbeb;
+}
+
+.option.correct-answer{
+    border:2px solid #16a34a;
+    background:#f0fdf4;
+}
+
+.option.user-wrong{
+    border:2px solid #dc2626;
+    background:#fef2f2;
+}
+
+.option-label{
+    font-weight:700;
+    margin-right:6px;
+}
+
+.answer-info{
+    margin-top:18px;
+    padding-top:15px;
+    border-top:1px solid #e5e7eb;
+}
+
+.answer-row{
+    margin:7px 0;
+    font-size:15px;
+}
+
+.correct-text{
+    color:#15803d;
+    font-weight:700;
+}
+
+.wrong-text{
+    color:#dc2626;
+    font-weight:700;
+}
+
+.unanswered-text{
+    color:#6b7280;
+    font-weight:700;
+}
+
+.loading{
+    text-align:center;
+    padding:50px;
+    color:#6b7280;
+}
+
+.error{
+    background:#fee2e2;
+    color:#991b1b;
+    padding:18px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+@media(max-width:600px){
+    header{
+        padding:15px;
+    }
+
+    .logo{
+        font-size:20px;
+    }
+
+    .container{
+        margin:20px auto;
+    }
+
+    .question-card{
+        padding:17px;
+    }
+
+    .page-title h1{
+        font-size:22px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <div class="logo">PorikkhaHub</div>
+    <a href="student-results.html" class="back-btn">← My Results</a>
+</header>
+
+<div class="container">
+
+    <div id="loading" class="loading">
+        Loading answer review...
+    </div>
+
+    <div id="errorBox" class="error" style="display:none;"></div>
+
+    <div id="content" style="display:none;">
+
+        <div class="page-title">
+            <h1>Answer Review</h1>
+            <p>See your selected answers and the correct answers.</p>
+        </div>
+
+        <div id="questions"></div>
+
+    </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+function escapeHtml(value){
+
+    if(value === null || value === undefined){
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+function getAttemptId(){
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    return params.get("attempt");
+}
+
+
+function getOptionText(row, answer){
+
+    if(!answer){
+        return "Not Answered";
+    }
+
+    const value =
+        String(answer).trim().toUpperCase();
+
+    if(value === "A"){
+        return row.option_a;
+    }
+
+    if(value === "B"){
+        return row.option_b;
+    }
+
+    if(value === "C"){
+        return row.option_c;
+    }
+
+    if(value === "D"){
+        return row.option_d;
+    }
+
+    return answer;
+}
+
+
+async function restoreSession(){
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_access_token"
+        );
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_refresh_token"
+        );
+
+    if(!accessToken || !refreshToken){
+        window.location.href = "login.html";
+        return false;
+    }
+
+    const { error } =
+        await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+        });
+
+    if(error){
+        localStorage.removeItem(
+            "porikkhahub_access_token"
+        );
+
+        localStorage.removeItem(
+            "porikkhahub_refresh_token"
+        );
+
+        window.location.href = "login.html";
+
+        return false;
+    }
+
+    return true;
+}
+
+
+function showError(message){
+
+    document.getElementById("loading")
+        .style.display = "none";
+
+    const box =
+        document.getElementById("errorBox");
+
+    box.textContent = message;
+
+    box.style.display = "block";
+}
+
+
+async function loadReview(){
+
+    const attemptId = getAttemptId();
+
+    if(!attemptId){
+
+        showError(
+            "Invalid exam attempt."
+        );
+
+        return;
+    }
+
+
+    const sessionOK =
+        await restoreSession();
+
+    if(!sessionOK){
+        return;
+    }
+
+
+    const { data, error } =
+        await supabaseClient.rpc(
+            "get_my_exam_answer_review",
+            {
+                p_attempt_id: attemptId
+            }
+        );
+
+
+    if(error){
+
+        console.error(error);
+
+        showError(
+            "Unable to load answer review. " +
+            (error.message || "")
+        );
+
+        return;
+    }
+
+
+    if(!data || data.length === 0){
+
+        showError(
+            "No answer review found. " +
+            "The result may have expired."
+        );
+
+        return;
+    }
+
+
+    renderQuestions(data);
+}
+
+
+function renderQuestions(data){
+
+    document.getElementById("loading")
+        .style.display = "none";
+
+    document.getElementById("content")
+        .style.display = "block";
+
+
+    const container =
+        document.getElementById("questions");
+
+
+    container.innerHTML =
+        data.map((row, index) => {
+
+            const selected =
+                row.selected_answer
+                ? String(row.selected_answer)
+                    .trim()
+                    .toUpperCase()
+                : null;
+
+            const correct =
+                row.correct_answer
+                ? String(row.correct_answer)
+                    .trim()
+                    .toUpperCase()
+                : null;
+
+
+            let statusText;
+            let statusClass;
+
+
+            if(!selected){
+
+                statusText = "Unanswered";
+                statusClass = "unanswered-text";
+
+            }else if(selected === correct){
+
+                statusText = "Correct";
+                statusClass = "correct-text";
+
+            }else{
+
+                statusText = "Wrong";
+                statusClass = "wrong-text";
+            }
+
+
+            const options = [
+
+                {
+                    key:"A",
+                    text:row.option_a
+                },
+
+                {
+                    key:"B",
+                    text:row.option_b
+                },
+
+                {
+                    key:"C",
+                    text:row.option_c
+                },
+
+                {
+                    key:"D",
+                    text:row.option_d
+                }
+
+            ];
+
+
+            const optionsHtml =
+                options.map(option => {
+
+                    let classes = "option";
+
+                    if(option.key === correct){
+
+                        classes +=
+                            " correct-answer";
+                    }
+
+                    if(
+                        option.key === selected &&
+                        selected !== correct
+                    ){
+
+                        classes +=
+                            " user-wrong";
+                    }
+
+                    if(
+                        option.key === selected &&
+                        selected === correct
+                    ){
+
+                        classes +=
+                            " user-answer";
+                    }
+
+
+                    return `
+                        <div class="${classes}">
+                            <span class="option-label">
+                                ${option.key}.
+                            </span>
+                            ${escapeHtml(option.text)}
+                        </div>
+                    `;
+
+                }).join("");
+
+
+            const selectedText =
+                selected
+                    ? `${selected}. ${escapeHtml(
+                        getOptionText(row, selected)
+                    )}`
+                    : "Not Answered";
+
+
+            const correctText =
+                `${correct}. ${escapeHtml(
+                    getOptionText(row, correct)
+                )}`;
+
+
+            return `
+
+                <div class="question-card">
+
+                    <div class="question-number">
+                        Question ${escapeHtml(
+                            row.question_number || index + 1
+                        )}
+                    </div>
+
+                    <div class="question-text">
+                        ${escapeHtml(row.question_text)}
+                    </div>
+
+                    ${optionsHtml}
+
+                    <div class="answer-info">
+
+                        <div class="answer-row">
+                            <strong>Your Answer:</strong>
+                            ${selectedText}
+                        </div>
+
+                        <div class="answer-row">
+                            <strong>Correct Answer:</strong>
+                            ${correctText}
+                        </div>
+
+                        <div class="answer-row ${statusClass}">
+                            ${statusText}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }).join("");
+}
+
+
+loadReview();
+
+</script>
+
+</body>
+</html>
+
+
+
+

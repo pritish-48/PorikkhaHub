@@ -1,0 +1,1532 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CQ Question Bank | PorikkhaHub</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    color:#1f2937;
+}
+
+.header{
+    background:#2563eb;
+    color:white;
+    padding:16px 20px;
+}
+
+.header-inner{
+    max-width:1100px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.logo{
+    font-size:21px;
+    font-weight:bold;
+}
+
+.back{
+    background:white;
+    color:#2563eb;
+    border:0;
+    padding:9px 14px;
+    border-radius:7px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.container{
+    max-width:1100px;
+    margin:25px auto;
+    padding:0 15px;
+}
+
+.card{
+    background:white;
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.06);
+}
+
+h2,h3{
+    margin-top:0;
+}
+
+label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+select,
+input,
+textarea{
+    width:100%;
+    padding:11px;
+    border:1px solid #cbd5e1;
+    border-radius:8px;
+    font-size:15px;
+    font-family:Arial,sans-serif;
+}
+
+textarea{
+    min-height:230px;
+    resize:vertical;
+    line-height:1.6;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+.field{
+    margin-bottom:16px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 180px;
+    gap:15px;
+}
+
+button{
+    border:0;
+    border-radius:8px;
+    padding:11px 17px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.primary{
+    background:#2563eb;
+    color:white;
+}
+
+.green{
+    background:#16a34a;
+    color:white;
+}
+
+.red{
+    background:#dc2626;
+    color:white;
+}
+
+.gray{
+    background:#64748b;
+    color:white;
+}
+
+.preview{
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:16px;
+    margin-top:15px;
+    white-space:pre-wrap;
+    line-height:1.7;
+}
+
+.question-item{
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    padding:17px;
+    margin-bottom:14px;
+}
+
+.question-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+}
+
+.badge{
+    background:#eff6ff;
+    color:#2563eb;
+    padding:5px 10px;
+    border-radius:15px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.question-text{
+    white-space:pre-wrap;
+    line-height:1.7;
+}
+
+.status{
+    margin-top:12px;
+    padding:11px;
+    border-radius:8px;
+    display:none;
+}
+
+.success{
+    display:block;
+    background:#f0fdf4;
+    color:#166534;
+}
+
+.error{
+    display:block;
+    background:#fef2f2;
+    color:#991b1b;
+}
+
+.loading{
+    text-align:center;
+    padding:30px;
+    color:#64748b;
+}
+
+.hidden{
+    display:none;
+}
+
+.help{
+    background:#eff6ff;
+    color:#1e40af;
+    padding:14px;
+    border-radius:9px;
+    line-height:1.7;
+    margin-bottom:15px;
+}
+
+@media(max-width:650px){
+    .row{
+        grid-template-columns:1fr;
+    }
+
+    .header-inner{
+        flex-direction:column;
+        align-items:stretch;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="header-inner">
+        <div class="logo">PorikkhaHub — CQ Question Bank</div>
+        <button class="back" onclick="location.href='admin-dashboard.html'">
+            ← Admin Dashboard
+        </button>
+    </div>
+</div>
+
+
+<div class="container">
+
+    <div id="loading" class="card loading">
+        Checking admin access...
+    </div>
+
+
+    <div id="mainArea" class="hidden">
+
+        <div class="card">
+
+            <h2>CQ Question Bank</h2>
+
+            <div class="field">
+
+                <label>Select CQ Exam</label>
+
+                <select id="examSelect"
+                        onchange="loadQuestions()">
+
+                    <option value="">
+                        Select a CQ exam
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>➕ Add CQ Question Manually</h3>
+
+            <div class="help">
+
+                পুরো creative question এখানে দিতে পারবে।
+
+                <br><br>
+
+                উদাহরণ:
+
+                <br>
+
+                উদ্দীপক: ...
+
+                <br>
+
+                ক) ...
+
+                <br>
+
+                খ) ...
+
+                <br>
+
+                গ) ...
+
+                <br>
+
+                ঘ) ...
+
+            </div>
+
+
+            <div class="row">
+
+                <div class="field">
+
+                    <label>Question Number</label>
+
+                    <input
+                        type="number"
+                        id="questionNumber"
+                        min="1"
+                        placeholder="1">
+
+                </div>
+
+
+                <div class="field">
+
+                    <label>Marks</label>
+
+                    <input
+                        type="number"
+                        id="marks"
+                        min="0"
+                        step="0.5"
+                        value="10">
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>CQ Question</label>
+
+                <textarea
+                    id="questionText"
+                    placeholder="উদ্দীপক লিখো...
+
+ক) ...
+খ) ...
+গ) ...
+ঘ) ..."></textarea>
+
+            </div>
+
+
+            <button
+                class="green"
+                onclick="addQuestion()">
+
+                Add Question
+
+            </button>
+
+
+            <div
+                id="manualStatus"
+                class="status">
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>📋 Bulk CQ Import</h3>
+
+            <div class="help">
+
+                একসাথে অনেক প্রশ্ন paste করতে পারবে।
+
+                <br><br>
+
+                Example:
+
+                <br><br>
+
+                1. উদ্দীপক: ...
+
+                <br>
+                ক) ...
+                <br>
+                খ) ...
+                <br>
+                গ) ...
+                <br>
+                ঘ) ...
+                <br>
+                Marks: 10
+
+                <br><br>
+
+                2. উদ্দীপক: ...
+
+                <br>
+                ক) ...
+                <br>
+                খ) ...
+                <br>
+                গ) ...
+                <br>
+                ঘ) ...
+                <br>
+                Marks: 10
+
+            </div>
+
+
+            <textarea
+                id="bulkText"
+                placeholder="Paste your CQ questions here..."></textarea>
+
+
+            <br><br>
+
+
+            <button
+                class="primary"
+                onclick="previewBulk()">
+
+                Preview Questions
+
+            </button>
+
+
+            <button
+                class="green"
+                onclick="importBulk()">
+
+                Import All Questions
+
+            </button>
+
+
+            <div
+                id="bulkPreview"
+                class="preview hidden">
+            </div>
+
+
+            <div
+                id="bulkStatus"
+                class="status">
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <h3>📚 Existing Questions</h3>
+
+            <div id="questionsList">
+
+                Select an exam to see questions.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="errorArea"
+        class="card hidden">
+
+        <h3 style="color:#dc2626">
+            <span id="errorMessage"></span>
+        </h3>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let exams = [];
+
+let currentQuestions = [];
+
+let bulkQuestions = [];
+
+
+/* =========================
+   ADMIN SESSION
+========================= */
+
+async function initialize(){
+
+    try{
+
+        const accessToken =
+            localStorage.getItem(
+                "porikkhahub_admin_access_token"
+            );
+
+        const refreshToken =
+            localStorage.getItem(
+                "porikkhahub_admin_refresh_token"
+            );
+
+
+        if(
+            !accessToken ||
+            !refreshToken
+        ){
+
+            throw new Error(
+                "Admin session not found. Please login again."
+            );
+        }
+
+
+        const {
+            data,
+            error
+        } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+        });
+
+
+        if(
+            error ||
+            !data.session
+        ){
+
+            throw new Error(
+                error?.message ||
+                "Could not restore admin session."
+            );
+        }
+
+
+        const {
+            data: isAdmin,
+            error: adminError
+        } =
+        await supabaseClient.rpc(
+            "is_admin"
+        );
+
+
+        if(adminError){
+
+            throw new Error(
+                adminError.message
+            );
+        }
+
+
+        if(!isAdmin){
+
+            throw new Error(
+                "Unauthorized: admin account required."
+            );
+        }
+
+
+        await loadExams();
+
+
+        document
+            .getElementById("loading")
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("mainArea")
+            .classList.remove("hidden");
+
+
+    }catch(error){
+
+        console.error(error);
+
+        document
+            .getElementById("loading")
+            .classList.add("hidden");
+
+
+        document
+            .getElementById("errorArea")
+            .classList.remove("hidden");
+
+
+        document
+            .getElementById("errorMessage")
+            .textContent =
+            error.message;
+    }
+}
+
+
+/* =========================
+   LOAD EXAMS
+========================= */
+
+async function loadExams(){
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient.rpc(
+        "get_admin_exams"
+    );
+
+
+    if(error){
+
+        throw new Error(
+            error.message
+        );
+    }
+
+
+    exams =
+        (data || [])
+        .filter(
+            exam =>
+                String(
+                    exam.exam_type || ""
+                )
+                .trim()
+                .toLowerCase()
+                === "cq"
+        );
+
+
+    const select =
+        document.getElementById(
+            "examSelect"
+        );
+
+
+    select.innerHTML =
+        `<option value="">
+            Select a CQ exam
+        </option>`;
+
+
+    exams.forEach(
+        exam => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                exam.id;
+
+            option.textContent =
+                `${exam.title} — ${exam.is_published ? "Published" : "Draft"}`;
+
+            select.appendChild(
+                option
+            );
+        }
+    );
+
+
+    if(exams.length === 0){
+
+        select.innerHTML =
+            `<option value="">
+                No CQ exams found
+            </option>`;
+    }
+}
+
+
+/* =========================
+   LOAD QUESTIONS
+========================= */
+
+async function loadQuestions(){
+
+    const examId =
+        document.getElementById(
+            "examSelect"
+        ).value;
+
+
+    const list =
+        document.getElementById(
+            "questionsList"
+        );
+
+
+    if(!examId){
+
+        list.innerHTML =
+            "Select a CQ exam to see questions.";
+
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+    await supabaseClient
+        .from("cq_questions")
+        .select(`
+            id,
+            exam_id,
+            question_number,
+            question_text,
+            marks,
+            created_at
+        `)
+        .eq(
+            "exam_id",
+            examId
+        )
+        .order(
+            "question_number",
+            {
+                ascending:true
+            }
+        );
+
+
+    if(error){
+
+        showStatus(
+            "manualStatus",
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+
+    currentQuestions =
+        data || [];
+
+
+    renderQuestions();
+}
+
+
+/* =========================
+   RENDER QUESTIONS
+========================= */
+
+function renderQuestions(){
+
+    const list =
+        document.getElementById(
+            "questionsList"
+        );
+
+
+    if(
+        currentQuestions.length === 0
+    ){
+
+        list.innerHTML =
+            `<p style="color:#64748b">
+                No questions added yet.
+            </p>`;
+
+        return;
+    }
+
+
+    list.innerHTML = "";
+
+
+    currentQuestions.forEach(
+        question => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "question-item";
+
+
+            div.innerHTML = `
+
+                <div class="question-top">
+
+                    <strong>
+                        Question ${question.question_number}
+                    </strong>
+
+                    <span class="badge">
+                        ${question.marks} Marks
+                    </span>
+
+                </div>
+
+
+                <div class="question-text">
+
+                    ${escapeHtml(
+                        question.question_text
+                    )}
+
+                </div>
+
+
+                <br>
+
+
+                <button
+                    class="red"
+                    onclick="deleteQuestion('${question.id}')">
+
+                    ❌ Delete
+
+                </button>
+
+            `;
+
+
+            list.appendChild(
+                div
+            );
+        }
+    );
+}
+
+
+/* =========================
+   ADD QUESTION
+========================= */
+
+async function addQuestion(){
+
+    const examId =
+        document.getElementById(
+            "examSelect"
+        ).value;
+
+
+    const number =
+        Number(
+            document.getElementById(
+                "questionNumber"
+            ).value
+        );
+
+
+    const text =
+        document.getElementById(
+            "questionText"
+        ).value.trim();
+
+
+    const marks =
+        Number(
+            document.getElementById(
+                "marks"
+            ).value
+        );
+
+
+    if(!examId){
+
+        showStatus(
+            "manualStatus",
+            "Please select a CQ exam.",
+            false
+        );
+
+        return;
+    }
+
+
+    if(!number || number < 1){
+
+        showStatus(
+            "manualStatus",
+            "Enter a valid question number.",
+            false
+        );
+
+        return;
+    }
+
+
+    if(!text){
+
+        showStatus(
+            "manualStatus",
+            "Write the CQ question.",
+            false
+        );
+
+        return;
+    }
+
+
+    if(!marks || marks <= 0){
+
+        showStatus(
+            "manualStatus",
+            "Enter valid marks.",
+            false
+        );
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+    await supabaseClient
+        .from("cq_questions")
+        .insert({
+
+            exam_id:
+                examId,
+
+            question_number:
+                number,
+
+            question_text:
+                text,
+
+            marks:
+                marks
+        });
+
+
+    if(error){
+
+        showStatus(
+            "manualStatus",
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+
+    document.getElementById(
+        "questionText"
+    ).value = "";
+
+
+    document.getElementById(
+        "questionNumber"
+    ).value = "";
+
+
+    showStatus(
+        "manualStatus",
+        "CQ question added successfully.",
+        true
+    );
+
+
+    await loadQuestions();
+}
+
+
+/* =========================
+   DELETE QUESTION
+========================= */
+
+async function deleteQuestion(
+    questionId
+){
+
+    if(
+        !confirm(
+            "Delete this CQ question?"
+        )
+    ){
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+    await supabaseClient
+        .from("cq_questions")
+        .delete()
+        .eq(
+            "id",
+            questionId
+        );
+
+
+    if(error){
+
+        alert(
+            error.message
+        );
+
+        return;
+    }
+
+
+    await loadQuestions();
+}
+
+
+/* =========================
+   BULK PARSER
+========================= */
+
+function parseBulkQuestions(
+    text
+){
+
+    const normalized =
+        text
+        .replace(/\r\n/g,"\n")
+        .replace(/\r/g,"\n")
+        .trim();
+
+
+    if(!normalized){
+
+        return [];
+    }
+
+
+    const lines =
+        normalized.split("\n");
+
+
+    const blocks = [];
+
+    let current = null;
+
+
+    for(
+        const rawLine
+        of lines
+    ){
+
+        const line =
+            rawLine.trim();
+
+
+        if(!line){
+
+            if(current){
+
+                current.lines.push("");
+
+            }
+
+            continue;
+        }
+
+
+        const match =
+            line.match(
+                /^(?:Q(?:uestion)?\s*)?(\d+)\s*[\.\):\-]\s*(.*)$/i
+            );
+
+
+        if(match){
+
+            if(current){
+
+                blocks.push(
+                    current
+                );
+            }
+
+
+            current = {
+
+                number:
+                    Number(
+                        match[1]
+                    ),
+
+                lines:[],
+
+                firstLine:
+                    match[2] || ""
+
+            };
+
+
+            continue;
+        }
+
+
+        const banglaMatch =
+            line.match(
+                /^প্রশ্ন\s*([০-৯]+)\s*[\.\):\-]\s*(.*)$/
+            );
+
+
+        if(banglaMatch){
+
+            if(current){
+
+                blocks.push(
+                    current
+                );
+            }
+
+
+            const banglaNumber =
+                banglaMatch[1]
+                .replace(
+                    /[০-৯]/g,
+                    d =>
+                        "০১২৩৪৫৬৭৮৯"
+                        .indexOf(d)
+                );
+
+
+            current = {
+
+                number:
+                    Number(
+                        banglaNumber
+                    ),
+
+                lines:[],
+
+                firstLine:
+                    banglaMatch[2] || ""
+
+            };
+
+
+            continue;
+        }
+
+
+        if(current){
+
+            current.lines.push(
+                rawLine
+            );
+
+        }else{
+
+            current = {
+
+                number:
+                    blocks.length + 1,
+
+                lines:[
+                    rawLine
+                ],
+
+                firstLine:""
+
+            };
+        }
+    }
+
+
+    if(current){
+
+        blocks.push(
+            current
+        );
+    }
+
+
+    return blocks.map(
+        block => {
+
+            let content = "";
+
+
+            if(
+                block.firstLine
+            ){
+
+                content +=
+                    block.firstLine;
+            }
+
+
+            if(
+                block.lines.length
+            ){
+
+                if(content){
+
+                    content += "\n";
+                }
+
+
+                content +=
+                    block.lines.join("\n");
+            }
+
+
+            const markMatch =
+                content.match(
+                    /(?:Marks?|মান|নম্বর)\s*[:\-]?\s*(\d+(?:\.\d+)?)/i
+                );
+
+
+            const marks =
+                markMatch
+                    ? Number(
+                        markMatch[1]
+                    )
+                    : 10;
+
+
+            content =
+                content.replace(
+                    /(?:Marks?|মান|নম্বর)\s*[:\-]?\s*\d+(?:\.\d+)?\s*$/i,
+                    ""
+                ).trim();
+
+
+            return {
+
+                number:
+                    block.number,
+
+                text:
+                    content,
+
+                marks:
+                    marks
+            };
+
+        }
+    );
+}
+
+
+/* =========================
+   PREVIEW BULK
+========================= */
+
+function previewBulk(){
+
+    const text =
+        document.getElementById(
+            "bulkText"
+        ).value;
+
+
+    bulkQuestions =
+        parseBulkQuestions(
+            text
+        );
+
+
+    const preview =
+        document.getElementById(
+            "bulkPreview"
+        );
+
+
+    if(
+        bulkQuestions.length === 0
+    ){
+
+        preview.classList.add(
+            "hidden"
+        );
+
+        showStatus(
+            "bulkStatus",
+            "No questions detected.",
+            false
+        );
+
+        return;
+    }
+
+
+    preview.innerHTML =
+        `<strong>
+            ${bulkQuestions.length}
+            question(s) detected
+        </strong>
+        <br><br>`;
+
+
+    bulkQuestions.forEach(
+        question => {
+
+            preview.innerHTML += `
+
+                <hr>
+
+                <strong>
+                    Question ${question.number}
+                </strong>
+
+                — ${question.marks} Marks
+
+                <br><br>
+
+                ${escapeHtml(
+                    question.text
+                )}
+
+            `;
+        }
+    );
+
+
+    preview.classList.remove(
+        "hidden"
+    );
+
+
+    showStatus(
+        "bulkStatus",
+        "Preview ready. Check everything before importing.",
+        true
+    );
+}
+
+
+/* =========================
+   BULK IMPORT
+========================= */
+
+async function importBulk(){
+
+    const examId =
+        document.getElementById(
+            "examSelect"
+        ).value;
+
+
+    if(!examId){
+
+        showStatus(
+            "bulkStatus",
+            "Please select a CQ exam first.",
+            false
+        );
+
+        return;
+    }
+
+
+    if(
+        bulkQuestions.length === 0
+    ){
+
+        previewBulk();
+
+        if(
+            bulkQuestions.length === 0
+        ){
+
+            return;
+        }
+    }
+
+
+    if(
+        !confirm(
+            `Import ${bulkQuestions.length} CQ question(s)?`
+        )
+    ){
+
+        return;
+    }
+
+
+    const rows =
+        bulkQuestions.map(
+            question => ({
+
+                exam_id:
+                    examId,
+
+                question_number:
+                    question.number,
+
+                question_text:
+                    question.text,
+
+                marks:
+                    question.marks
+            })
+        );
+
+
+    const {
+        error
+    } =
+    await supabaseClient
+        .from("cq_questions")
+        .insert(
+            rows
+        );
+
+
+    if(error){
+
+        showStatus(
+            "bulkStatus",
+            error.message,
+            false
+        );
+
+        return;
+    }
+
+
+    showStatus(
+        "bulkStatus",
+        `${rows.length} CQ question(s) imported successfully.`,
+        true
+    );
+
+
+    document.getElementById(
+        "bulkText"
+    ).value = "";
+
+
+    document.getElementById(
+        "bulkPreview"
+    ).classList.add(
+        "hidden"
+    );
+
+
+    bulkQuestions = [];
+
+
+    await loadQuestions();
+}
+
+
+/* =========================
+   STATUS
+========================= */
+
+function showStatus(
+    elementId,
+    message,
+    success
+){
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    element.textContent =
+        message;
+
+
+    element.className =
+        "status " +
+        (
+            success
+                ? "success"
+                : "error"
+        );
+}
+
+
+/* =========================
+   ESCAPE
+========================= */
+
+function escapeHtml(
+    text
+){
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        text || "";
+
+
+    return div.innerHTML;
+}
+
+
+/* =========================
+   START
+========================= */
+
+initialize();
+
+</script>
+
+</body>
+</html>

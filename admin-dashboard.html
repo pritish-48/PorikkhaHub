@@ -1,0 +1,1105 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Dashboard | PorikkhaHub</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            padding: 18px 25px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar h2 {
+            margin: 0;
+        }
+
+        .admin-name {
+            color: #d1d5db;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            margin: 0 0 8px;
+        }
+
+        .welcome p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+
+            font-size: 30px;
+
+            color: #2563eb;
+        }
+
+        .stat-card p {
+            margin:
+                8px 0 0;
+
+            color: #6b7280;
+
+            font-size: 14px;
+        }
+
+        .actions {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 18px;
+
+            margin-bottom: 30px;
+        }
+
+        .action-card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+        }
+
+        .action-card h3 {
+            margin-top: 0;
+        }
+
+        .action-card p {
+            color: #6b7280;
+
+            min-height: 42px;
+        }
+
+        button {
+            border: none;
+
+            padding:
+                11px 18px;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            font-size: 14px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .logout {
+            background: #dc2626;
+            color: white;
+        }
+
+        .question-bank-btn {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .recent {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 14px;
+
+            box-shadow:
+                0 5px 20px rgba(0,0,0,.06);
+
+            overflow-x: auto;
+        }
+
+        .recent h2 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+
+            border-collapse:
+                collapse;
+
+            min-width: 700px;
+        }
+
+        th,
+        td {
+            padding: 13px;
+
+            border-bottom:
+                1px solid #e5e7eb;
+
+            text-align: left;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+
+        .loading {
+            color: #6b7280;
+        }
+
+        @media (max-width: 1000px) {
+
+            .stats {
+                grid-template-columns:
+                    repeat(3, 1fr);
+            }
+
+            .actions {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            .stats {
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .actions {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="topbar">
+
+    <h2>PorikkhaHub Admin</h2>
+
+    <div>
+
+        <span
+            class="admin-name"
+            id="adminName">
+            Admin
+        </span>
+
+        &nbsp;
+
+        <button
+            class="logout"
+            onclick="logout()">
+            Logout
+        </button>
+
+    </div>
+
+</div>
+
+
+<div class="container">
+
+
+    <div class="welcome">
+
+        <h1>
+            Welcome to Admin Dashboard
+        </h1>
+
+        <p>
+            Manage exams, students, questions and results from here.
+        </p>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="stats">
+
+
+        <div class="stat-card">
+
+            <h3 id="totalExams">
+                0
+            </h3>
+
+            <p>
+                Total Exams
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3 id="publishedExams">
+                0
+            </h3>
+
+            <p>
+                Published Exams
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3 id="totalStudents">
+                0
+            </h3>
+
+            <p>
+                Total Students
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3 id="totalQuestions">
+                0
+            </h3>
+
+            <p>
+                Total MCQ Questions
+            </p>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <h3 id="submittedExams">
+                0
+            </h3>
+
+            <p>
+                Submitted Exams
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="actions">
+
+
+        <!-- CREATE EXAM -->
+
+        <div class="action-card">
+
+            <h3>
+                Create Exam
+            </h3>
+
+            <p>
+                Create a new MCQ or CQ examination.
+            </p>
+
+            <button
+                class="primary"
+                onclick="openCreateExam()">
+
+                Create Exam
+
+            </button>
+
+        </div>
+
+
+        <!-- MANAGE EXAMS -->
+
+        <div class="action-card">
+
+            <h3>
+                Manage Exams
+            </h3>
+
+            <p>
+                Edit, publish, unpublish or delete examinations.
+            </p>
+
+            <button
+                class="success"
+                onclick="openManageExams()">
+
+                Manage Exams
+
+            </button>
+
+        </div>
+
+
+        <!-- RESULTS -->
+
+        <div class="action-card">
+
+            <h3>
+                Student Results
+            </h3>
+
+            <p>
+                View marks and performance of submitted exams.
+            </p>
+
+            <button
+                class="primary"
+                onclick="openResults()">
+
+                View Results
+
+            </button>
+
+        </div>
+
+
+        <!-- STUDENTS -->
+
+        <div class="action-card">
+
+            <h3>
+                Students
+            </h3>
+
+            <p>
+                Manage registered students.
+            </p>
+
+            <button
+                class="secondary"
+                onclick="openStudents()">
+
+                Students
+
+            </button>
+
+        </div>
+
+
+        <!-- OLD QUESTION MANAGEMENT -->
+
+        <div class="action-card">
+
+            <h3>
+                MCQ Questions
+            </h3>
+
+            <p>
+                Manage questions for an examination.
+            </p>
+
+            <button
+                class="secondary"
+                onclick="openQuestions()">
+
+                Questions
+
+            </button>
+
+        </div>
+
+
+       <!-- NEW QUESTION BANK -->
+
+<div class="action-card">
+
+    <h3>MCQ Question Bank</h3>
+
+    <p>
+        Manually add MCQs or copy-paste many questions at once.
+    </p>
+
+    <a href="./mcq-question-bank.html" class="question-bank-btn" style="display:inline-block;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:bold;font-size:14px;">Open MCQ Question Bank</a>
+
+</div>
+
+
+<!-- CQ Question Bank -->
+
+<div class="action-card">
+
+    <h3>CQ Question Bank</h3>
+
+    <p>
+        Manually add CQ questions or import many questions at once.
+    </p>
+
+    <button
+        class="success"
+        onclick="openCQQuestionBank()">
+
+        Open CQ Question Bank
+
+    </button>
+
+</div>
+
+
+        <!-- REFRESH -->
+
+        <div class="action-card">
+
+            <h3>
+                Refresh Data
+            </h3>
+
+            <p>
+                Reload the latest dashboard statistics.
+            </p>
+
+            <button
+                class="secondary"
+                onclick="loadDashboard()">
+
+                Refresh
+
+            </button>
+
+        </div>
+
+
+    </div>
+
+
+    <!-- RECENT RESULTS -->
+
+    <div class="recent">
+
+        <h2>
+            Recent Results
+        </h2>
+
+
+        <div
+            id="recentLoading"
+            class="loading">
+
+            Loading recent results...
+
+        </div>
+
+
+        <table
+            id="recentTable"
+            style="display:none;">
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Student
+                    </th>
+
+                    <th>
+                        Exam
+                    </th>
+
+                    <th>
+                        Marks
+                    </th>
+
+                    <th>
+                        Submitted
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody
+                id="recentBody">
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+
+/* =========================
+   START PAGE
+========================= */
+
+async function startPage() {
+
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_admin_access_token"
+        );
+
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_admin_refresh_token"
+        );
+
+
+    if (
+        !accessToken ||
+        !refreshToken
+    ) {
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+
+        });
+
+
+    if (error) {
+
+        console.error(error);
+
+        alert(
+            "Admin session expired."
+        );
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+
+    }
+
+
+    /*
+        Save refreshed tokens.
+    */
+
+    if (data && data.session) {
+
+        localStorage.setItem(
+            "porikkhahub_admin_access_token",
+            data.session.access_token
+        );
+
+        localStorage.setItem(
+            "porikkhahub_admin_refresh_token",
+            data.session.refresh_token
+        );
+
+    }
+
+
+    const admin =
+        JSON.parse(
+            localStorage.getItem(
+                "porikkhahub_admin"
+            ) || "null"
+        );
+
+
+    if (
+        admin &&
+        admin.full_name
+    ) {
+
+        document.getElementById(
+            "adminName"
+        ).textContent =
+            admin.full_name;
+
+    }
+
+
+    await loadDashboard();
+
+}
+
+
+
+/* =========================
+   LOAD DASHBOARD
+========================= */
+
+async function loadDashboard() {
+
+
+    /*
+        Statistics
+    */
+
+    const {
+        data: stats,
+        error: statsError
+    } =
+        await supabaseClient.rpc(
+            "get_admin_dashboard_stats"
+        );
+
+
+    if (statsError) {
+
+        console.error(
+            statsError
+        );
+
+        alert(
+            "Could not load dashboard statistics: " +
+            statsError.message
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "totalExams"
+    ).textContent =
+        stats.total_exams;
+
+
+    document.getElementById(
+        "publishedExams"
+    ).textContent =
+        stats.published_exams;
+
+
+    document.getElementById(
+        "totalStudents"
+    ).textContent =
+        stats.total_students;
+
+
+    document.getElementById(
+        "totalQuestions"
+    ).textContent =
+        stats.total_questions;
+
+
+    document.getElementById(
+        "submittedExams"
+    ).textContent =
+        stats.submitted_exams;
+
+
+
+    /*
+        Recent Results
+    */
+
+    const {
+        data: results,
+        error
+    } =
+        await supabaseClient
+            .from("admin_exam_results")
+            .select(`
+                student_name,
+                exam_title,
+                obtained_marks,
+                total_marks,
+                submitted_at
+            `)
+            .eq(
+                "status",
+                "submitted"
+            )
+            .order(
+                "submitted_at",
+                {
+                    ascending: false
+                }
+            )
+            .limit(5);
+
+
+    document.getElementById(
+        "recentLoading"
+    ).style.display =
+        "none";
+
+
+    if (error) {
+
+        console.error(error);
+
+        return;
+
+    }
+
+
+    const body =
+        document.getElementById(
+            "recentBody"
+        );
+
+
+    body.innerHTML = "";
+
+
+    if (
+        !results ||
+        results.length === 0
+    ) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    No submitted results yet.
+                </td>
+            </tr>
+        `;
+
+    } else {
+
+
+        results.forEach(
+            result => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const submitted =
+                    result.submitted_at
+                        ? new Date(
+                            result.submitted_at
+                          ).toLocaleString()
+                        : "-";
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHtml(
+                            result.student_name || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            result.exam_title || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        <strong>
+                            ${result.obtained_marks ?? 0}
+                            /
+                            ${result.total_marks ?? 0}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${submitted}
+                    </td>
+
+                `;
+
+
+                body.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    }
+
+
+    document.getElementById(
+        "recentTable"
+    ).style.display =
+        "table";
+
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function openCreateExam() {
+
+    window.location.href =
+        "create-exam.html";
+
+}
+
+
+function openManageExams() {
+
+    window.location.href =
+        "manage-exams.html";
+
+}
+
+
+function openResults() {
+
+    window.location.href =
+        "admin-results.html";
+
+}
+
+
+function openQuestions() {
+
+    window.location.href =
+        "manage-questions.html";
+
+}
+
+
+function openCQQuestionBank() {
+
+    window.location.href =
+        "cq-question-bank.html";
+
+}
+
+
+function openStudents() {
+
+    window.location.href =
+        "admin-students.html";
+
+}
+
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+    await supabaseClient.auth.signOut();
+
+
+    localStorage.removeItem(
+        "porikkhahub_admin"
+    );
+
+    localStorage.removeItem(
+        "porikkhahub_admin_access_token"
+    );
+
+    localStorage.removeItem(
+        "porikkhahub_admin_refresh_token"
+    );
+
+
+    window.location.href =
+        "admin-login.html";
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+startPage();
+
+</script>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,575 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Results | PorikkhaHub</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .topbar h2 {
+            margin: 0;
+        }
+
+        .back-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .header-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
+            margin-bottom: 20px;
+        }
+
+        .header-card h1 {
+            margin: 0 0 8px;
+        }
+
+        .header-card p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .filter-box {
+            background: white;
+            padding: 18px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            max-width: 500px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.06);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f9fafb;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .marks {
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .correct {
+            color: #16a34a;
+            font-weight: bold;
+        }
+
+        .wrong {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .unanswered {
+            color: #6b7280;
+            font-weight: bold;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 6px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .loading,
+        .empty,
+        .error {
+            padding: 35px;
+            text-align: center;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="topbar">
+
+    <h2>PorikkhaHub Admin</h2>
+
+    <button
+        class="back-btn"
+        onclick="goDashboard()">
+        Admin Dashboard
+    </button>
+
+</div>
+
+
+<div class="container">
+
+    <div class="header-card">
+
+        <h1>Exam Results</h1>
+
+        <p>
+            View student examination results and performance.
+        </p>
+
+    </div>
+
+
+    <div class="filter-box">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by student, mobile or exam..."
+            oninput="filterResults()">
+
+    </div>
+
+
+    <div class="table-card">
+
+        <div
+            id="loading"
+            class="loading">
+            Loading results...
+        </div>
+
+        <div
+            id="error"
+            class="error"
+            style="display:none;">
+        </div>
+
+        <div
+            id="empty"
+            class="empty"
+            style="display:none;">
+            No submitted exam results found.
+        </div>
+
+
+        <table
+            id="resultsTable"
+            style="display:none;">
+
+            <thead>
+
+                <tr>
+                    <th>Student</th>
+                    <th>Mobile</th>
+                    <th>Exam</th>
+                    <th>Marks</th>
+                    <th>Correct</th>
+                    <th>Wrong</th>
+                    <th>Unanswered</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                </tr>
+
+            </thead>
+
+            <tbody id="resultsBody"></tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://jsjkxpsnuizngofyjvdl.supabase.co";
+
+const SUPABASE_KEY =
+    "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
+
+
+const supabaseClient =
+    supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+let allResults = [];
+
+
+async function startPage() {
+
+    const accessToken =
+        localStorage.getItem(
+            "porikkhahub_admin_access_token"
+        );
+
+    const refreshToken =
+        localStorage.getItem(
+            "porikkhahub_admin_refresh_token"
+        );
+
+
+    if (!accessToken || !refreshToken) {
+
+        alert("Admin login required.");
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient.auth.setSession({
+
+            access_token:
+                accessToken,
+
+            refresh_token:
+                refreshToken
+
+        });
+
+
+    if (error) {
+
+        console.error(error);
+
+        alert("Admin session expired.");
+
+        window.location.href =
+            "admin-login.html";
+
+        return;
+    }
+
+
+    await loadResults();
+
+}
+
+
+async function loadResults() {
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+            .from("admin_exam_results")
+            .select("*")
+            .eq("status", "submitted")
+            .order(
+                "submitted_at",
+                {
+                    ascending: false
+                }
+            );
+
+
+    document.getElementById(
+        "loading"
+    ).style.display = "none";
+
+
+    if (error) {
+
+        console.error(error);
+
+        document.getElementById(
+            "error"
+        ).textContent =
+            "Could not load results: " +
+            error.message;
+
+        document.getElementById(
+            "error"
+        ).style.display = "block";
+
+        return;
+    }
+
+
+    allResults = data || [];
+
+
+    if (allResults.length === 0) {
+
+        document.getElementById(
+            "empty"
+        ).style.display = "block";
+
+        return;
+    }
+
+
+    renderResults(allResults);
+
+}
+
+
+function renderResults(results) {
+
+    const table =
+        document.getElementById(
+            "resultsTable"
+        );
+
+    const body =
+        document.getElementById(
+            "resultsBody"
+        );
+
+
+    body.innerHTML = "";
+
+
+    results.forEach(result => {
+
+        const row =
+            document.createElement("tr");
+
+
+        const submitted =
+            result.submitted_at
+                ? new Date(
+                    result.submitted_at
+                  ).toLocaleString()
+                : "-";
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHtml(
+                    result.student_name || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    result.student_mobile || "-"
+                )}
+            </td>
+
+            <td>
+                ${escapeHtml(
+                    result.exam_title || "-"
+                )}
+            </td>
+
+            <td class="marks">
+                ${result.obtained_marks ?? 0}
+                /
+                ${result.total_marks ?? 0}
+            </td>
+
+            <td class="correct">
+                ${result.correct_count ?? 0}
+            </td>
+
+            <td class="wrong">
+                ${result.wrong_count ?? 0}
+            </td>
+
+            <td class="unanswered">
+                ${result.unanswered_count ?? 0}
+            </td>
+
+            <td>
+                <span class="status">
+                    Submitted
+                </span>
+            </td>
+
+            <td>
+                ${submitted}
+            </td>
+
+        `;
+
+
+        body.appendChild(row);
+
+    });
+
+
+    table.style.display = "table";
+
+}
+
+
+function filterResults() {
+
+    const search =
+        document.getElementById(
+            "searchInput"
+        ).value
+        .toLowerCase()
+        .trim();
+
+
+    if (!search) {
+
+        renderResults(allResults);
+
+        return;
+    }
+
+
+    const filtered =
+        allResults.filter(result => {
+
+            return (
+
+                (result.student_name || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                (result.student_mobile || "")
+                    .toLowerCase()
+                    .includes(search)
+
+                ||
+
+                (result.exam_title || "")
+                    .toLowerCase()
+                    .includes(search)
+
+            );
+
+        });
+
+
+    if (filtered.length === 0) {
+
+        document.getElementById(
+            "resultsTable"
+        ).style.display = "none";
+
+        document.getElementById(
+            "empty"
+        ).textContent =
+            "No matching results found.";
+
+        document.getElementById(
+            "empty"
+        ).style.display = "block";
+
+        return;
+    }
+
+
+    document.getElementById(
+        "empty"
+    ).style.display = "none";
+
+
+    renderResults(filtered);
+
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+}
+
+
+function goDashboard() {
+
+    window.location.href =
+        "admin-dashboard.html";
+
+}
+
+
+startPage();
+
+</script>
+
+</body>
+</html>
+
+
+
