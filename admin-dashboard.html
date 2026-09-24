@@ -1,414 +1,1580 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Admin Dashboard | PorikkhaHub</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
 
     <style>
+        :root {
+            --bg: #f4f7fb;
+            --card: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #635bff;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 10px 35px rgba(15, 23, 42, 0.07);
+        }
+
         * {
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5f7fb;
-            color: #1f2937;
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(99, 91, 255, 0.08),
+                    transparent 30%
+                ),
+                var(--bg);
+
+            color: var(--text);
         }
 
-        .navbar {
-            background: #111827;
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+
+            width: 250px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #111827 0%,
+                    #171d2e 100%
+                );
+
             color: white;
-            padding: 16px 30px;
+
+            padding: 25px 16px;
+
+            z-index: 100;
+
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
             align-items: center;
+            gap: 12px;
+
+            padding: 5px 12px 30px;
         }
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
+        .brand-logo {
+            width: 42px;
+            height: 42px;
 
-        .admin-label {
-            font-size: 14px;
-            opacity: 0.85;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .welcome {
-            margin-bottom: 25px;
-        }
-
-        .welcome h1 {
-            margin: 0 0 8px;
-            font-size: 30px;
-        }
-
-        .welcome p {
-            margin: 0;
-            color: #6b7280;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 14px;
-            padding: 22px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
-
-        .stat-title {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .stat-value {
-            font-size: 30px;
-            font-weight: bold;
-        }
-
-        .section {
-            background: white;
-            border-radius: 14px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
-
-        .section h2 {
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .action-card {
-            display: block;
-            text-decoration: none;
-            color: #111827;
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
             border-radius: 12px;
-            padding: 20px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #4f46e5
+                );
+
+            font-size: 20px;
+            font-weight: 800;
+
+            box-shadow:
+                0 8px 25px rgba(99, 91, 255, 0.35);
+        }
+
+        .brand-name {
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .nav-title {
+            color: #6b7280;
+            font-size: 10px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+
+            padding: 0 12px 10px;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #cbd5e1;
+
+            padding: 12px 13px;
+
+            border-radius: 10px;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            font-size: 14px;
+            font-weight: 500;
+
             transition: 0.2s;
         }
 
-        .action-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        .nav a:hover {
+            background: rgba(255,255,255,0.07);
+            color: white;
+            transform: translateX(2px);
         }
 
-        .action-card h3 {
-            margin: 0 0 8px;
+        .nav a.active {
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(99,91,255,0.25),
+                    rgba(99,91,255,0.08)
+                );
+
+            color: white;
+
+            box-shadow:
+                inset 3px 0 0 #7c73ff;
         }
 
-        .action-card p {
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .admin-mini {
+            background: rgba(255,255,255,0.05);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            border-radius: 13px;
+
+            padding: 13px;
+
+            margin-bottom: 12px;
+        }
+
+        .admin-mini-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .admin-mini-role {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 3px;
+        }
+
+        .logout {
+            width: 100%;
+
+            border: 0;
+            border-radius: 10px;
+
+            padding: 11px;
+
+            background: rgba(239,68,68,0.12);
+            color: #fca5a5;
+
+            cursor: pointer;
+
+            font-weight: 600;
+
+            transition: 0.2s;
+        }
+
+        .logout:hover {
+            background: rgba(239,68,68,0.22);
+            color: white;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: 250px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 76px;
+
+            background: rgba(255,255,255,0.85);
+
+            backdrop-filter: blur(15px);
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 38px;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 50;
+        }
+
+        .page-title h1 {
             margin: 0;
-            color: #6b7280;
+
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .page-title p {
+            margin: 3px 0 0;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .top-admin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #22c55e;
+
+            box-shadow:
+                0 0 0 4px rgba(34,197,94,0.12);
+        }
+
+        .top-admin span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 34px 38px 50px;
+            max-width: 1500px;
+        }
+
+        /* =========================
+           WELCOME
+        ========================= */
+
+        .welcome {
+            margin-bottom: 28px;
+        }
+
+        .welcome h2 {
+            margin: 0;
+
+            font-size: 28px;
+            font-weight: 800;
+
+            letter-spacing: -0.7px;
+        }
+
+        .welcome p {
+            margin: 7px 0 0;
+
+            color: var(--muted);
             font-size: 14px;
         }
 
-        .result-table-wrapper {
+        /* =========================
+           STATISTICS
+        ========================= */
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(5, minmax(0, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            position: relative;
+
+            overflow: hidden;
+
+            background: var(--card);
+
+            border: 1px solid rgba(229,231,235,0.8);
+
+            border-radius: 17px;
+
+            padding: 21px;
+
+            box-shadow: var(--shadow);
+
+            transition:
+                transform 0.25s,
+                box-shadow 0.25s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+
+            box-shadow:
+                0 18px 45px rgba(15,23,42,0.11);
+        }
+
+        .stat-card::after {
+            content: "";
+
+            position: absolute;
+
+            width: 90px;
+            height: 90px;
+
+            border-radius: 50%;
+
+            right: -35px;
+            top: -35px;
+
+            background: rgba(99,91,255,0.07);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-label {
+            color: var(--muted);
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 38px;
+            height: 38px;
+
+            border-radius: 11px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 17px;
+        }
+
+        .icon-purple {
+            background: #eeecff;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+        }
+
+        .icon-orange {
+            background: #fef3c7;
+        }
+
+        .icon-pink {
+            background: #fce7f3;
+        }
+
+        .stat-number {
+            margin-top: 16px;
+
+            font-size: 30px;
+            font-weight: 800;
+
+            letter-spacing: -1px;
+        }
+
+        .stat-small {
+            margin-top: 5px;
+
+            color: #9ca3af;
+
+            font-size: 11px;
+        }
+
+        /* =========================
+           SECTION HEADER
+        ========================= */
+
+        .section {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 18px;
+
+            box-shadow: var(--shadow);
+
+            margin-bottom: 25px;
+
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 22px 24px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title h3 {
+            margin: 0;
+
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .section-title p {
+            margin: 4px 0 0;
+
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .view-all {
+            text-decoration: none;
+
+            color: var(--primary);
+
+            font-size: 12px;
+            font-weight: 700;
+
+            padding: 8px 12px;
+
+            border-radius: 8px;
+
+            background: #f3f2ff;
+        }
+
+        .view-all:hover {
+            background: #e9e7ff;
+        }
+
+        /* =========================
+           QUICK ACTIONS
+        ========================= */
+
+        .actions {
+            padding: 22px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 15px;
+        }
+
+        .action {
+            text-decoration: none;
+
+            color: var(--text);
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 18px;
+
+            display: flex;
+            align-items: center;
+
+            gap: 14px;
+
+            transition: 0.22s;
+
+            background: #fff;
+        }
+
+        .action:hover {
+            border-color: #c7c3ff;
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 12px 30px rgba(99,91,255,0.09);
+        }
+
+        .action-icon {
+            width: 44px;
+            height: 44px;
+
+            flex-shrink: 0;
+
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 20px;
+
+            background: #f3f2ff;
+        }
+
+        .action h4 {
+            margin: 0;
+
+            font-size: 14px;
+            font-weight: 750;
+        }
+
+        .action p {
+            margin: 4px 0 0;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .arrow {
+            margin-left: auto;
+
+            color: #9ca3af;
+
+            font-size: 18px;
+        }
+
+        /* =========================
+           RESULTS
+        ========================= */
+
+        .results {
             overflow-x: auto;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-        }
 
-        th,
-        td {
-            padding: 13px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-            font-size: 14px;
+            border-collapse: collapse;
+
+            min-width: 850px;
         }
 
         th {
-            background: #f9fafb;
+            padding: 14px 20px;
+
+            text-align: left;
+
+            color: #6b7280;
+
+            background: #fafbfc;
+
+            font-size: 10px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.7px;
+
+            font-weight: 800;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 20px;
+
+            border-bottom: 1px solid #f0f1f3;
+
+            font-size: 13px;
+        }
+
+        tbody tr {
+            transition: 0.15s;
+        }
+
+        tbody tr:hover {
+            background: #fafaff;
+        }
+
+        .student {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+
+            border-radius: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e0e7ff,
+                    #ddd6fe
+                );
+
+            color: #4f46e5;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .student-name {
+            font-weight: 700;
+        }
+
+        .student-mobile {
+            margin-top: 3px;
+
+            color: #9ca3af;
+
+            font-size: 10px;
+        }
+
+        .exam-name {
             font-weight: 600;
+        }
+
+        .marks {
+            font-weight: 800;
+        }
+
+        .score-good {
+            color: #059669;
         }
 
         .status {
-            display: inline-block;
-            padding: 5px 9px;
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding: 6px 9px;
+
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            text-transform: capitalize;
+        }
+
+        .status::before {
+            content: "";
+
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: currentColor;
         }
 
         .status-submitted {
-            background: #dcfce7;
-            color: #166534;
+            color: #047857;
+            background: #ecfdf5;
         }
 
         .status-auto {
-            background: #fef3c7;
-            color: #92400e;
+            color: #b45309;
+            background: #fffbeb;
         }
 
         .empty {
-            color: #6b7280;
-            padding: 15px 0;
+            padding: 45px 20px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 13px;
         }
 
         .error {
+            margin: 20px;
+
+            padding: 14px;
+
+            background: #fef2f2;
+
             color: #b91c1c;
-            background: #fee2e2;
-            padding: 12px;
-            border-radius: 8px;
+
+            border-radius: 10px;
+
+            font-size: 13px;
         }
 
-        .logout-btn {
-            border: none;
-            background: #dc2626;
-            color: white;
-            padding: 9px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
+        .loading {
+            padding: 45px 20px;
+
+            text-align: center;
+
+            color: #9ca3af;
+
+            font-size: 13px;
         }
 
-        .logout-btn:hover {
-            background: #b91c1c;
+        /* =========================
+           MOBILE
+        ========================= */
+
+        .mobile-header {
+            display: none;
         }
 
-        @media (max-width: 1000px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
+        @media (max-width: 1200px) {
+
+            .stats {
+                grid-template-columns:
+                    repeat(3, 1fr);
             }
+
         }
 
-        @media (max-width: 700px) {
-            .navbar {
-                padding: 14px 18px;
+        @media (max-width: 900px) {
+
+            .sidebar {
+                display: none;
             }
 
-            .logo {
-                font-size: 20px;
+            .main {
+                margin-left: 0;
             }
 
-            .container {
-                margin: 20px auto;
-                padding: 0 14px;
+            .mobile-header {
+                display: flex;
+
+                height: 64px;
+
+                align-items: center;
+
+                padding: 0 18px;
+
+                background: #111827;
+
+                color: white;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .mobile-logo {
+                font-size: 19px;
+                font-weight: 800;
+            }
+
+            .topbar {
+                margin-top: 0;
+
+                padding: 0 18px;
+
+                height: 65px;
+            }
+
+            .content {
+                padding: 25px 18px 40px;
+            }
+
+            .actions {
+                grid-template-columns: 1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .stats {
+                grid-template-columns: 1fr 1fr;
+
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .stat-icon {
+                width: 32px;
+                height: 32px;
+
+                font-size: 14px;
+            }
+
+            .welcome h2 {
+                font-size: 24px;
             }
 
             .actions {
                 grid-template-columns: 1fr;
             }
 
-            .welcome h1 {
-                font-size: 25px;
+            .top-admin span {
+                display: none;
             }
+
+        }
+
+        @media (max-width: 400px) {
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
         }
     </style>
 </head>
 
 <body>
 
-    <nav class="navbar">
-        <div>
-            <div class="logo">PorikkhaHub</div>
-            <div class="admin-label">Admin Panel</div>
-        </div>
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
 
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </nav>
+    <aside class="sidebar">
 
-    <main class="container">
+        <div class="brand">
 
-        <div class="welcome">
-            <h1>Admin Dashboard</h1>
-            <p>Manage exams, students, questions and results.</p>
-        </div>
-
-        <!-- Statistics -->
-        <div class="stats-grid">
-
-            <div class="stat-card">
-                <div class="stat-title">Total Exams</div>
-                <div class="stat-value" id="totalExams">Loading...</div>
+            <div class="brand-logo">
+                P
             </div>
 
-            <div class="stat-card">
-                <div class="stat-title">Published Exams</div>
-                <div class="stat-value" id="publishedExams">Loading...</div>
-            </div>
+            <div>
+                <div class="brand-name">
+                    PorikkhaHub
+                </div>
 
-            <div class="stat-card">
-                <div class="stat-title">Total Students</div>
-                <div class="stat-value" id="totalStudents">Loading...</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-title">Total MCQ Questions</div>
-                <div class="stat-value" id="totalQuestions">Loading...</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-title">Submitted Exams</div>
-                <div class="stat-value" id="submittedExams">Loading...</div>
+                <div class="brand-sub">
+                    Examination Platform
+                </div>
             </div>
 
         </div>
 
-        <!-- Quick Actions -->
-        <section class="section">
-            <h2>Quick Actions</h2>
 
-            <div class="actions">
+        <div class="nav-title">
+            Main Menu
+        </div>
 
-                <a class="action-card" href="create-exam.html">
-                    <h3>Create Exam</h3>
-                    <p>Create a new MCQ or CQ exam.</p>
-                </a>
+        <nav class="nav">
 
-                <a class="action-card" href="manage-exams.html">
-                    <h3>Manage Exams</h3>
-                    <p>Edit, publish, unpublish or delete exams.</p>
-                </a>
+            <a href="admin-dashboard.html" class="active">
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
 
-                <a class="action-card" href="manage-questions.html">
-                    <h3>Manage Questions</h3>
-                    <p>Add, edit or delete MCQ questions.</p>
-                </a>
+            <a href="manage-exams.html">
+                <span class="nav-icon">▣</span>
+                Exams
+            </a>
 
-                <a class="action-card" href="admin-students.html">
-                    <h3>Students</h3>
-                    <p>View registered students.</p>
-                </a>
+            <a href="manage-questions.html">
+                <span class="nav-icon">☷</span>
+                Questions
+            </a>
 
-                <a class="action-card" href="admin-results.html">
-                    <h3>MCQ Results</h3>
-                    <p>View student exam results.</p>
-                </a>
+            <a href="admin-students.html">
+                <span class="nav-icon">♙</span>
+                Students
+            </a>
 
-                <a class="action-card" href="cq-answer-sheets.html">
-                    <h3>CQ Checking</h3>
-                    <p>Check and mark CQ answer sheets.</p>
-                </a>
+            <a href="admin-results.html">
+                <span class="nav-icon">◫</span>
+                Results
+            </a>
+
+            <a href="cq-answer-sheets.html">
+                <span class="nav-icon">✓</span>
+                CQ Checking
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="admin-mini">
+
+                <div class="admin-mini-name">
+                    PorikkhaHub Admin
+                </div>
+
+                <div class="admin-mini-role">
+                    Administrator
+                </div>
 
             </div>
-        </section>
 
-        <!-- Recent Results -->
-        <section class="section">
+            <button
+                class="logout"
+                onclick="logout()"
+            >
+                ⇥ &nbsp; Logout
+            </button>
 
-            <h2>Recent Results</h2>
+        </div>
 
-            <div id="recentResults">
-                Loading...
+    </aside>
+
+
+    <!-- =========================
+         MOBILE HEADER
+    ========================= -->
+
+    <div class="mobile-header">
+
+        <div class="mobile-logo">
+            PorikkhaHub
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MAIN
+    ========================= -->
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div class="page-title">
+
+                <h1>
+                    Admin Dashboard
+                </h1>
+
+                <p>
+                    Overview of your examination platform
+                </p>
+
             </div>
 
-        </section>
+
+            <div class="top-admin">
+
+                <div class="online-dot"></div>
+
+                <span>
+                    Admin
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+
+            <!-- =========================
+                 WELCOME
+            ========================= -->
+
+            <div class="welcome">
+
+                <h2>
+                    Good day, Admin 👋
+                </h2>
+
+                <p>
+                    Here's what's happening with PorikkhaHub today.
+                </p>
+
+            </div>
+
+
+            <!-- =========================
+                 STATISTICS
+            ========================= -->
+
+            <div class="stats">
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Total Exams
+                        </div>
+
+                        <div class="stat-icon icon-purple">
+                            📝
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="totalExams"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="stat-small">
+                        All created examinations
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Published Exams
+                        </div>
+
+                        <div class="stat-icon icon-green">
+                            🚀
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="publishedExams"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="stat-small">
+                        Currently available exams
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Total Students
+                        </div>
+
+                        <div class="stat-icon icon-blue">
+                            👨‍🎓
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="totalStudents"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="stat-small">
+                        Registered students
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            MCQ Questions
+                        </div>
+
+                        <div class="stat-icon icon-orange">
+                            ❓
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="totalQuestions"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="stat-small">
+                        Questions in question bank
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+
+                        <div class="stat-label">
+                            Submitted Exams
+                        </div>
+
+                        <div class="stat-icon icon-pink">
+                            📊
+                        </div>
+
+                    </div>
+
+                    <div
+                        class="stat-number"
+                        id="submittedExams"
+                    >
+                        Loading...
+                    </div>
+
+                    <div class="stat-small">
+                        Completed submissions
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =========================
+                 QUICK ACTIONS
+            ========================= -->
+
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div class="section-title">
+
+                        <h3>
+                            Quick Actions
+                        </h3>
+
+                        <p>
+                            Frequently used administration tools
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+
+                    <a
+                        href="create-exam.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            ➕
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Create Exam
+                            </h4>
+
+                            <p>
+                                Create a new examination
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="manage-exams.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            📚
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Manage Exams
+                            </h4>
+
+                            <p>
+                                Edit and publish exams
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="manage-questions.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            ❓
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Question Bank
+                            </h4>
+
+                            <p>
+                                Manage MCQ questions
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="admin-students.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            👥
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Students
+                            </h4>
+
+                            <p>
+                                View registered students
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="admin-results.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            📈
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                Results
+                            </h4>
+
+                            <p>
+                                View exam performance
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                    <a
+                        href="cq-answer-sheets.html"
+                        class="action"
+                    >
+
+                        <div class="action-icon">
+                            ✍️
+                        </div>
+
+                        <div>
+
+                            <h4>
+                                CQ Checking
+                            </h4>
+
+                            <p>
+                                Check answer sheets
+                            </p>
+
+                        </div>
+
+                        <div class="arrow">
+                            ›
+                        </div>
+
+                    </a>
+
+
+                </div>
+
+            </section>
+
+
+            <!-- =========================
+                 RECENT RESULTS
+            ========================= -->
+
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div class="section-title">
+
+                        <h3>
+                            Recent Results
+                        </h3>
+
+                        <p>
+                            Latest student exam submissions
+                        </p>
+
+                    </div>
+
+
+                    <a
+                        href="admin-results.html"
+                        class="view-all"
+                    >
+                        View All →
+                    </a>
+
+                </div>
+
+
+                <div
+                    id="recentResults"
+                    class="results"
+                >
+
+                    <div class="loading">
+                        Loading recent results...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </div>
 
     </main>
 
+
     <script>
 
-        // ==============================
-        // LOAD DASHBOARD STATISTICS
-        // ==============================
+        // ==========================================
+        // DASHBOARD STATISTICS
+        // ==========================================
 
         async function loadDashboardStats() {
 
-            console.log("Loading dashboard statistics...");
+            console.log(
+                "Loading dashboard statistics..."
+            );
 
             try {
 
                 const result =
-                    await supabaseClient.rpc("get_admin_dashboard_stats");
+                    await supabaseClient.rpc(
+                        "get_admin_dashboard_stats"
+                    );
 
-                console.log("Dashboard RPC:", result);
+                console.log(
+                    "Dashboard RPC:",
+                    result
+                );
 
                 if (result.error) {
-                    console.error("Dashboard RPC error:", result.error);
 
-                    document.getElementById("totalExams").textContent = "Error";
-                    document.getElementById("publishedExams").textContent = "Error";
-                    document.getElementById("totalStudents").textContent = "Error";
-                    document.getElementById("totalQuestions").textContent = "Error";
-                    document.getElementById("submittedExams").textContent = "Error";
+                    console.error(
+                        "Dashboard error:",
+                        result.error
+                    );
+
+                    document.getElementById(
+                        "totalExams"
+                    ).textContent = "Error";
+
+                    document.getElementById(
+                        "publishedExams"
+                    ).textContent = "Error";
+
+                    document.getElementById(
+                        "totalStudents"
+                    ).textContent = "Error";
+
+                    document.getElementById(
+                        "totalQuestions"
+                    ).textContent = "Error";
+
+                    document.getElementById(
+                        "submittedExams"
+                    ).textContent = "Error";
 
                     return;
                 }
 
+
                 const data = result.data;
 
-                console.log("Dashboard data:", data);
-
-                document.getElementById("totalExams").textContent =
+                document.getElementById(
+                    "totalExams"
+                ).textContent =
                     data.total_exams ?? 0;
 
-                document.getElementById("publishedExams").textContent =
+                document.getElementById(
+                    "publishedExams"
+                ).textContent =
                     data.published_exams ?? 0;
 
-                document.getElementById("totalStudents").textContent =
+                document.getElementById(
+                    "totalStudents"
+                ).textContent =
                     data.total_students ?? 0;
 
-                document.getElementById("totalQuestions").textContent =
+                document.getElementById(
+                    "totalQuestions"
+                ).textContent =
                     data.total_questions ?? 0;
 
-                document.getElementById("submittedExams").textContent =
+                document.getElementById(
+                    "submittedExams"
+                ).textContent =
                     data.submitted_exams ?? 0;
 
             } catch (error) {
 
-                console.error("Dashboard exception:", error);
+                console.error(
+                    "Dashboard exception:",
+                    error
+                );
 
             }
+
         }
 
 
-        // ==============================
-        // LOAD RECENT RESULTS
-        // ==============================
+        // ==========================================
+        // RECENT RESULTS
+        // ==========================================
 
         async function loadRecentResults() {
 
-            console.log("Loading recent results...");
-
             const container =
-                document.getElementById("recentResults");
+                document.getElementById(
+                    "recentResults"
+                );
 
             try {
 
-                const result = await supabaseClient
-                    .from("admin_exam_results")
-                    .select("*")
-                    .order("submitted_at", {
-                        ascending: false
-                    })
-                    .limit(5);
+                const result =
+                    await supabaseClient
+                        .from("admin_exam_results")
+                        .select("*")
+                        .order(
+                            "submitted_at",
+                            {
+                                ascending: false
+                            }
+                        )
+                        .limit(5);
 
-                console.log("Recent results query:", result);
+
+                console.log(
+                    "Recent results:",
+                    result
+                );
+
 
                 if (result.error) {
 
@@ -418,125 +1584,235 @@
                     );
 
                     container.innerHTML =
-                        '<div class="error">Unable to load recent results.</div>';
+                        `
+                        <div class="error">
+                            Unable to load recent results.
+                        </div>
+                        `;
 
                     return;
                 }
 
-                const rows = result.data || [];
 
-                console.log(
-                    "Recent results rows:",
-                    rows
-                );
+                const rows =
+                    result.data || [];
+
 
                 if (rows.length === 0) {
 
                     container.innerHTML =
-                        '<div class="empty">No exam results yet.</div>';
+                        `
+                        <div class="empty">
+                            No exam results yet.
+                        </div>
+                        `;
 
                     return;
                 }
 
 
                 let html = `
-                    <div class="result-table-wrapper">
                     <table>
+
                         <thead>
+
                             <tr>
-                                <th>Student</th>
-                                <th>Exam</th>
-                                <th>Marks</th>
-                                <th>Correct</th>
-                                <th>Wrong</th>
-                                <th>Unanswered</th>
-                                <th>Status</th>
+
+                                <th>
+                                    Student
+                                </th>
+
+                                <th>
+                                    Exam
+                                </th>
+
+                                <th>
+                                    Marks
+                                </th>
+
+                                <th>
+                                    Correct
+                                </th>
+
+                                <th>
+                                    Wrong
+                                </th>
+
+                                <th>
+                                    Unanswered
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
                             </tr>
+
                         </thead>
+
                         <tbody>
                 `;
 
 
-                rows.forEach(row => {
+                rows.forEach(
+                    row => {
 
-                    const status =
-                        row.status || "";
+                        const name =
+                            row.student_name ||
+                            "Unknown";
 
-                    let statusClass =
-                        "status-submitted";
+                        const firstLetter =
+                            name
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase();
 
-                    if (status === "auto_submitted") {
-                        statusClass = "status-auto";
+
+                        const status =
+                            row.status ||
+                            "submitted";
+
+
+                        const statusClass =
+                            status ===
+                            "auto_submitted"
+                                ? "status-auto"
+                                : "status-submitted";
+
+
+                        const statusText =
+                            status ===
+                            "auto_submitted"
+                                ? "Auto submitted"
+                                : "Submitted";
+
+
+                        const obtained =
+                            row.obtained_marks ??
+                            0;
+
+
+                        const total =
+                            row.total_marks ??
+                            0;
+
+
+                        html += `
+
+                            <tr>
+
+                                <td>
+
+                                    <div class="student">
+
+                                        <div class="avatar">
+                                            ${escapeHtml(
+                                                firstLetter
+                                            )}
+                                        </div>
+
+                                        <div>
+
+                                            <div class="student-name">
+                                                ${escapeHtml(
+                                                    name
+                                                )}
+                                            </div>
+
+                                            <div class="student-mobile">
+                                                ${escapeHtml(
+                                                    row.student_mobile ||
+                                                    ""
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <div class="exam-name">
+                                        ${escapeHtml(
+                                            row.exam_title ||
+                                            "Unknown Exam"
+                                        )}
+                                    </div>
+
+                                </td>
+
+
+                                <td>
+
+                                    <span class="marks score-good">
+
+                                        ${escapeHtml(
+                                            obtained
+                                        )}
+
+                                        /
+                                        ${escapeHtml(
+                                            total
+                                        )}
+
+                                    </span>
+
+                                </td>
+
+
+                                <td>
+                                    ${row.correct_count ?? 0}
+                                </td>
+
+
+                                <td>
+                                    ${row.wrong_count ?? 0}
+                                </td>
+
+
+                                <td>
+                                    ${row.unanswered_count ?? 0}
+                                </td>
+
+
+                                <td>
+
+                                    <span
+                                        class="status
+                                        ${statusClass}"
+                                    >
+
+                                        ${escapeHtml(
+                                            statusText
+                                        )}
+
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
                     }
-
-                    const submittedMarks =
-                        row.obtained_marks ?? 0;
-
-                    const totalMarks =
-                        row.total_marks ?? 0;
-
-
-                    html += `
-                        <tr>
-
-                            <td>
-                                ${escapeHtml(
-                                    row.student_name || "Unknown"
-                                )}
-                                <br>
-                                <small style="color:#6b7280;">
-                                    ${escapeHtml(
-                                        row.student_mobile || ""
-                                    )}
-                                </small>
-                            </td>
-
-                            <td>
-                                ${escapeHtml(
-                                    row.exam_title || "Unknown Exam"
-                                )}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    ${submittedMarks}
-                                </strong>
-                                / ${totalMarks}
-                            </td>
-
-                            <td>
-                                ${row.correct_count ?? 0}
-                            </td>
-
-                            <td>
-                                ${row.wrong_count ?? 0}
-                            </td>
-
-                            <td>
-                                ${row.unanswered_count ?? 0}
-                            </td>
-
-                            <td>
-                                <span class="status ${statusClass}">
-                                    ${escapeHtml(
-                                        status
-                                    )}
-                                </span>
-                            </td>
-
-                        </tr>
-                    `;
-
-                });
+                );
 
 
                 html += `
+
                         </tbody>
+
                     </table>
-                    </div>
+
                 `;
 
-                container.innerHTML = html;
+
+                container.innerHTML =
+                    html;
+
 
             } catch (error) {
 
@@ -546,36 +1822,64 @@
                 );
 
                 container.innerHTML =
-                    '<div class="error">Unable to load recent results.</div>';
+                    `
+                    <div class="error">
+                        Unable to load recent results.
+                    </div>
+                    `;
+
             }
+
         }
 
 
-        // ==============================
-        // HTML ESCAPE
-        // ==============================
+        // ==========================================
+        // HTML SECURITY
+        // ==========================================
 
         function escapeHtml(value) {
 
             return String(value)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
 
         }
 
 
-        // ==============================
+        // ==========================================
         // LOGOUT
-        // ==============================
+        // ==========================================
 
         async function logout() {
 
             try {
 
-                await supabaseClient.auth.signOut();
+                await supabaseClient
+                    .auth
+                    .signOut();
 
             } catch (error) {
 
@@ -585,6 +1889,7 @@
                 );
 
             }
+
 
             localStorage.removeItem(
                 "porikkhahub_admin"
@@ -598,35 +1903,33 @@
                 "porikkhahub_admin_refresh_token"
             );
 
+
             window.location.href =
                 "admin-login.html";
+
         }
 
 
-        // ==============================
-        // START DASHBOARD
-        // ==============================
+        // ==========================================
+        // START
+        // ==========================================
 
         function startDashboard() {
 
             console.log(
-                "PorikkhaHub dashboard started."
+                "PorikkhaHub premium dashboard started."
             );
 
             loadDashboardStats();
+
             loadRecentResults();
 
         }
 
 
-        // Run after page is fully loaded.
         window.addEventListener(
             "load",
             function () {
-
-                console.log(
-                    "WINDOW LOAD FIRED"
-                );
 
                 setTimeout(
                     startDashboard,
@@ -640,3 +1943,4 @@
 
 </body>
 </html>
+```
