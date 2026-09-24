@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>PorikkhaHub - Admin Dashboard</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -51,10 +52,6 @@
 
         .welcome {
             margin-bottom: 25px;
-        }
-
-        .welcome h2 {
-            margin-bottom: 5px;
         }
 
         .stats {
@@ -130,7 +127,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             border-bottom: 1px solid #e5e7eb;
             text-align: left;
@@ -145,12 +143,18 @@
             padding: 20px 0;
         }
 
+        .error {
+            color: #dc2626;
+            padding: 20px 0;
+        }
+
         @media (max-width: 600px) {
             table {
                 font-size: 13px;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 8px;
             }
         }
@@ -161,7 +165,7 @@
 
 <header>
     <h1>PorikkhaHub Admin</h1>
-    <button onclick="logout()">Logout</button>
+    <button id="logoutBtn">Logout</button>
 </header>
 
 <div class="container">
@@ -171,7 +175,8 @@
         <p>Manage exams, students, MCQ and CQ submissions from here.</p>
     </div>
 
-    <!-- Statistics -->
+    <!-- STATISTICS -->
+
     <div class="stats">
 
         <div class="stat-card">
@@ -201,230 +206,361 @@
 
     </div>
 
-    <!-- Actions -->
+
+    <!-- ACTION BUTTONS -->
+
     <div class="actions">
 
-        <button class="action-btn" onclick="location.href='create-exam.html'">
+        <button class="action-btn" id="createExamBtn">
             ➕ Create Exam
             <span>Create a new examination</span>
         </button>
 
-        <button class="action-btn" onclick="location.href='manage-exams.html'">
+        <button class="action-btn" id="manageExamsBtn">
             📚 Manage Exams
             <span>Edit, publish or delete exams</span>
         </button>
 
-        <button class="action-btn" onclick="location.href='admin-results.html'">
+        <button class="action-btn" id="resultsBtn">
             📊 Student Results
             <span>View submitted exam results</span>
         </button>
 
-        <button class="action-btn" onclick="location.href='admin-students.html'">
+        <button class="action-btn" id="studentsBtn">
             👨‍🎓 Students
             <span>View registered students</span>
         </button>
 
-        <button class="action-btn" onclick="location.href='manage-questions.html'">
+        <button class="action-btn" id="questionsBtn">
             ❓ MCQ Questions
             <span>Manage MCQ question bank</span>
         </button>
 
-        <!-- NEW CQ BUTTON -->
-        <button class="action-btn" onclick="location.href='cq-answer-sheets.html'">
+        <button class="action-btn" id="cqBtn">
             📝 CQ Answer Sheets
             <span>View answer sheets and give marks</span>
         </button>
 
-        <button class="action-btn" onclick="loadDashboard()">
+        <button class="action-btn" id="refreshBtn">
             🔄 Refresh
             <span>Refresh dashboard statistics</span>
         </button>
 
     </div>
 
-    <!-- Recent Results -->
+
+    <!-- RECENT RESULTS -->
+
     <div class="section">
+
         <h2>Recent Student Results</h2>
 
         <div id="resultsArea">
             <div class="empty">Loading...</div>
         </div>
+
     </div>
 
 </div>
 
+
 <script>
 
-const supabaseClient = window.supabaseClient;
+document.addEventListener("DOMContentLoaded", async function () {
 
-async function checkAdmin() {
+    console.log("PorikkhaHub Admin Dashboard JS loaded.");
 
-    const {
-        data: { user },
-        error
-    } = await supabaseClient.auth.getUser();
+    const supabaseClient = window.supabaseClient;
 
-    if (error || !user) {
-        window.location.href = "admin-login.html";
-        return false;
+    if (!supabaseClient) {
+
+        console.error("Supabase client not found.");
+
+        document.getElementById("resultsArea").innerHTML =
+            '<div class="error">Supabase connection not found.</div>';
+
+        return;
     }
 
-    const { data: admin, error: adminError } =
-        await supabaseClient
+
+    // BUTTONS
+
+    document.getElementById("createExamBtn").onclick = function () {
+        window.location.href = "create-exam.html";
+    };
+
+    document.getElementById("manageExamsBtn").onclick = function () {
+        window.location.href = "manage-exams.html";
+    };
+
+    document.getElementById("resultsBtn").onclick = function () {
+        window.location.href = "admin-results.html";
+    };
+
+    document.getElementById("studentsBtn").onclick = function () {
+        window.location.href = "admin-students.html";
+    };
+
+    document.getElementById("questionsBtn").onclick = function () {
+        window.location.href = "manage-questions.html";
+    };
+
+    document.getElementById("cqBtn").onclick = function () {
+        window.location.href = "cq-answer-sheets.html";
+    };
+
+    document.getElementById("refreshBtn").onclick = function () {
+        loadDashboard();
+    };
+
+    document.getElementById("logoutBtn").onclick = async function () {
+
+        await supabaseClient.auth.signOut();
+
+        localStorage.removeItem("porikkhahub_admin");
+        localStorage.removeItem("porikkhahub_admin_access_token");
+        localStorage.removeItem("porikkhahub_admin_refresh_token");
+
+        window.location.href = "admin-login.html";
+    };
+
+
+    // ADMIN CHECK
+
+    async function checkAdmin() {
+
+        const {
+            data: { user },
+            error
+        } = await supabaseClient.auth.getUser();
+
+        console.log("Admin Auth User:", user);
+        console.log("Auth Error:", error);
+
+        if (error || !user) {
+
+            window.location.href = "admin-login.html";
+
+            return false;
+        }
+
+
+        const {
+            data: admin,
+            error: adminError
+        } = await supabaseClient
             .from("admins")
             .select("id, full_name, email")
             .eq("auth_user_id", user.id)
             .maybeSingle();
 
-    if (adminError || !admin) {
-        alert("Unauthorized: admin account required.");
-        await supabaseClient.auth.signOut();
-        window.location.href = "admin-login.html";
-        return false;
+
+        console.log("Admin Profile:", admin);
+        console.log("Admin Profile Error:", adminError);
+
+
+        if (adminError || !admin) {
+
+            alert("Unauthorized: admin account required.");
+
+            await supabaseClient.auth.signOut();
+
+            window.location.href = "admin-login.html";
+
+            return false;
+        }
+
+        return true;
     }
 
-    return true;
-}
+
+    // LOAD DASHBOARD
+
+    async function loadDashboard() {
+
+        console.log("Loading dashboard...");
+
+        const allowed = await checkAdmin();
+
+        if (!allowed) return;
 
 
-async function loadDashboard() {
+        const {
+            data,
+            error
+        } = await supabaseClient.rpc(
+            "get_admin_dashboard_stats"
+        );
 
-    const allowed = await checkAdmin();
 
-    if (!allowed) return;
+        console.log("Dashboard RPC data:", data);
+        console.log("Dashboard RPC error:", error);
 
-    try {
-
-        const { data, error } =
-            await supabaseClient.rpc("get_admin_dashboard_stats");
 
         if (error) {
+
             console.error(error);
-            alert("Dashboard loading failed: " + error.message);
+
+            document.getElementById("resultsArea").innerHTML =
+                '<div class="error">Dashboard loading failed: ' +
+                error.message +
+                '</div>';
+
             return;
         }
 
+
+        // UPDATE STATS
+
         document.getElementById("totalExams").textContent =
-            data.total_exams ?? 0;
+            data?.total_exams ?? 0;
 
         document.getElementById("publishedExams").textContent =
-            data.published_exams ?? 0;
+            data?.published_exams ?? 0;
 
         document.getElementById("totalStudents").textContent =
-            data.total_students ?? 0;
+            data?.total_students ?? 0;
 
         document.getElementById("totalQuestions").textContent =
-            data.total_questions ?? 0;
+            data?.total_questions ?? 0;
 
         document.getElementById("submittedExams").textContent =
-            data.submitted_exams ?? 0;
+            data?.submitted_exams ?? 0;
+
 
         await loadRecentResults();
 
-    } catch (err) {
-
-        console.error(err);
-
     }
-}
 
 
-async function loadRecentResults() {
+    // LOAD RECENT RESULTS
 
-    const area = document.getElementById("resultsArea");
+    async function loadRecentResults() {
 
-    const { data, error } =
-        await supabaseClient
+        console.log("Loading recent results...");
+
+
+        const area =
+            document.getElementById("resultsArea");
+
+
+        const {
+            data,
+            error
+        } = await supabaseClient
             .from("admin_exam_results")
             .select("*")
-            .order("submitted_at", { ascending: false })
+            .order("submitted_at", {
+                ascending: false
+            })
             .limit(5);
 
-    if (error) {
 
-        area.innerHTML =
-            `<div class="empty">
-                Could not load recent results.
-            </div>`;
+        console.log("Recent results:", data);
+        console.log("Recent results error:", error);
 
-        console.error(error);
-        return;
-    }
 
-    if (!data || data.length === 0) {
+        if (error) {
 
-        area.innerHTML =
-            `<div class="empty">
-                No submitted results yet.
-            </div>`;
+            area.innerHTML =
+                '<div class="error">' +
+                'Could not load recent results: ' +
+                error.message +
+                '</div>';
 
-        return;
-    }
+            return;
+        }
 
-    let html = `
-        <table>
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Exam</th>
-                    <th>Marks</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
 
-    data.forEach(row => {
+        if (!data || data.length === 0) {
 
-        html += `
-            <tr>
-                <td>${escapeHtml(row.student_name || "-")}</td>
-                <td>${escapeHtml(row.exam_title || "-")}</td>
-                <td>
-                    ${row.obtained_marks ?? 0}
-                    /
-                    ${row.total_marks ?? 0}
-                </td>
-                <td>${escapeHtml(row.status || "-")}</td>
-            </tr>
+            area.innerHTML =
+                '<div class="empty">' +
+                'No submitted results yet.' +
+                '</div>';
+
+            return;
+        }
+
+
+        let html = `
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Student</th>
+                        <th>Exam</th>
+                        <th>Marks</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
         `;
 
-    });
 
-    html += `
-            </tbody>
-        </table>
-    `;
+        data.forEach(function (row) {
 
-    area.innerHTML = html;
-}
+            html += `
+                <tr>
 
+                    <td>
+                        ${escapeHtml(row.student_name || "-")}
+                    </td>
 
-function escapeHtml(value) {
+                    <td>
+                        ${escapeHtml(row.exam_title || "-")}
+                    </td>
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+                    <td>
+                        ${row.obtained_marks ?? 0}
+                        /
+                        ${row.total_marks ?? 0}
+                    </td>
 
-}
+                    <td>
+                        ${escapeHtml(row.status || "-")}
+                    </td>
 
+                </tr>
+            `;
 
-async function logout() {
-
-    await supabaseClient.auth.signOut();
-
-    localStorage.removeItem("porikkhahub_admin");
-    localStorage.removeItem("porikkhahub_admin_access_token");
-    localStorage.removeItem("porikkhahub_admin_refresh_token");
-
-    window.location.href = "admin-login.html";
-}
+        });
 
 
-loadDashboard();
+        html += `
+                </tbody>
+
+            </table>
+        `;
+
+
+        area.innerHTML = html;
+
+    }
+
+
+    // HTML SAFETY
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    }
+
+
+    // START
+
+    await loadDashboard();
+
+});
 
 </script>
 
