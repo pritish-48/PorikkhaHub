@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+```html
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -52,7 +53,7 @@ header{background:#fff;border-bottom:1px solid #ddd;padding:16px 30px;display:fl
 
 <a class="card" href="student-results.html">
 <div class="card-icon">📊</div>
-<h3 onclick="openResults()" style="cursor:pointer;">My Results</h3>
+<h3>My Results</h3>
 <p>Check your completed examination results and marks.</p>
 </a>
 
@@ -86,14 +87,101 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
 
+
+/* =========================
+   RESTORE SUPABASE SESSION
+========================= */
+
+async function restoreStudentSession(){
+
+const accessToken =
+localStorage.getItem("porikkhahub_access_token");
+
+const refreshToken =
+localStorage.getItem("porikkhahub_refresh_token");
+
+if(!accessToken || !refreshToken){
+
+window.location.href="login.html";
+return false;
+
+}
+
+try{
+
+const response = await fetch(
+SUPABASE_URL + "/auth/v1/token?grant_type=refresh_token",
+{
+method:"POST",
+headers:{
+"apikey":SUPABASE_KEY,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+refresh_token:refreshToken
+})
+}
+);
+
+const data = await response.json();
+
+if(!response.ok || !data.access_token){
+
+console.error("Session restore failed:",data);
+
+localStorage.removeItem("porikkhahub_access_token");
+localStorage.removeItem("porikkhahub_refresh_token");
+
+window.location.href="login.html";
+
+return false;
+
+}
+
+
+/* Save refreshed tokens */
+
+localStorage.setItem(
+"porikkhahub_access_token",
+data.access_token
+);
+
+if(data.refresh_token){
+
+localStorage.setItem(
+"porikkhahub_refresh_token",
+data.refresh_token
+);
+
+}
+
+return true;
+
+}catch(error){
+
+console.error("Session restore error:",error);
+
+return false;
+
+}
+
+}
+
+
+/* =========================
+   LOAD STUDENT INFORMATION
+========================= */
+
 function loadStudent(){
 
 const studentData =
 localStorage.getItem("porikkhahub_student");
 
 if(!studentData){
+
 window.location.href="login.html";
 return;
+
 }
 
 try{
@@ -111,15 +199,24 @@ document.getElementById("welcomeText").textContent =
 }catch(error){
 
 console.error(error);
+
 window.location.href="login.html";
 
 }
 
 }
 
+
+/* =========================
+   LOAD PUBLISHED EXAMS
+========================= */
+
 async function loadExams(){
 
 const examList=document.getElementById("examList");
+
+const accessToken =
+localStorage.getItem("porikkhahub_access_token");
 
 try{
 
@@ -129,13 +226,18 @@ SUPABASE_URL+
 {
 method:"GET",
 headers:{
-"apikey":SUPABASE_KEY
+"apikey":SUPABASE_KEY,
+"Authorization":"Bearer "+accessToken
 }
 }
 );
 
 if(!response.ok){
-throw new Error("Failed to load exams");
+
+throw new Error(
+"Failed to load exams: "+response.status
+);
+
 }
 
 const exams=await response.json();
@@ -158,15 +260,19 @@ const type=(exam.exam_type||"mcq").toLowerCase();
 let examLink="#";
 
 if(type==="mcq"){
+
 examLink=
 "student-mcq-exam.html?exam="+
 encodeURIComponent(exam.id);
+
 }
 
 if(type==="cq"){
+
 examLink=
 "student-cq-exam.html?exam="+
 encodeURIComponent(exam.id);
+
 }
 
 const div=document.createElement("div");
@@ -210,6 +316,11 @@ examList.innerHTML=
 
 }
 
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
 function escapeHtml(value){
 
 return String(value)
@@ -221,6 +332,11 @@ return String(value)
 
 }
 
+
+/* =========================
+   LOGOUT
+========================= */
+
 function logout(){
 
 localStorage.removeItem("porikkhahub_student");
@@ -231,16 +347,32 @@ window.location.href="login.html";
 
 }
 
+
+/* =========================
+   START DASHBOARD
+========================= */
+
+async function init(){
+
+const sessionOK =
+await restoreStudentSession();
+
+if(!sessionOK){
+
+return;
+
+}
+
 loadStudent();
+
 loadExams();
+
+}
+
+init();
 
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
+```
