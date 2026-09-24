@@ -1,164 +1,219 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>PorikkhaHub - Admin Dashboard</title>
+```
+<title>PorikkhaHub - Admin Dashboard</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            color: #222;
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f7fb;
+        color: #222;
+    }
+
+    header {
+        background: #111827;
+        color: white;
+        padding: 18px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    header button {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    header button:hover {
+        opacity: 0.9;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    .welcome {
+        margin-bottom: 25px;
+    }
+
+    .welcome h2 {
+        margin: 0 0 7px;
+    }
+
+    .welcome p {
+        margin: 0;
+        color: #6b7280;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 22px;
+        border-radius: 14px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-card h3 {
+        margin: 0;
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 600;
+    }
+
+    .stat-card p {
+        margin: 10px 0 0;
+        font-size: 30px;
+        font-weight: bold;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .action-btn {
+        border: none;
+        padding: 17px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        background: white;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+        text-align: left;
+        transition: 0.15s;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    }
+
+    .action-btn span {
+        display: block;
+        margin-top: 6px;
+        font-size: 13px;
+        font-weight: normal;
+        color: #6b7280;
+    }
+
+    .section {
+        background: white;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .section h2 {
+        margin-top: 0;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
+
+    th,
+    td {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+    }
+
+    th {
+        background: #f9fafb;
+    }
+
+    .empty {
+        color: #6b7280;
+        padding: 20px 0;
+    }
+
+    .error {
+        color: #dc2626;
+        padding: 20px 0;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status-submitted {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-auto {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            margin-top: 20px;
         }
 
         header {
-            background: #111827;
-            color: white;
-            padding: 18px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px;
         }
 
         header h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        header button {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        .welcome {
-            margin-bottom: 25px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
+            font-size: 20px;
         }
 
         .stat-card {
-            background: white;
-            padding: 22px;
-            border-radius: 14px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-        }
-
-        .stat-card h3 {
-            margin: 0;
-            font-size: 15px;
-            color: #6b7280;
+            padding: 18px;
         }
 
         .stat-card p {
-            margin: 10px 0 0;
-            font-size: 30px;
-            font-weight: bold;
+            font-size: 26px;
         }
+    }
+</style>
+```
 
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .action-btn {
-            border: none;
-            padding: 17px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            background: white;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-            text-align: left;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .action-btn span {
-            display: block;
-            margin-top: 6px;
-            font-size: 13px;
-            font-weight: normal;
-            color: #6b7280;
-        }
-
-        .section {
-            background: white;
-            border-radius: 14px;
-            padding: 22px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-        }
-
-        .section h2 {
-            margin-top: 0;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-        }
-
-        th {
-            background: #f9fafb;
-        }
-
-        .empty {
-            color: #6b7280;
-            padding: 20px 0;
-        }
-
-        .error {
-            color: #dc2626;
-            padding: 20px 0;
-        }
-
-        @media (max-width: 600px) {
-            table {
-                font-size: 13px;
-            }
-
-            th,
-            td {
-                padding: 8px;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -170,174 +225,156 @@
 
 <div class="container">
 
-    <div class="welcome">
-        <h2>Admin Dashboard</h2>
-        <p>Manage exams, students, MCQ and CQ submissions from here.</p>
+```
+<div class="welcome">
+    <h2>Admin Dashboard</h2>
+    <p>Manage exams, students, MCQ and CQ submissions from here.</p>
+</div>
+
+
+<!-- STATISTICS -->
+
+<div class="stats">
+
+    <div class="stat-card">
+        <h3>Total Exams</h3>
+        <p id="totalExams">0</p>
     </div>
 
-    <!-- STATISTICS -->
-
-    <div class="stats">
-
-        <div class="stat-card">
-            <h3>Total Exams</h3>
-            <p id="totalExams">0</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Published Exams</h3>
-            <p id="publishedExams">0</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total Students</h3>
-            <p id="totalStudents">0</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Total MCQ Questions</h3>
-            <p id="totalQuestions">0</p>
-        </div>
-
-        <div class="stat-card">
-            <h3>Submitted Exams</h3>
-            <p id="submittedExams">0</p>
-        </div>
-
+    <div class="stat-card">
+        <h3>Published Exams</h3>
+        <p id="publishedExams">0</p>
     </div>
 
-
-    <!-- ACTION BUTTONS -->
-
-    <div class="actions">
-
-        <button class="action-btn" id="createExamBtn">
-            ➕ Create Exam
-            <span>Create a new examination</span>
-        </button>
-
-        <button class="action-btn" id="manageExamsBtn">
-            📚 Manage Exams
-            <span>Edit, publish or delete exams</span>
-        </button>
-
-        <button class="action-btn" id="resultsBtn">
-            📊 Student Results
-            <span>View submitted exam results</span>
-        </button>
-
-        <button class="action-btn" id="studentsBtn">
-            👨‍🎓 Students
-            <span>View registered students</span>
-        </button>
-
-        <button class="action-btn" id="questionsBtn">
-            ❓ MCQ Questions
-            <span>Manage MCQ question bank</span>
-        </button>
-
-        <button class="action-btn" id="cqBtn">
-            📝 CQ Answer Sheets
-            <span>View answer sheets and give marks</span>
-        </button>
-
-        <button class="action-btn" id="refreshBtn">
-            🔄 Refresh
-            <span>Refresh dashboard statistics</span>
-        </button>
-
+    <div class="stat-card">
+        <h3>Total Students</h3>
+        <p id="totalStudents">0</p>
     </div>
 
+    <div class="stat-card">
+        <h3>Total MCQ Questions</h3>
+        <p id="totalQuestions">0</p>
+    </div>
 
-    <!-- RECENT RESULTS -->
-
-    <div class="section">
-
-        <h2>Recent Student Results</h2>
-
-        <div id="resultsArea">
-            <div class="empty">Loading...</div>
-        </div>
-
+    <div class="stat-card">
+        <h3>Submitted Exams</h3>
+        <p id="submittedExams">0</p>
     </div>
 
 </div>
 
 
+<!-- ACTION BUTTONS -->
+
+<div class="actions">
+
+    <button class="action-btn" id="createExamBtn">
+        ➕ Create Exam
+        <span>Create a new examination</span>
+    </button>
+
+    <button class="action-btn" id="manageExamsBtn">
+        📚 Manage Exams
+        <span>Edit, publish or delete exams</span>
+    </button>
+
+    <button class="action-btn" id="resultsBtn">
+        📊 Student Results
+        <span>View submitted exam results</span>
+    </button>
+
+    <button class="action-btn" id="studentsBtn">
+        👨‍🎓 Students
+        <span>View registered students</span>
+    </button>
+
+    <button class="action-btn" id="questionsBtn">
+        ❓ MCQ Questions
+        <span>Manage MCQ question bank</span>
+    </button>
+
+    <button class="action-btn" id="cqBtn">
+        📝 CQ Answer Sheets
+        <span>View answer sheets and give marks</span>
+    </button>
+
+    <button class="action-btn" id="refreshBtn">
+        🔄 Refresh
+        <span>Refresh dashboard statistics</span>
+    </button>
+
+</div>
+
+
+<!-- RECENT RESULTS -->
+
+<div class="section">
+
+    <h2>Recent Student Results</h2>
+
+    <div id="resultsArea">
+        <div class="empty">Loading...</div>
+    </div>
+
+</div>
+```
+
+</div>
+
 <script>
 
-document.addEventListener("DOMContentLoaded", async function () {
-
-    console.log("PorikkhaHub Admin Dashboard JS loaded.");
+    // ==========================================
+    // SUPABASE
+    // ==========================================
 
     const supabaseClient = window.supabaseClient;
 
-    if (!supabaseClient) {
 
-        console.error("Supabase client not found.");
+    // ==========================================
+    // HTML ESCAPE
+    // ==========================================
 
-        document.getElementById("resultsArea").innerHTML =
-            '<div class="error">Supabase connection not found.</div>';
+    function escapeHtml(value) {
 
-        return;
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
     }
 
 
-    // BUTTONS
-
-    document.getElementById("createExamBtn").onclick = function () {
-        window.location.href = "create-exam.html";
-    };
-
-    document.getElementById("manageExamsBtn").onclick = function () {
-        window.location.href = "manage-exams.html";
-    };
-
-    document.getElementById("resultsBtn").onclick = function () {
-        window.location.href = "admin-results.html";
-    };
-
-    document.getElementById("studentsBtn").onclick = function () {
-        window.location.href = "admin-students.html";
-    };
-
-    document.getElementById("questionsBtn").onclick = function () {
-        window.location.href = "manage-questions.html";
-    };
-
-    document.getElementById("cqBtn").onclick = function () {
-        window.location.href = "cq-answer-sheets.html";
-    };
-
-    document.getElementById("refreshBtn").onclick = function () {
-        loadDashboard();
-    };
-
-    document.getElementById("logoutBtn").onclick = async function () {
-
-        await supabaseClient.auth.signOut();
-
-        localStorage.removeItem("porikkhahub_admin");
-        localStorage.removeItem("porikkhahub_admin_access_token");
-        localStorage.removeItem("porikkhahub_admin_refresh_token");
-
-        window.location.href = "admin-login.html";
-    };
-
-
+    // ==========================================
     // ADMIN CHECK
+    // ==========================================
 
     async function checkAdmin() {
 
+        console.log("Checking admin...");
+
+        if (!supabaseClient) {
+
+            console.error("Supabase client not found.");
+
+            return false;
+        }
+
+
         const {
-            data: { user },
-            error
+            data: authData,
+            error: authError
         } = await supabaseClient.auth.getUser();
 
-        console.log("Admin Auth User:", user);
-        console.log("Auth Error:", error);
 
-        if (error || !user) {
+        console.log("Auth user:", authData?.user);
+        console.log("Auth error:", authError);
+
+
+        if (authError || !authData?.user) {
+
+            console.log("No logged-in user.");
 
             window.location.href = "admin-login.html";
 
@@ -351,15 +388,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         } = await supabaseClient
             .from("admins")
             .select("id, full_name, email")
-            .eq("auth_user_id", user.id)
+            .eq("auth_user_id", authData.user.id)
             .maybeSingle();
 
 
-        console.log("Admin Profile:", admin);
-        console.log("Admin Profile Error:", adminError);
+        console.log("Admin profile:", admin);
+        console.log("Admin profile error:", adminError);
 
 
         if (adminError || !admin) {
+
+            console.error("Admin verification failed.");
 
             alert("Unauthorized: admin account required.");
 
@@ -370,19 +409,28 @@ document.addEventListener("DOMContentLoaded", async function () {
             return false;
         }
 
+
+        console.log("Admin verified successfully.");
+
         return true;
     }
 
 
-    // LOAD DASHBOARD
+    // ==========================================
+    // LOAD DASHBOARD STATISTICS
+    // ==========================================
 
     async function loadDashboard() {
 
         console.log("Loading dashboard...");
 
+
         const allowed = await checkAdmin();
 
-        if (!allowed) return;
+        if (!allowed) {
+
+            return;
+        }
 
 
         const {
@@ -393,47 +441,62 @@ document.addEventListener("DOMContentLoaded", async function () {
         );
 
 
-        console.log("Dashboard RPC data:", data);
-        console.log("Dashboard RPC error:", error);
+        console.log("Dashboard data:", data);
+        console.log("Dashboard error:", error);
 
 
         if (error) {
 
-            console.error(error);
+            console.error("Dashboard RPC error:", error);
 
             document.getElementById("resultsArea").innerHTML =
                 '<div class="error">Dashboard loading failed: ' +
-                error.message +
+                escapeHtml(error.message) +
                 '</div>';
 
             return;
         }
 
 
-        // UPDATE STATS
+        if (!data) {
+
+            console.error("Dashboard returned no data.");
+
+            return;
+        }
+
+
+        // UPDATE STATISTICS
 
         document.getElementById("totalExams").textContent =
-            data?.total_exams ?? 0;
+            data.total_exams ?? 0;
 
         document.getElementById("publishedExams").textContent =
-            data?.published_exams ?? 0;
+            data.published_exams ?? 0;
 
         document.getElementById("totalStudents").textContent =
-            data?.total_students ?? 0;
+            data.total_students ?? 0;
 
         document.getElementById("totalQuestions").textContent =
-            data?.total_questions ?? 0;
+            data.total_questions ?? 0;
 
         document.getElementById("submittedExams").textContent =
-            data?.submitted_exams ?? 0;
+            data.submitted_exams ?? 0;
 
+
+        console.log("Statistics updated successfully.");
+
+
+        // LOAD RESULTS
 
         await loadRecentResults();
 
     }
 
 
+    // ==========================================
     // LOAD RECENT RESULTS
+    // ==========================================
 
     async function loadRecentResults() {
 
@@ -456,7 +519,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             .limit(5);
 
 
-        console.log("Recent results:", data);
+        console.log("Recent results data:", data);
         console.log("Recent results error:", error);
 
 
@@ -465,7 +528,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             area.innerHTML =
                 '<div class="error">' +
                 'Could not load recent results: ' +
-                error.message +
+                escapeHtml(error.message) +
                 '</div>';
 
             return;
@@ -484,6 +547,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
         let html = `
+            <div class="table-wrapper">
+
             <table>
 
                 <thead>
@@ -493,6 +558,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         <th>Exam</th>
                         <th>Marks</th>
                         <th>Status</th>
+                        <th>Submitted</th>
                     </tr>
 
                 </thead>
@@ -503,25 +569,57 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         data.forEach(function (row) {
 
+            let statusClass = "status-submitted";
+
+            if (row.status === "auto_submitted") {
+                statusClass = "status-auto";
+            }
+
+
+            let submittedTime = "-";
+
+            if (row.submitted_at) {
+
+                submittedTime =
+                    new Date(row.submitted_at)
+                        .toLocaleString();
+
+            }
+
+
             html += `
                 <tr>
 
                     <td>
-                        ${escapeHtml(row.student_name || "-")}
+                        ${escapeHtml(
+                            row.student_name || "-"
+                        )}
                     </td>
 
                     <td>
-                        ${escapeHtml(row.exam_title || "-")}
+                        ${escapeHtml(
+                            row.exam_title || "-"
+                        )}
                     </td>
 
                     <td>
-                        ${row.obtained_marks ?? 0}
+                        <strong>
+                            ${row.obtained_marks ?? 0}
+                        </strong>
                         /
                         ${row.total_marks ?? 0}
                     </td>
 
                     <td>
-                        ${escapeHtml(row.status || "-")}
+                        <span class="status ${statusClass}">
+                            ${escapeHtml(
+                                row.status || "-"
+                            )}
+                        </span>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(submittedTime)}
                     </td>
 
                 </tr>
@@ -534,33 +632,118 @@ document.addEventListener("DOMContentLoaded", async function () {
                 </tbody>
 
             </table>
+
+            </div>
         `;
 
 
         area.innerHTML = html;
 
-    }
 
-
-    // HTML SAFETY
-
-    function escapeHtml(value) {
-
-        return String(value)
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
+        console.log("Recent results loaded successfully.");
 
     }
 
 
-    // START
+    // ==========================================
+    // BUTTON EVENTS
+    // ==========================================
 
-    await loadDashboard();
+    document.getElementById("createExamBtn").onclick =
+        function () {
+            window.location.href = "create-exam.html";
+        };
 
-});
+
+    document.getElementById("manageExamsBtn").onclick =
+        function () {
+            window.location.href = "manage-exams.html";
+        };
+
+
+    document.getElementById("resultsBtn").onclick =
+        function () {
+            window.location.href = "admin-results.html";
+        };
+
+
+    document.getElementById("studentsBtn").onclick =
+        function () {
+            window.location.href = "admin-students.html";
+        };
+
+
+    document.getElementById("questionsBtn").onclick =
+        function () {
+            window.location.href = "manage-questions.html";
+        };
+
+
+    // CQ ANSWER SHEETS
+
+    document.getElementById("cqBtn").onclick =
+        function () {
+            window.location.href = "cq-answer-sheets.html";
+        };
+
+
+    // REFRESH
+
+    document.getElementById("refreshBtn").onclick =
+        function () {
+
+            loadDashboard();
+
+        };
+
+
+    // LOGOUT
+
+    document.getElementById("logoutBtn").onclick =
+        async function () {
+
+            console.log("Logging out...");
+
+
+            if (supabaseClient) {
+
+                await supabaseClient.auth.signOut();
+
+            }
+
+
+            localStorage.removeItem(
+                "porikkhahub_admin"
+            );
+
+            localStorage.removeItem(
+                "porikkhahub_admin_access_token"
+            );
+
+            localStorage.removeItem(
+                "porikkhahub_admin_refresh_token"
+            );
+
+
+            window.location.href =
+                "admin-login.html";
+
+        };
+
+
+    // ==========================================
+    // START DASHBOARD
+    // ==========================================
+
+    window.addEventListener("load", function () {
+
+        console.log(
+            "PorikkhaHub Admin Dashboard loaded."
+        );
+
+        loadDashboard();
+
+    });
 
 </script>
 
