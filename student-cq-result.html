@@ -47,6 +47,17 @@ button{
     color:#111827;
 }
 
+.marked-btn{
+    background:#2563eb;
+    color:white;
+    font-size:16px;
+    padding:12px 18px;
+}
+
+.marked-btn:hover{
+    background:#1d4ed8;
+}
+
 main{
     max-width:1000px;
     margin:25px auto;
@@ -132,6 +143,36 @@ main{
     background:#eee;
 }
 
+.marked-images{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin-top:15px;
+}
+
+.marked-page{
+    background:#f8fafc;
+    border:1px solid #dbe2ea;
+    border-radius:12px;
+    padding:10px;
+}
+
+.marked-page img{
+    width:100%;
+    max-height:700px;
+    object-fit:contain;
+    border-radius:8px;
+    background:#eee;
+    display:block;
+}
+
+.page-label{
+    text-align:center;
+    font-weight:700;
+    margin-top:8px;
+    color:#475569;
+}
+
 .marks{
     margin-top:15px;
     font-size:18px;
@@ -144,8 +185,30 @@ main{
     background:#f3f4f6;
 }
 
+.marked-status{
+    padding:14px;
+    border-radius:10px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1e40af;
+    margin-top:15px;
+}
+
 .hidden{
     display:none;
+}
+
+.small{
+    font-size:13px;
+    color:#64748b;
+}
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
 }
 
 @media(max-width:600px){
@@ -164,6 +227,10 @@ main{
 
     .logo{
         font-size:18px;
+    }
+
+    .marked-btn{
+        width:100%;
     }
 }
 </style>
@@ -231,6 +298,55 @@ main{
 
         <div id="submitted"></div>
 
+
+        <div style="margin-top:20px;">
+
+            <button
+                class="marked-btn"
+                onclick="showMarkedSheet()"
+            >
+                👀 View Marked Answer Sheet
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- MARKED ANSWER SHEET -->
+
+    <div
+        id="markedSheetPanel"
+        class="panel hidden"
+    >
+
+        <div class="section-title">
+
+            <h2 style="margin:0;">
+                🖍️ Teacher Marked Answer Sheet
+            </h2>
+
+            <button
+                class="gray"
+                onclick="hideMarkedSheet()"
+            >
+                Hide
+            </button>
+
+        </div>
+
+
+        <div
+            id="markedSheetStatus"
+            class="marked-status"
+        >
+            Loading marked answer sheet...
+        </div>
+
+
+        <div id="markedQuestions"></div>
+
     </div>
 
 
@@ -263,17 +379,14 @@ main{
 const SUPABASE_URL =
     "https://jsjkxpsnuizngofyjvdl.supabase.co";
 
-
 const SUPABASE_KEY =
     "sb_publishable_rGBAYVe2ZeqDk8tvrYy2Tg_m4fbtSLf";
-
 
 const supabaseClient =
     supabase.createClient(
         SUPABASE_URL,
         SUPABASE_KEY
     );
-
 
 
 /* =========================
@@ -286,7 +399,6 @@ function goBack(){
         "student-results.html";
 
 }
-
 
 
 /* =========================
@@ -303,7 +415,6 @@ function escapeHtml(value){
         .replace(/'/g,"&#039;");
 
 }
-
 
 
 /* =========================
@@ -381,7 +492,6 @@ async function restoreStudent(){
 }
 
 
-
 /* =========================
    GET ATTEMPT ID
 ========================= */
@@ -399,7 +509,6 @@ function getAttemptId(){
     );
 
 }
-
 
 
 /* =========================
@@ -486,7 +595,6 @@ async function loadResult(){
 }
 
 
-
 /* =========================
    RENDER RESULT
 ========================= */
@@ -507,37 +615,42 @@ function renderResult(rows){
         .classList.remove("hidden");
 
 
-
     document
         .getElementById("examTitle")
         .textContent =
             first.exam_title;
 
 
-
     let calculatedObtained = 0;
-let calculatedTotal = 0;
 
-rows.forEach(row => {
+    let calculatedTotal = 0;
 
-    calculatedObtained +=
-        Number(row.obtained_question_marks || 0);
 
-    calculatedTotal +=
-        Number(row.question_marks || 0);
+    rows.forEach(row => {
 
-});
+        calculatedObtained +=
+            Number(
+                row.obtained_question_marks || 0
+            );
 
-document
-    .getElementById("obtained")
-    .textContent =
-        calculatedObtained;
+        calculatedTotal +=
+            Number(
+                row.question_marks || 0
+            );
 
-document
-    .getElementById("total")
-    .textContent =
-        calculatedTotal;
+    });
 
+
+    document
+        .getElementById("obtained")
+        .textContent =
+            calculatedObtained;
+
+
+    document
+        .getElementById("total")
+        .textContent =
+            calculatedTotal;
 
 
     document
@@ -551,7 +664,6 @@ document
             : "";
 
 
-
     const box =
         document.getElementById(
             "questions"
@@ -561,9 +673,380 @@ document
     box.innerHTML = "";
 
 
+    rows.forEach(row => {
 
-    rows.forEach(
-        row => {
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.className =
+            "question";
+
+
+        let images = [];
+
+
+        try{
+
+            if(
+                Array.isArray(
+                    row.answer_images
+                )
+            ){
+
+                images =
+                    row.answer_images;
+
+            }else{
+
+                images =
+                    JSON.parse(
+                        row.answer_images ||
+                        "[]"
+                    );
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Image parse error:",
+                error
+            );
+
+            images = [];
+
+        }
+
+
+        let imageHTML = "";
+
+
+        if(images.length){
+
+            imageHTML = `
+
+                <h3>
+                    📷 Your Handwritten Answer
+                </h3>
+
+                <div class="images">
+
+                    ${
+                        images.map(
+                            (img,i) => `
+
+                                <div>
+
+                                    <img
+                                        src="${escapeHtml(img)}"
+                                        alt="Answer page ${i+1}"
+                                    >
+
+                                    <div
+                                        class="small"
+                                        style="margin-top:5px"
+                                    >
+                                        Page ${i+1}
+                                    </div>
+
+                                </div>
+
+                            `
+                        ).join("")
+                    }
+
+                </div>
+
+            `;
+
+        }
+
+
+        div.innerHTML = `
+
+            <div class="qtitle">
+
+                Question
+                ${Number(
+                    row.question_number
+                )}
+
+                —
+                ${Number(
+                    row.question_marks || 0
+                )}
+                marks
+
+            </div>
+
+
+            <div class="question-text">
+
+                ${escapeHtml(
+                    row.question_text
+                )}
+
+            </div>
+
+
+            <div class="marks">
+
+                Obtained:
+
+                ${Number(
+                    row.obtained_question_marks || 0
+                )}
+
+                /
+
+                ${Number(
+                    row.question_marks || 0
+                )}
+
+            </div>
+
+
+            ${
+                row.answer_text
+                ? `
+
+                    <h3>
+                        📝 Your Answer
+                    </h3>
+
+                    <div class="answer">
+
+                        ${escapeHtml(
+                            row.answer_text
+                        )}
+
+                    </div>
+
+                `
+                : ""
+            }
+
+
+            ${imageHTML}
+
+
+            ${
+                row.teacher_feedback
+                ? `
+
+                    <h3>
+                        👨‍🏫 Teacher Feedback
+                    </h3>
+
+                    <div class="feedback">
+
+                        ${escapeHtml(
+                            row.teacher_feedback
+                        )}
+
+                    </div>
+
+                `
+                : `
+
+                    <div
+                        class="status"
+                        style="margin-top:15px"
+                    >
+                        👨‍🏫 Teacher feedback
+                        এখনো দেওয়া হয়নি।
+                    </div>
+
+                `
+            }
+
+        `;
+
+
+        box.appendChild(
+            div
+        );
+
+    });
+
+}
+
+
+/* =========================
+   SHOW MARKED SHEET
+========================= */
+
+async function showMarkedSheet(){
+
+    const panel =
+        document.getElementById(
+            "markedSheetPanel"
+        );
+
+
+    const status =
+        document.getElementById(
+            "markedSheetStatus"
+        );
+
+
+    const box =
+        document.getElementById(
+            "markedQuestions"
+        );
+
+
+    panel.classList.remove(
+        "hidden"
+    );
+
+
+    status.innerHTML =
+        "⏳ Marked answer sheet loading...";
+
+
+    box.innerHTML = "";
+
+
+    panel.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+
+    const attemptId =
+        getAttemptId();
+
+
+    if(!attemptId){
+
+        status.innerHTML =
+            "❌ Exam attempt পাওয়া যায়নি.";
+
+        return;
+    }
+
+
+    try{
+
+        const {data,error} =
+            await supabaseClient.rpc(
+                "get_my_cq_marked_sheets",
+                {
+                    p_attempt_id:
+                        attemptId
+                }
+            );
+
+
+        if(error){
+
+            console.error(
+                "Marked sheet error:",
+                error
+            );
+
+
+            status.innerHTML =
+                "❌ Marked answer sheet load failed.<br><br>" +
+                escapeHtml(
+                    error.message
+                );
+
+
+            return;
+        }
+
+
+        console.log(
+            "Marked sheets:",
+            data
+        );
+
+
+        if(
+            !data ||
+            !data.length
+        ){
+
+            status.innerHTML =
+                "ℹ️ এই পরীক্ষার marked answer sheet এখনো পাওয়া যায়নি.";
+
+            return;
+        }
+
+
+        let markedCount = 0;
+
+
+        data.forEach(row => {
+
+            let annotations = [];
+
+
+            try{
+
+                if(
+                    Array.isArray(
+                        row.annotation_data
+                    )
+                ){
+
+                    annotations =
+                        row.annotation_data;
+
+                }else{
+
+                    annotations =
+                        JSON.parse(
+                            row.annotation_data ||
+                            "[]"
+                        );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    "Annotation parse error:",
+                    error
+                );
+
+                annotations = [];
+
+            }
+
+
+            const markedImages =
+                annotations
+                    .filter(
+                        item =>
+                            item &&
+                            typeof item.marked_image === "string"
+                    )
+                    .sort(
+                        (a,b) =>
+                            Number(
+                                a.image_index || 0
+                            ) -
+                            Number(
+                                b.image_index || 0
+                            )
+                    );
+
+
+            if(
+                markedImages.length
+            ){
+
+                markedCount +=
+                    markedImages.length;
+
+            }
+
 
             const div =
                 document.createElement(
@@ -575,88 +1058,136 @@ document
                 "question";
 
 
-
-            let images = [];
-
-
-            try{
-
-                if(
-                    Array.isArray(
-                        row.answer_images
-                    )
-                ){
-
-                    images =
-                        row.answer_images;
-
-                }else{
-
-                    images =
-                        JSON.parse(
-                            row.answer_images ||
-                            "[]"
-                        );
-
-                }
-
-            }catch(error){
-
-                console.error(
-                    "Image parse error:",
-                    error
-                );
-
-                images = [];
-
-            }
+            let markedHTML = "";
 
 
+            if(
+                markedImages.length
+            ){
 
-            let imageHTML = "";
-
-
-
-            if(images.length){
-
-                imageHTML = `
+                markedHTML = `
 
                     <h3>
-                        📷 Your Handwritten Answer
+                        🖍️ Teacher's Marking
                     </h3>
 
-                    <div class="images">
+                    <div class="marked-images">
 
-                        ${
-                            images.map(
-                                (img,i) => `
+                `;
 
-                                    <div>
 
-                                        <img
-                                            src="${img}"
-                                            alt="Answer page ${i+1}"
-                                        >
+                markedImages.forEach(
+                    (item,index) => {
 
-                                        <div
-                                            class="small"
-                                            style="margin-top:5px"
-                                        >
-                                            Page ${i+1}
-                                        </div>
+                        /*
+                         * Fix escaped data URL.
+                         *
+                         * data\:image/jpeg
+                         * becomes
+                         * data:image/jpeg
+                         */
 
-                                    </div>
+                        let markedSrc =
+                            String(
+                                item.marked_image ||
+                                ""
+                            );
 
-                                `
-                            ).join("")
+
+                        markedSrc =
+                            markedSrc.replace(
+                                /^data\\:/,
+                                "data:"
+                            );
+
+
+                        /*
+                         * Extra safety:
+                         * sometimes JSON escaping can
+                         * create backslashes.
+                         */
+
+                        markedSrc =
+                            markedSrc.replace(
+                                /^data\\\\:/,
+                                "data:"
+                            );
+
+
+                        /*
+                         * Validate image
+                         */
+
+                        if(
+                            !markedSrc.startsWith(
+                                "data:image/"
+                            )
+                        ){
+
+                            console.error(
+                                "Invalid marked image:",
+                                markedSrc.substring(
+                                    0,
+                                    100
+                                )
+                            );
+
+                            return;
                         }
+
+
+                        markedHTML += `
+
+                            <div
+                                class="marked-page"
+                            >
+
+                                <img
+                                    src="${markedSrc}"
+                                    alt="Teacher marked page ${index + 1}"
+                                    style="
+                                        display:block;
+                                        width:100%;
+                                        max-width:900px;
+                                        height:auto;
+                                        object-fit:contain;
+                                    "
+                                >
+
+                                <div
+                                    class="page-label"
+                                >
+                                    Marked Page ${index + 1}
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                );
+
+
+                markedHTML += `
 
                     </div>
 
                 `;
 
-            }
+            }else{
 
+                markedHTML = `
+
+                    <div
+                        class="status"
+                        style="margin-top:15px"
+                    >
+                        🕐 এই প্রশ্নের খাতা এখনো mark করা হয়নি।
+                    </div>
+
+                `;
+
+            }
 
 
             div.innerHTML = `
@@ -668,9 +1199,11 @@ document
                         row.question_number
                     )}
 
-                    — ${Number(
+                    —
+                    ${Number(
                         row.question_marks || 0
-                    )} marks
+                    )}
+                    marks
 
                 </div>
 
@@ -689,7 +1222,7 @@ document
                     Obtained:
 
                     ${Number(
-                        row.obtained_question_marks || 0
+                        row.obtained_marks || 0
                     )}
 
                     /
@@ -701,28 +1234,7 @@ document
                 </div>
 
 
-                ${
-                    row.answer_text
-                    ? `
-
-                        <h3>
-                            📝 Your Answer
-                        </h3>
-
-                        <div class="answer">
-
-                            ${escapeHtml(
-                                row.answer_text
-                            )}
-
-                        </div>
-
-                    `
-                    : ""
-                }
-
-
-                ${imageHTML}
+                ${markedHTML}
 
 
                 ${
@@ -742,17 +1254,7 @@ document
                         </div>
 
                     `
-                    : `
-
-                        <div
-                            class="status"
-                            style="margin-top:15px"
-                        >
-                            👨‍🏫 Teacher feedback
-                            এখনো দেওয়া হয়নি।
-                        </div>
-
-                    `
+                    : ""
                 }
 
             `;
@@ -762,11 +1264,58 @@ document
                 div
             );
 
+        });
+
+
+        if(
+            markedCount > 0
+        ){
+
+            status.innerHTML =
+                "✅ Teacher marked answer sheet loaded successfully.";
+
+        }else{
+
+            status.innerHTML =
+                "ℹ️ Teacher এখনো কোনো page mark করেননি.";
+
         }
-    );
+
+
+    }catch(error){
+
+        console.error(
+            "Unexpected marked sheet error:",
+            error
+        );
+
+
+        status.innerHTML =
+            "❌ Unexpected error:<br><br>" +
+            escapeHtml(
+                error.message
+            );
+
+    }
 
 }
 
+
+/* =========================
+   HIDE MARKED SHEET
+========================= */
+
+function hideMarkedSheet(){
+
+    document
+        .getElementById(
+            "markedSheetPanel"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+}
 
 
 /* =========================
@@ -794,7 +1343,6 @@ function showError(message){
 }
 
 
-
 /* =========================
    START
 ========================= */
@@ -806,15 +1354,15 @@ function showError(message){
 
 
     if(!ok){
+
         return;
+
     }
 
 
     await loadResult();
 
 })();
-
-
 </script>
 
 </body>
